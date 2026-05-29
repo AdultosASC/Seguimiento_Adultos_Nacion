@@ -2,243 +2,53 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <base target="_top">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dirección Nacional de Adultos</title>
   <style>
     :root {
-      --primary: #6366f1;
-      --primary-hover: #4f46e5;
-      --purple-dark: #4c1d95; /* Morado oscuro institucional */
-      --purple-light: #8b5cf6;
-      --bg: #f8fafc;
-      --card-bg: #ffffff;
-      --text: #1e293b;
-      --text-light: #64748b;
-      --border: #e2e8f0;
-      --success: #10b981;
-      --danger: #ef4444;
+      --primary: #6366f1; --primary-hover: #4f46e5; --purple-dark: #4c1d95; --purple-light: #8b5cf6;
+      --bg: #f8fafc; --card-bg: #ffffff; --text: #1e293b; --text-light: #64748b; --border: #e2e8f0;
+      --success: #10b981; --danger: #ef4444;
     }
-
-    body {
-      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-      background-color: var(--bg);
-      color: var(--text);
-      margin: 0;
-      padding: 2rem 1rem;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      box-sizing: border-box;
-    }
-
-    .container {
-      background-color: var(--card-bg);
-      padding: 2.5rem;
-      border-radius: 16px;
-      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
-      width: 100%;
-      max-width: 450px;
-      transition: all 0.2s ease;
-      box-sizing: border-box;
-    }
-
-    .container.wide {
-      max-width: 800px;
-    }
-
-    /* Estilo para el nuevo título institucional superior */
-    .header-institucional {
-      color: var(--purple-dark);
-      font-size: 1.25rem;
-      font-weight: 700;
-      text-align: center;
-      margin-bottom: 1.5rem;
-      line-height: 1.4;
-      border-bottom: 2px dashed var(--border);
-      padding-bottom: 1rem;
-    }
-
-    h1 {
-      font-size: 1.4rem;
-      font-weight: 700;
-      margin: 0 0 1.5rem 0;
-      text-align: center;
-      color: var(--text);
-    }
-
-    .form-group {
-      margin-bottom: 1.5rem;
-    }
-
-    /* Etiquetas de los filtros en color morado oscuro */
-    .label-filtro {
-      display: block;
-      font-size: 0.9rem;
-      font-weight: 700;
-      color: var(--purple-dark);
-      margin-bottom: 0.6rem;
-    }
-
-    select {
-      width: 100%;
-      padding: 0.75rem 1rem;
-      font-size: 1rem;
-      background-color: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      color: var(--text);
-      outline: none;
-      cursor: pointer;
-      appearance: none;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%234c1d95'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
-      background-repeat: no-repeat;
-      background-position: right 1rem center;
-      background-size: 1.25rem;
-      transition: border-color 0.2s;
-    }
-    
-    select:focus {
-      border-color: var(--purple-light);
-    }
-
-    button {
-      width: 100%;
-      padding: 0.75rem 1rem;
-      font-size: 1rem;
-      font-weight: 600;
-      color: white;
-      background-color: var(--primary);
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: background-color 0.2s;
-      margin-top: 1rem;
-    }
-
+    body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 2rem 1rem; display: flex; justify-content: center; align-items: center; min-height: 100vh; box-sizing: border-box; }
+    .container { background-color: var(--card-bg); padding: 2.5rem; border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05); width: 100%; max-width: 450px; box-sizing: border-box; }
+    .container.wide { max-width: 800px; }
+    .header-institucional { color: var(--purple-dark); font-size: 1.25rem; font-weight: 700; text-align: center; margin-bottom: 1.5rem; border-bottom: 2px dashed var(--border); padding-bottom: 1rem; }
+    h1 { font-size: 1.4rem; font-weight: 700; margin: 0 0 1.5rem 0; text-align: center; }
+    .form-group { margin-bottom: 1.5rem; }
+    .label-filtro { display: block; font-size: 0.9rem; font-weight: 700; color: var(--purple-dark); margin-bottom: 0.6rem; }
+    select { width: 100%; padding: 0.75rem 1rem; font-size: 1rem; background-color: var(--bg); border: 1px solid var(--border); border-radius: 8px; color: var(--text); outline: none; cursor: pointer; }
+    button { width: 100%; padding: 0.75rem 1rem; font-size: 1rem; font-weight: 600; color: white; background-color: var(--primary); border: none; border-radius: 8px; cursor: pointer; margin-top: 1rem; }
     button:hover { background-color: var(--primary-hover); }
     button:disabled { background-color: var(--border); cursor: not-allowed; }
-
     .hidden { display: none !important; }
-
-    /* ESTILOS DEL REPORTE */
-    .titulo-principal-a {
-      color: var(--purple-dark);
-      font-weight: bold;
-      font-size: 1.8rem;
-      margin-bottom: 1.5rem;
-      border-bottom: 2px solid var(--border);
-      padding-bottom: 0.5rem;
-    }
-
-    .seccion-reporte {
-      background-color: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 1.5rem;
-      margin-bottom: 1.5rem;
-    }
-
-    .seccion-reporte h2 {
-      font-size: 1.2rem;
-      color: var(--primary);
-      margin-top: 0;
-      margin-bottom: 1rem;
-      font-weight: 700;
-    }
-
-    .grid-datos {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 1rem;
-    }
-
-    .dato-bloque {
-      display: flex;
-      flex-direction: column;
-    }
-
-    .dato-verificacion {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background: var(--card-bg);
-      padding: 0.75rem 1rem;
-      border-radius: 8px;
-      border: 1px solid var(--border);
-    }
-
-    .dato-mixto-linea {
-      grid-column: 1 / -1;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      background: var(--card-bg);
-      padding: 0.75rem 1rem;
-      border-radius: 8px;
-      border: 1px solid var(--border);
-    }
-
-    .mixto-izq {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-    }
-
-    .verificacion-titulo {
-      font-size: 0.95rem;
-      font-weight: 600;
-      color: var(--text);
-    }
-
-    .status-badge {
-      font-size: 1.2rem;
-      font-weight: bold;
-    }
-
-    .dato-label {
-      font-size: 0.8rem;
-      font-weight: 600;
-      color: var(--text-light);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin-bottom: 0.2rem;
-    }
-
-    .dato-valor {
-      font-size: 1rem;
-      font-weight: 500;
-      color: var(--text);
-    }
-
-    .btn-back {
-      background-color: transparent;
-      color: var(--text-light);
-      border: 1px solid var(--border);
-      margin-top: 1rem;
-    }
+    .titulo-principal-a { color: var(--purple-dark); font-weight: bold; font-size: 1.8rem; margin-bottom: 1.5rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; }
+    .seccion-reporte { background-color: var(--bg); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; }
+    .seccion-reporte h2 { font-size: 1.2rem; color: var(--primary); margin-top: 0; margin-bottom: 1rem; font-weight: 700; }
+    .grid-datos { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; }
+    .dato-bloque { display: flex; flex-direction: column; }
+    .dato-verificacion { display: flex; justify-content: space-between; align-items: center; background: var(--card-bg); padding: 0.75rem 1rem; border-radius: 8px; border: 1px solid var(--border); }
+    .dato-mixto-linea { grid-column: 1 / -1; display: flex; align-items: center; justify-content: space-between; background: var(--card-bg); padding: 0.75rem 1rem; border-radius: 8px; border: 1px solid var(--border); }
+    .mixto-izq { display: flex; align-items: center; gap: 0.75rem; }
+    .verificacion-titulo { font-size: 0.95rem; font-weight: 600; color: var(--text); }
+    .status-badge { font-size: 1.2rem; font-weight: bold; }
+    .dato-label { font-size: 0.8rem; font-weight: 600; color: var(--text-light); text-transform: uppercase; margin-bottom: 0.2rem; }
+    .dato-valor { font-size: 1rem; font-weight: 500; color: var(--text); }
+    .btn-back { background-color: transparent; color: var(--text-light); border: 1px solid var(--border); margin-top: 1rem; }
     .btn-back:hover { background-color: var(--bg); color: var(--text); }
-
-    .loader {
-      text-align: center;
-      color: var(--text-light);
-      font-style: italic;
-      padding: 2rem 0;
-    }
+    .loader { text-align: center; color: var(--text-light); font-style: italic; padding: 2rem 0; }
   </style>
 </head>
 <body>
 
   <div id="paginaFiltros" class="container">
     <div class="header-institucional">Dirección Nacional de Adultos en el Movimiento</div>
-    
     <h1>Consulta de Información</h1>
     
     <div class="form-group">
       <label for="selectA" class="label-filtro">Seleccione Área Estratégica</label>
-      <select id="selectA" onchange="cargarColumnaC()">
-        <option value="">Cargando áreas...</option>
+      <select id="selectA" onchange="cambioArea()">
+        <option value="">Conectando con la base de datos...</option>
       </select>
     </div>
 
@@ -252,14 +62,11 @@
     <button id="btnConsultar" disabled onclick="irAPaginaReporte()">Consultar</button>
   </div>
 
-
   <div id="paginaReporte" class="container wide hidden">
     <div id="tituloColumnaA" class="titulo-principal-a"></div>
-    
-    <div id="loaderReporte" class="loader">Procesando información y cálculos en tiempo real...</div>
+    <div id="loaderReporte" class="loader">Procesando información...</div>
     
     <div id="contenidoReporte" class="hidden">
-      
       <div class="seccion-reporte">
         <h2>Información General</h2>
         <div class="grid-datos">
@@ -319,34 +126,49 @@
           <div id="boxAAA" class="dato-bloque hidden" style="grid-column: 1 / -1; background: #f0fdf4; padding: 0.75rem; border-radius: 8px; border: 1px solid #bbf7d0; margin-top: 0.5rem;"><span class="dato-label" style="color: #166534;">AAA</span><span id="valAAAFecha" class="dato-valor" style="font-weight: 600; color: #14532d;"></span></div>
         </div>
       </div>
-
     </div>
-
     <button class="btn-back" onclick="volverYRefrescarConsulta()">Volver a consultar</button>
   </div>
 
   <script>
+    // 🔽 PEGA AQUÍ TU ENLACE DE IMPLEMENTACIÓN (/exec) 🔽
+    const API_URL = "https://script.googleusercontent.com/macros/echo?user_content_key=AUkAhnTI-6Wf4COfl43oEbA4yq0coZKOgxgrUoikis4_jLF7gKoO2tgeA8rattDT-9w0L2hl6K_jGNE7jL4UzI1d7UJpJXQJfzt_432O0bQ6qzIxFDaUiDwroFHqarT_iQtgV-B8WoIDxAgxxQWfEdvzGyyBfwdHO3z08vvNH8Ro9GtD6-Bt7Cp4MTel8AqYzh3AhukgWn5xEXGQHaRbTvSNQbXoxjwRU4V5sz2Mh1CwDL85ihqRsoCCIAuBme0mfqDIGR-ATKVexSlgKUI53kCt0N2Qr80oig&lib=Me93YWTUFsF58WGbQ4BJkLLC8W8iNzlzf"; 
+    
+    let baseDatosCompleta = [];
+
     window.onload = function() {
-      inicializarDesplegableA();
+      cargarDatosDesdeAPI();
     };
+
+    function cargarDatosDesdeAPI() {
+      var select = document.getElementById('selectA');
+      select.innerHTML = '<option value="">Conectando con la base de datos...</option>';
+      
+      fetch(API_URL)
+        .then(response => response.json())
+        .then(data => {
+          baseDatosCompleta = data;
+          inicializarDesplegableA();
+        })
+        .catch(err => {
+          select.innerHTML = '<option value="">Error de conexión. Revisa los permisos.</option>';
+          console.error(err);
+        });
+    }
 
     function inicializarDesplegableA() {
       var select = document.getElementById('selectA');
-      select.innerHTML = '<option value="">Cargando áreas...</option>';
+      let areas = [...new Set(baseDatosCompleta.map(item => item.columnaA))].filter(Boolean).sort();
       
-      google.script.run
-        .withSuccessHandler(function(opciones) {
-          select.innerHTML = '<option value="">-- Seleccione un Área --</option>';
-          opciones.forEach(function(opt) {
-            var el = document.createElement('option');
-            el.value = opt; el.textContent = opt;
-            select.appendChild(el);
-          });
-        })
-        .obtenerOpcionesColumnaA();
+      select.innerHTML = '<option value="">-- Seleccione un Área --</option>';
+      areas.forEach(area => {
+        var el = document.createElement('option');
+        el.value = area; el.textContent = area;
+        select.appendChild(el);
+      });
     }
 
-    function cargarColumnaC() {
+    function cambioArea() {
       var valorA = document.getElementById('selectA').value;
       var grupoC = document.getElementById('grupoC');
       var selectC = document.getElementById('selectC');
@@ -358,20 +180,20 @@
         return;
       }
 
-      selectC.innerHTML = '<option value="">Cargando nombres...</option>';
+      let nombresFiltrados = baseDatosCompleta
+        .filter(item => item.columnaA === valorA)
+        .map(item => item.nombre)
+        .filter(Boolean).sort();
+
+      selectC.innerHTML = '<option value="">-- Seleccione un nombre --</option>';
+      nombresFiltrados.forEach(nom => {
+        var el = document.createElement('option');
+        el.value = nom; el.textContent = nom;
+        selectC.appendChild(el);
+      });
+
       grupoC.classList.remove('hidden');
       btnConsultar.disabled = true;
-
-      google.script.run
-        .withSuccessHandler(function(nombres) {
-          selectC.innerHTML = '<option value="">-- Seleccione un nombre --</option>';
-          nombres.forEach(function(nom) {
-            var el = document.createElement('option');
-            el.value = nom; el.textContent = nom;
-            selectC.appendChild(el);
-          });
-        })
-        .obtenerNombresFiltrados(valorA);
     }
 
     function activarBotonConsultar() {
@@ -390,11 +212,9 @@
       var el = document.getElementById(idElemento);
       var esVerdadero = (valorBooleano === true || valorBooleano === "true" || valorBooleano === "VERDADERO");
       if (esVerdadero) {
-        el.textContent = "✔️";
-        el.style.color = "var(--success)";
+        el.textContent = "✔️"; el.style.color = "var(--success)";
       } else {
-        el.textContent = "❌";
-        el.style.color = "var(--danger)";
+        el.textContent = "❌"; el.style.color = "var(--danger)";
       }
       return esVerdadero;
     }
@@ -403,158 +223,85 @@
       var valorA = document.getElementById('selectA').value;
       var valorC = document.getElementById('selectC').value;
 
+      let res = baseDatosCompleta.find(item => item.columnaA === valorA && item.nombre === valorC);
+      if(!res) return;
+
       document.getElementById('paginaFiltros').classList.add('hidden');
       document.getElementById('paginaReporte').classList.remove('hidden');
-      document.getElementById('loaderReporte').classList.remove('hidden');
-      document.getElementById('contenidoReporte').classList.add('hidden');
 
-      google.script.run
-        .withSuccessHandler(function(res) {
-          if (res) {
-            document.getElementById('tituloColumnaA').textContent = res.columnaA;
-            document.getElementById('valNombre').textContent = res.nombre;
-            document.getElementById('valCargo').textContent = res.cargo;
-            document.getElementById('valNombramiento').textContent = res.nombramiento;
-            document.getElementById('valMetodologia').textContent = res.metodologia;
-            
-            document.getElementById('valFechaNom').textContent = formatearFechaVisual(res.fechaNombramiento);
-            document.getElementById('valFechaFin').textContent = formatearFechaVisual(res.fechaFinalizacion);
+      document.getElementById('tituloColumnaA').textContent = res.columnaA;
+      document.getElementById('valNombre').textContent = res.nombre;
+      document.getElementById('valCargo').textContent = res.cargo;
+      document.getElementById('valNombramiento').textContent = res.nombramiento;
+      document.getElementById('valMetodologia').textContent = res.metodologia;
+      document.getElementById('valFechaNom').textContent = formatearFechaVisual(res.fechaNombramiento);
+      document.getElementById('valFechaFin').textContent = formatearFechaVisual(res.fechaFinalizacion);
 
-            // Conversión Duración
-            if (res.duracionMeses && !isNaN(res.duracionMeses)) {
-              var tAnios = Math.floor(res.duracionMeses / 12);
-              var tMeses = res.duracionMeses % 12;
-              var txt = "";
-              if (tAnios > 0) txt += tAnios + (tAnios === 1 ? " año " : " años ");
-              if (tMeses > 0) txt += tMeses + (tMeses === 1 ? " mes" : " meses");
-              document.getElementById('valDuracion').textContent = txt || res.duracionMeses + " meses";
-            } else {
-              document.getElementById('valDuracion').textContent = "N/A";
-            }
+      if (res.duracionMeses && !isNaN(res.duracionMeses)) {
+        var tAnios = Math.floor(res.duracionMeses / 12); var tMeses = res.duracionMeses % 12;
+        var txt = "";
+        if (tAnios > 0) txt += tAnios + (tAnios === 1 ? " año " : " años ");
+        if (tMeses > 0) txt += tMeses + (tMeses === 1 ? " mes" : " meses");
+        document.getElementById('valDuracion').textContent = txt || res.duracionMeses + " meses";
+      } else { document.getElementById('valDuracion').textContent = "N/A"; }
 
-            // Tiempo Restante Exacto
-            if (res.fechaFinalizacion && res.fechaFinalizacion !== "N/A") {
-              var p = res.fechaFinalizacion.split("-");
-              var fechaFin = new Date(p[0], p[1] - 1, p[2]);
-              var fechaHoy = new Date();
-              fechaHoy.setHours(0,0,0,0);
+      if (res.fechaFinalizacion && res.fechaFinalizacion !== "N/A") {
+        var p = res.fechaFinalizacion.split("-");
+        var fechaFin = new Date(p[0], p[1] - 1, p[2]);
+        var fechaHoy = new Date(); fechaHoy.setHours(0,0,0,0);
 
-              if (fechaFin >= fechaHoy) {
-                var diffAnios = fechaFin.getFullYear() - fechaHoy.getFullYear();
-                var diffMeses = fechaFin.getMonth() - fechaHoy.getMonth();
-                var diffDias = fechaFin.getDate() - fechaHoy.getDate();
+        if (fechaFin >= fechaHoy) {
+          var diffAnios = fechaFin.getFullYear() - fechaHoy.getFullYear();
+          var diffMeses = fechaFin.getMonth() - fechaHoy.getMonth();
+          var diffDias = fechaFin.getDate() - fechaHoy.getDate();
+          if (diffDias < 0) { diffMeses--; var diasMesAnterior = new Date(fechaFin.getFullYear(), fechaFin.getMonth(), 0).getDate(); diffDias += diasMesAnterior; }
+          if (diffMeses < 0) { diffAnios--; diffMeses += 12; }
+          var textoRestante = "";
+          if (diffAnios > 0) textoRestante += diffAnios + (diffAnios === 1 ? " año, " : " años, ");
+          if (diffMeses > 0) textoRestante += diffMeses + (diffMeses === 1 ? " mes " : " meses ");
+          if (diffDias > 0) { if (textoRestante !== "") textoRestante += "y "; textoRestante += diffDias + (diffDias === 1 ? " día" : " días"); }
+          document.getElementById('valTiempoRestante').textContent = textoRestante || "Finaliza hoy";
+        } else { document.getElementById('valTiempoRestante').textContent = "Período vencido / Cargo finalizado"; }
+      } else { document.getElementById('valTiempoRestante').textContent = "Sin fecha de finalización registrada"; }
 
-                if (diffDias < 0) {
-                  diffMeses--;
-                  var diasMesAnterior = new Date(fechaFin.getFullYear(), fechaFin.getMonth(), 0).getDate();
-                  diffDias += diasMesAnterior;
-                }
-                if (diffMeses < 0) {
-                  diffAnios--;
-                  diffMeses += 12;
-                }
+      mapearIconoEstado('statusAcuerdo', res.acuerdoMutuo);
+      mapearIconoEstado('statusCurso1', res.cursoSfH1);
+      mapearIconoEstado('statusCurso2', res.cursoSfH2);
+      mapearIconoEstado('statusAval', res.avalAsesor);
 
-                var textoRestante = "";
-                if (diffAnios > 0) textoRestante += diffAnios + (diffAnios === 1 ? " año, " : " años, ");
-                if (diffMeses > 0) textoRestante += diffMeses + (diffMeses === 1 ? " mes " : " meses ");
-                if (diffDias > 0) {
-                  if (textoRestante !== "") textoRestante += "y ";
-                  textoRestante += diffDias + (diffDias === 1 ? " día" : " días");
-                }
-                document.getElementById('valTiempoRestante').textContent = textoRestante || "Finaliza hoy";
-              } else {
-                document.getElementById('valTiempoRestante').textContent = "Período vencido / Cargo finalizado";
-              }
-            } else {
-              document.getElementById('valTiempoRestante').textContent = "Sin fecha de finalización registrada";
-            }
+      document.getElementById('valAsesorPersonal').textContent = res.asesorPersonal;
+      mapearIconoEstado('statusPPD', res.desarrolloPPD);
+      var esEva1True = mapearIconoEstado('statusEva1', res.evaluacion1);
+      var f1Formateada = formatearFechaVisual(res.fechaEvaluacion1);
+      if (esEva1True && f1Formateada !== "") { document.getElementById('valFechaEva1').textContent = f1Formateada; document.getElementById('boxFechaEva1').classList.remove('hidden'); } else { document.getElementById('boxFechaEva1').classList.add('hidden'); }
+      var esEva2True = mapearIconoEstado('statusEva2', res.evaluacion2);
+      var f2Formateada = formatearFechaVisual(res.fechaEvaluacion2);
+      if (esEva2True && f2Formateada !== "") { document.getElementById('valFechaEva2').textContent = f2Formateada; document.getElementById('boxFechaEva2').classList.remove('hidden'); } else { document.getElementById('boxFechaEva2').classList.add('hidden'); }
+      var fGestorFormateada = formatearFechaVisual(res.gestorNacionalFecha);
+      if (fGestorFormateada && fGestorFormateada !== "" && res.gestorNacionalFecha !== "N/A") { document.getElementById('valGestorFecha').textContent = "Fecha de registro: " + fGestorFormateada; document.getElementById('boxGestor').classList.remove('hidden'); } else { document.getElementById('boxGestor').classList.add('hidden'); }
 
-            // SECCIÓN 2
-            mapearIconoEstado('statusAcuerdo', res.acuerdoMutuo);
-            mapearIconoEstado('statusCurso1', res.cursoSfH1);
-            mapearIconoEstado('statusCurso2', res.cursoSfH2);
-            mapearIconoEstado('statusAval', res.avalAsesor);
+      mapearIconoEstado('statusS4PPD', res.s4DesarrolloPPD);
+      var esS4Eva1True = mapearIconoEstado('statusS4Eva1', res.s4Evaluacion1);
+      var fS4Nom1 = formatearFechaVisual(res.s4FechaEvaluacion1);
+      if (esS4Eva1True && fS4Nom1 !== "") { document.getElementById('valFechaS4Eva1').textContent = fS4Nom1; document.getElementById('boxFechaS4Eva1').classList.remove('hidden'); } else { document.getElementById('boxFechaS4Eva1').classList.add('hidden'); }
+      var esS4Eva2True = mapearIconoEstado('statusS4Eva2', res.s4Evaluacion2);
+      var fS4Nom2 = formatearFechaVisual(res.s4FechaEvaluacion2);
+      if (esS4Eva2True && fS4Nom2 !== "") { document.getElementById('valFechaS4Eva2').textContent = fS4Nom2; document.getElementById('boxFechaS4Eva2').classList.remove('hidden'); } else { document.getElementById('boxFechaS4Eva2').classList.add('hidden'); }
+      var fAAAFormateada = formatearFechaVisual(res.aaaFecha);
+      if (fAAAFormateada && fAAAFormateada !== "" && res.aaaFecha !== "N/A") { document.getElementById('valAAAFecha').textContent = "Fecha de acreditación: " + fAAAFormateada; document.getElementById('boxAAA').classList.remove('hidden'); } else { document.getElementById('boxAAA').classList.add('hidden'); }
 
-            // SECCIÓN 3
-            document.getElementById('valAsesorPersonal').textContent = res.asesorPersonal;
-            mapearIconoEstado('statusPPD', res.desarrolloPPD);
-
-            var esEva1True = mapearIconoEstado('statusEva1', res.evaluacion1);
-            var f1Formateada = formatearFechaVisual(res.fechaEvaluacion1);
-            if (esEva1True && f1Formateada !== "") {
-              document.getElementById('valFechaEva1').textContent = f1Formateada;
-              document.getElementById('boxFechaEva1').classList.remove('hidden');
-            } else {
-              document.getElementById('boxFechaEva1').classList.add('hidden');
-            }
-
-            var esEva2True = mapearIconoEstado('statusEva2', res.evaluacion2);
-            var f2Formateada = formatearFechaVisual(res.fechaEvaluacion2);
-            if (esEva2True && f2Formateada !== "") {
-              document.getElementById('valFechaEva2').textContent = f2Formateada;
-              document.getElementById('boxFechaEva2').classList.remove('hidden');
-            } else {
-              document.getElementById('boxFechaEva2').classList.add('hidden');
-            }
-
-            var fGestorFormateada = formatearFechaVisual(res.gestorNacionalFecha);
-            if (fGestorFormateada && fGestorFormateada !== "" && res.gestorNacionalFecha !== "N/A") {
-              document.getElementById('valGestorFecha').textContent = "Fecha de registro: " + fGestorFormateada;
-              document.getElementById('boxGestor').classList.remove('hidden');
-            } else {
-              document.getElementById('boxGestor').classList.add('hidden');
-            }
-
-            // SECCIÓN 4
-            mapearIconoEstado('statusS4PPD', res.s4DesarrolloPPD);
-
-            var esS4Eva1True = mapearIconoEstado('statusS4Eva1', res.s4Evaluacion1);
-            var fS4Nom1 = formatearFechaVisual(res.s4FechaEvaluacion1);
-            if (esS4Eva1True && fS4Nom1 !== "") {
-              document.getElementById('valFechaS4Eva1').textContent = fS4Nom1;
-              document.getElementById('boxFechaS4Eva1').classList.remove('hidden');
-            } else {
-              document.getElementById('boxFechaS4Eva1').classList.add('hidden');
-            }
-
-            var esS4Eva2True = mapearIconoEstado('statusS4Eva2', res.s4Evaluacion2);
-            var fS4Nom2 = formatearFechaVisual(res.s4FechaEvaluacion2);
-            if (esS4Eva2True && fS4Nom2 !== "") {
-              document.getElementById('valFechaS4Eva2').textContent = fS4Nom2;
-              document.getElementById('boxFechaS4Eva2').classList.remove('hidden');
-            } else {
-              document.getElementById('boxFechaS4Eva2').classList.add('hidden');
-            }
-
-            var fAAAFormateada = formatearFechaVisual(res.aaaFecha);
-            if (fAAAFormateada && fAAAFormateada !== "" && res.aaaFecha !== "N/A") {
-              document.getElementById('valAAAFecha').textContent = "Fecha de acreditación: " + fAAAFormateada;
-              document.getElementById('boxAAA').classList.remove('hidden');
-            } else {
-              document.getElementById('boxAAA').classList.add('hidden');
-            }
-
-            document.getElementById('loaderReporte').classList.add('hidden');
-            document.getElementById('contenidoReporte').classList.remove('hidden');
-          }
-        })
-        .obtenerDetallesConsulta(valorA, valorC);
+      document.getElementById('loaderReporte').classList.add('hidden');
+      document.getElementById('contenidoReporte').classList.remove('hidden');
     }
 
-    // NUEVA FUNCIÓN: LÍMPIA FORMULARIO, REFRESCA DATOS Y REGRESA A INICIO
     function volverYRefrescarConsulta() {
-      // 1. Regresar a la vista de filtros
       document.getElementById('paginaReporte').classList.add('hidden');
       document.getElementById('paginaFiltros').classList.remove('hidden');
-      
-      // 2. Resetear los selectores e interfaz
       document.getElementById('selectA').value = "";
       document.getElementById('grupoC').classList.add('hidden');
       document.getElementById('selectC').innerHTML = '<option value="">-- Seleccione un nombre --</option>';
       document.getElementById('btnConsultar').disabled = true;
-      
-      // 3. Volver a consultar la columna A para asegurar datos frescos de la hoja
-      inicializarDesplegableA();
+      cargarDatosDesdeAPI();
     }
   </script>
 </body>
