@@ -28,18 +28,21 @@
     .grid-datos { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; }
     .dato-bloque { display: flex; flex-direction: column; }
     
-    /* SOLUCIÓN DE ESPACIADO: Agregamos separación interna para que el contenido no se pegue */
     .dato-verificacion { display: flex; justify-content: space-between; align-items: center; background: var(--card-bg); padding: 0.75rem 1rem; border-radius: 8px; border: 1px solid var(--border); gap: 1.5rem; }
     .dato-mixto-linea { grid-column: 1 / -1; display: flex; align-items: center; justify-content: space-between; background: var(--card-bg); padding: 0.75rem 1rem; border-radius: 8px; border: 1px solid var(--border); gap: 1.5rem; }
     .mixto-izq { display: flex; align-items: center; gap: 0.85rem; }
-    
-    /* Espaciador específico para textos inline como el de Asesor Personal */
     .dato-inline-bloque { grid-column: 1 / -1; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; }
 
     .verificacion-titulo { font-size: 0.95rem; font-weight: 600; color: var(--text); }
     .status-badge { font-size: 1.2rem; font-weight: bold; }
     .dato-label { font-size: 0.8rem; font-weight: 600; color: var(--text-light); text-transform: uppercase; margin-bottom: 0.2rem; }
     .dato-valor { font-size: 1rem; font-weight: 500; color: var(--text); }
+    
+    /* Estilos del botón de Google Drive */
+    .btn-drive { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; background-color: #0f9d58; color: white; border: none; padding: 0.75rem 1.2rem; border-radius: 8px; font-weight: 600; text-decoration: none; font-size: 0.95rem; margin-top: 0.25rem; width: fit-content; cursor: pointer; transition: background 0.2s; }
+    .btn-drive:hover { background-color: #0b7b44; }
+    .text-no-link { color: var(--text-light); font-style: italic; font-size: 0.95rem; }
+
     .btn-back { background-color: transparent; color: var(--text-light); border: 1px solid var(--border); margin-top: 1rem; }
     .btn-back:hover { background-color: var(--bg); color: var(--text); }
     .loader { text-align: center; color: var(--text-light); font-style: italic; padding: 2rem 0; }
@@ -137,12 +140,18 @@
           <div id="boxAAA" class="dato-bloque hidden" style="grid-column: 1 / -1; background: #f0fdf4; padding: 0.75rem; border-radius: 8px; border: 1px solid #bbf7d0; margin-top: 0.5rem;"><span class="dato-label" style="color: #166534;">AAA</span><span id="valAAAFecha" class="dato-valor" style="font-weight: 600; color: #14532d;"></span></div>
         </div>
       </div>
+
+      <div class="seccion-reporte">
+        <h2>Carpeta Personal</h2>
+        <div id="contenedorDrive">
+          </div>
+      </div>
     </div>
     <button class="btn-back" onclick="volverYRefrescarConsulta()">Volver a consultar</button>
   </div>
 
   <script>
-    // 🔽 PEGA AQUÍ TU URL DE APPS SCRIPT COMPLETA (/exec) 🔽
+    // 🔽 REEMPLAZA ESTO CON TU URL DE APPS SCRIPT REAL (/exec) 🔽
     const API_URL = "https://script.google.com/macros/s/AKfycbz-rGMlo7nCfzS2GETN3dzoUokqQ1JsrjR29PtvM1RQrgXDvGO0L1BXdPaZ4FAgW66SsA/exec"; 
     
     let baseDatosCompleta = [];
@@ -281,4 +290,81 @@
       if (res.duracionMeses && !isNaN(res.duracionMeses)) {
         var tAnios = Math.floor(res.duracionMeses / 12); var tMeses = res.duracionMeses % 12;
         var txt = "";
-        if (tAnios > 0) txt += tAnios + (tAnios === 1 ? " año " :
+        if (tAnios > 0) txt += tAnios + (tAnios === 1 ? " año " : " años ");
+        if (tMeses > 0) txt += tMeses + (tMeses === 1 ? " mes" : " meses");
+        document.getElementById('valDuracion').textContent = txt || res.duracionMeses + " meses";
+      } else { document.getElementById('valDuracion').textContent = "N/A"; }
+
+      let fechaFinObj = extraerEstructuraFecha(res.fechaFinalizacion);
+      if (fechaFinObj) {
+        var fechaHoy = new Date(); fechaHoy.setHours(0,0,0,0);
+
+        if (fechaFinObj >= fechaHoy) {
+          var diffAnios = fechaFinObj.getFullYear() - fechaHoy.getFullYear();
+          var diffMeses = fechaFinObj.getMonth() - fechaHoy.getMonth();
+          var diffDias = fechaFinObj.getDate() - fechaHoy.getDate();
+          if (diffDias < 0) { diffMeses--; var diasMesAnterior = new Date(fechaFinObj.getFullYear(), fechaFinObj.getMonth(), 0).getDate(); diffDias += diasMesAnterior; }
+          if (diffMeses < 0) { diffAnios--; diffMeses += 12; }
+          var textoRestante = "";
+          if (diffAnios > 0) textoRestante += diffAnios + (diffAnios === 1 ? " año, " : " años, ");
+          if (diffMeses > 0) textoRestante += diffMeses + (diffMeses === 1 ? " mes " : " meses ");
+          if (diffDias > 0) { if (textoRestante !== "") textoRestante += "y "; textoRestante += diffDias + (diffDias === 1 ? " día" : " días"); }
+          document.getElementById('valTiempoRestante').textContent = textoRestante || "Finaliza hoy";
+        } else { document.getElementById('valTiempoRestante').textContent = "Período vencido / Cargo finalizado"; }
+      } else { document.getElementById('valTiempoRestante').textContent = "Sin fecha de finalización registrada"; }
+
+      // SECCIÓN 2
+      mapearIconoEstado('statusAcuerdo', res.acuerdoMutuo);
+      mapearIconoEstado('statusCurso1', res.cursoSfH1);
+      mapearIconoEstado('statusCurso2', res.cursoSfH2);
+      mapearIconoEstado('statusAval', res.avalAsesor);
+      mapearIconoEstado('statusInduccion', res.moduloInduccion);
+      mapearIconoEstado('statusAfiliacion', res.afiliacionVigente);
+
+      // SECCIÓN 3
+      document.getElementById('valAsesorPersonal').textContent = res.asesorPersonal;
+      mapearIconoEstado('statusPPD', res.desarrolloPPD);
+      var esEva1True = mapearIconoEstado('statusEva1', res.evaluacion1);
+      var f1Formateada = formatearFechaVisual(res.fechaEvaluacion1);
+      if (esEva1True && f1Formateada !== "N/A") { document.getElementById('valFechaEva1').textContent = f1Formateada; document.getElementById('boxFechaEva1').classList.remove('hidden'); } else { document.getElementById('boxFechaEva1').classList.add('hidden'); }
+      var esEva2True = mapearIconoEstado('statusEva2', res.evaluacion2);
+      var f2Formateada = formatearFechaVisual(res.fechaEvaluacion2);
+      if (esEva2True && f2Formateada !== "N/A") { document.getElementById('valFechaEva2').textContent = f2Formateada; document.getElementById('boxFechaEva2').classList.remove('hidden'); } else { document.getElementById('boxFechaEva2').classList.add('hidden'); }
+      var fGestorFormateada = formatearFechaVisual(res.gestorNacionalFecha);
+      if (fGestorFormateada && fGestorFormateada !== "N/A") { document.getElementById('valGestorFecha').textContent = "Fecha de registro: " + fGestorFormateada; document.getElementById('boxGestor').classList.remove('hidden'); } else { document.getElementById('boxGestor').classList.add('hidden'); }
+
+      // SECCIÓN 4
+      mapearIconoEstado('statusS4PPD', res.s4DesarrolloPPD);
+      var esS4Eva1True = mapearIconoEstado('statusS4Eva1', res.s4Evaluacion1);
+      var fS4Nom1 = formatearFechaVisual(res.s4FechaEvaluacion1);
+      if (esS4Eva1True && fS4Nom1 !== "N/A") { document.getElementById('valFechaS4Eva1').textContent = fS4Nom1; document.getElementById('boxFechaS4Eva1').classList.remove('hidden'); } else { document.getElementById('boxFechaS4Eva1').classList.add('hidden'); }
+      var esS4Eva2True = mapearIconoEstado('statusS4Eva2', res.s4Evaluacion2);
+      var fS4Nom2 = formatearFechaVisual(res.s4FechaEvaluacion2);
+      if (esS4Eva2True && fS4Nom2 !== "N/A") { document.getElementById('valFechaS4Eva2').textContent = fS4Nom2; document.getElementById('boxFechaS4Eva2').classList.remove('hidden'); } else { document.getElementById('boxFechaS4Eva2').classList.add('hidden'); }
+      var fAAAFormateada = formatearFechaVisual(res.aaaFecha);
+      if (fAAAFormateada && fAAAFormateada !== "N/A") { document.getElementById('valAAAFecha').textContent = "Fecha de acreditación: " + fAAAFormateada; document.getElementById('boxAAA').classList.remove('hidden'); } else { document.getElementById('boxAAA').classList.add('hidden'); }
+
+      // SECCIÓN 5: CARPETA PERSONAL (Inyección dinámica del link de Drive)
+      var divDrive = document.getElementById('contenedorDrive');
+      if (res.carpetaDrive && res.carpetaDrive.startsWith("http")) {
+        divDrive.innerHTML = '<a href="' + res.carpetaDrive + '" target="_blank" class="btn-drive">📂 Abrir Carpeta en Google Drive</a>';
+      } else {
+        divDrive.innerHTML = '<span class="text-no-link">No se encuentra registrada una carpeta de Drive válida para este usuario.</span>';
+      }
+
+      document.getElementById('loaderReporte').classList.add('hidden');
+      document.getElementById('contenidoReporte').classList.remove('hidden');
+    }
+
+    function volverYRefrescarConsulta() {
+      document.getElementById('paginaReporte').classList.add('hidden');
+      document.getElementById('paginaFiltros').classList.remove('hidden');
+      document.getElementById('selectA').value = "";
+      document.getElementById('grupoC').classList.add('hidden');
+      document.getElementById('selectC').innerHTML = '<option value="">-- Seleccione un nombre --</option>';
+      document.getElementById('btnConsultar').disabled = true;
+      cargarDatosDesdeAPI();
+    }
+  </script>
+</body>
+</html>
