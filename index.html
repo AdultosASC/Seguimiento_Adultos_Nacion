@@ -153,8 +153,7 @@
   </div>
 
   <script>
-    // URL DE TU NUEVA API PROBADA Y VERIFICADA
-    const API_URL = "https://script.google.com/macros/s/AKfycby9I9LZVEkTQ3r7wrO_XgNMnTLvReR-xZYGQZPaz2ASS4c2eHf3mqKbaeYREMbgRUHLUQ/exec"; 
+    const API_URL = "https://script.google.com/macros/s/AKfycbw8nMZcJnVAyjYgFxL57TWl0I467x3lvC-fvbK4txd7iueD88nteozbir2hB4N9KRuV7g/exec"; 
     
     let baseDatosCompleta = [];
 
@@ -207,4 +206,171 @@
         .map(item => item.nombre)
         .filter(Boolean).sort();
 
-      selectC.innerHTML = '<option value
+      selectC.innerHTML = '<option value="">-- Seleccione un nombre --</option>';
+      nombresFiltrados.forEach(nom => {
+        var el = document.createElement('option');
+        el.value = nom; el.textContent = nom;
+        selectC.appendChild(el);
+      });
+
+      grupoC.classList.remove('hidden');
+      btnConsultar.disabled = true;
+    }
+
+    function activarBotonConsultar() {
+      var selectC = document.getElementById('selectC').value;
+      document.getElementById('btnConsultar').disabled = (selectC === "");
+    }
+
+    function extraerEstructuraFecha(strFecha) {
+      if(!strFecha || strFecha === "N/A" || strFecha.toString().trim() === "") return null;
+      let texto = strFecha.toString().trim();
+      
+      if (texto.includes('T') && texto.includes('/')) {
+        let partesSlash = texto.split('/');
+        if (partesSlash.length === 3) {
+          let parteDia = partesSlash[0].split('T')[0];
+          let mes = parseInt(partesSlash[1], 10) - 1;
+          let anio = parseInt(partesSlash[2], 10);
+          let dia = parseInt(parteDia, 10);
+          return new Date(anio, mes, dia);
+        }
+      }
+      if (texto.includes('-')) {
+        let partesDash = texto.split('-');
+        if (partesDash.length === 3) {
+          let anio = parseInt(partesDash[0], 10);
+          let mes = parseInt(partesDash[1], 10) - 1;
+          let dia = parseInt(partesDash[2], 10);
+          return new Date(anio, mes, dia);
+        }
+      }
+      let intentoDirecto = new Date(texto);
+      if (!isNaN(intentoDirecto.getTime())) return intentoDirecto;
+      return null;
+    }
+
+    function formatearFechaVisual(strFecha) {
+      let objetoFecha = extraerEstructuraFecha(strFecha);
+      if (!objetoFecha) return strFecha || "N/A";
+      let dia = String(objetoFecha.getDate()).padStart(2, '0');
+      let mes = String(objetoFecha.getMonth() + 1).padStart(2, '0');
+      let anio = objetoFecha.getFullYear();
+      return dia + "/" + mes + "/" + anio;
+    }
+
+    function mapearIconoEstado(idElemento, valorBooleano) {
+      var el = document.getElementById(idElemento);
+      var esVerdadero = (valorBooleano === true || valorBooleano === "true" || valorBooleano === "VERDADERO");
+      if (esVerdadero) {
+        el.textContent = "✔️"; el.style.color = "var(--success)";
+      } else {
+        el.textContent = "❌"; el.style.color = "var(--danger)";
+      }
+      return esVerdadero;
+    }
+
+    function irAPaginaReporte() {
+      var valorA = document.getElementById('selectA').value;
+      var valorC = document.getElementById('selectC').value;
+
+      let res = baseDatosCompleta.find(item => item.columnaA === valorA && item.nombre === valorC);
+      if(!res) return;
+
+      document.getElementById('paginaFiltros').classList.add('hidden');
+      document.getElementById('paginaReporte').classList.remove('hidden');
+
+      document.getElementById('tituloColumnaA').textContent = res.columnaA;
+      document.getElementById('valNombre').textContent = res.nombre;
+      document.getElementById('valCargo').textContent = res.cargo;
+      document.getElementById('valNombramiento').textContent = res.nombramiento;
+      document.getElementById('valMetodologia').textContent = res.metodologia;
+      document.getElementById('valFechaNom').textContent = formatearFechaVisual(res.fechaNombramiento);
+      document.getElementById('valFechaFin').textContent = formatearFechaVisual(res.fechaFinalizacion);
+
+      if (res.duracionMeses && !isNaN(res.duracionMeses)) {
+        var tAnios = Math.floor(res.duracionMeses / 12); var tMeses = res.duracionMeses % 12;
+        var txt = "";
+        if (tAnios > 0) txt += tAnios + (tAnios === 1 ? " año " : " años ");
+        if (tMeses > 0) txt += tMeses + (tMeses === 1 ? " mes" : " meses");
+        document.getElementById('valDuracion').textContent = txt || res.duracionMeses + " meses";
+      } else { document.getElementById('valDuracion').textContent = "N/A"; }
+
+      let fechaFinObj = extraerEstructuraFecha(res.fechaFinalizacion);
+      if (fechaFinObj) {
+        var fechaHoy = new Date(); fechaHoy.setHours(0,0,0,0);
+        if (fechaFinObj >= fechaHoy) {
+          var diffAnios = fechaFinObj.getFullYear() - fechaHoy.getFullYear();
+          var diffMeses = fechaFinObj.getMonth() - fechaHoy.getMonth();
+          var diffDias = fechaFinObj.getDate() - fechaHoy.getDate();
+          if (diffDias < 0) { diffMeses--; var diasMesAnterior = new Date(fechaFinObj.getFullYear(), fechaFinObj.getMonth(), 0).getDate(); diffDias += diasMesAnterior; }
+          if (diffMeses < 0) { diffAnios--; diffMeses += 12; }
+          var textoRestante = "";
+          if (diffAnios > 0) textoRestante += diffAnios + (diffAnios === 1 ? " año, " : " años, ");
+          if (diffMeses > 0) textoRestante += diffMeses + (diffMeses === 1 ? " mes " : " meses ");
+          if (diffDias > 0) { if (textoRestante !== "") textoRestante += "y "; textoRestante += diffDias + (diffDias === 1 ? " día" : " días"); }
+          document.getElementById('valTiempoRestante').textContent = textoRestante || "Finaliza hoy";
+        } else { document.getElementById('valTiempoRestante').textContent = "Período vencido / Cargo finalizado"; }
+      } else { document.getElementById('valTiempoRestante').textContent = "Sin fecha de finalización registrada"; }
+
+      // SECCIÓN 2
+      mapearIconoEstado('statusAcuerdo', res.acuerdoMutuo);
+      mapearIconoEstado('statusCurso1', res.cursoSfH1);
+      mapearIconoEstado('statusCurso2', res.cursoSfH2);
+      mapearIconoEstado('statusAval', res.avalAsesor);
+      mapearIconoEstado('statusInduccion', res.moduloInduccion);
+      mapearIconoEstado('statusAfiliacion', res.afiliacionVigente);
+
+      // SECCIÓN 3
+      document.getElementById('valAsesorPersonal').textContent = res.asesorPersonal;
+      mapearIconoEstado('statusPPD', res.desarrolloPPD);
+      
+      var esValInicialTrue = mapearIconoEstado('statusValInicial', res.valoracionInicial);
+      var f1Formateada = formatearFechaVisual(res.fechaValoracionInicial);
+      if (esValInicialTrue && f1Formateada !== "N/A") { document.getElementById('valFechaValInicial').textContent = f1Formateada; document.getElementById('boxFechaValInicial').classList.remove('hidden'); } else { document.getElementById('boxFechaValInicial').classList.add('hidden'); }
+      
+      var esValFinalTrue = mapearIconoEstado('statusValFinal', res.valoracionFinal);
+      var f2Formateada = formatearFechaVisual(res.fechaValoracionFinal);
+      if (esValFinalTrue && f2Formateada !== "N/A") { document.getElementById('valFechaValFinal').textContent = f2Formateada; document.getElementById('boxFechaValFinal').classList.remove('hidden'); } else { document.getElementById('boxFechaValFinal').classList.add('hidden'); }
+      
+      var fGestorFormateada = formatearFechaVisual(res.gestorNacionalFecha);
+      if (fGestorFormateada && fGestorFormateada !== "N/A") { document.getElementById('valGestorFecha').textContent = "Fecha de registro: " + fGestorFormateada; document.getElementById('boxGestor').classList.remove('hidden'); } else { document.getElementById('boxGestor').classList.add('hidden'); }
+
+      // SECCIÓN 4
+      mapearIconoEstado('statusS4PPD', res.s4DesarrolloPPD);
+      
+      var esS4ValInicialTrue = mapearIconoEstado('statusS4ValInicial', res.s4ValoracionInicial);
+      var fS4Nom1 = formatearFechaVisual(res.s4FechaValoracionInicial);
+      if (esS4ValInicialTrue && fS4Nom1 !== "N/A") { document.getElementById('valFechaS4ValInicial').textContent = fS4Nom1; document.getElementById('boxFechaS4ValInicial').classList.remove('hidden'); } else { document.getElementById('boxFechaS4ValInicial').classList.add('hidden'); }
+      
+      var esS4ValFinalTrue = mapearIconoEstado('statusS4ValFinal', res.s4ValoracionFinal);
+      var fS4Nom2 = formatearFechaVisual(res.s4FechaValoracionFinal);
+      if (esS4ValFinalTrue && fS4Nom2 !== "N/A") { document.getElementById('valFechaS4ValFinal').textContent = fS4Nom2; document.getElementById('boxFechaS4ValFinal').classList.remove('hidden'); } else { document.getElementById('boxFechaS4ValFinal').classList.add('hidden'); }
+      
+      var fAAAFormateada = formatearFechaVisual(res.aaaFecha);
+      if (fAAAFormateada && fAAAFormateada !== "N/A") { document.getElementById('valAAAFecha').textContent = "Fecha de acreditación: " + fAAAFormateada; document.getElementById('boxAAA').classList.remove('hidden'); } else { document.getElementById('boxAAA').classList.add('hidden'); }
+
+      // SECCIÓN 5
+      var divDrive = document.getElementById('contenedorDrive');
+      if (res.carpetaDrive && res.carpetaDrive.startsWith("http")) {
+        divDrive.innerHTML = '<a href="' + res.carpetaDrive + '" target="_blank" class="btn-drive">📂 Abrir Carpeta en Google Drive</a>';
+      } else {
+        divDrive.innerHTML = '<span class="text-no-link">No se encuentra registrada una carpeta de Drive válida para este usuario.</span>';
+      }
+
+      document.getElementById('loaderReporte').classList.add('hidden');
+      document.getElementById('contenidoReporte').classList.remove('hidden');
+    }
+
+    function volverYRefrescarConsulta() {
+      document.getElementById('paginaReporte').classList.add('hidden');
+      document.getElementById('paginaFiltros').classList.remove('hidden');
+      document.getElementById('selectA').value = "";
+      document.getElementById('grupoC').classList.add('hidden');
+      document.getElementById('selectC').innerHTML = '<option value="">-- Seleccione un nombre --</option>';
+      document.getElementById('btnConsultar').disabled = true;
+      cargarDatosDesdeAPI();
+    }
+  </script>
+</body>
+</html>
