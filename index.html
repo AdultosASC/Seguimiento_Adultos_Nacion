@@ -115,7 +115,11 @@
             <div class="mixto-izq"><span id="statusValInicial" class="status-badge"></span><span class="verificacion-titulo">Valoración Inicial</span></div>
             <div id="boxFechaValInicial" class="dato-bloque hidden" style="text-align: right;"><span class="dato-label">Fecha de realización</span><span id="valFechaValInicial" class="dato-valor"></span></div>
           </div>
-          <div class="dato-verificacion" style="grid-column: 1 / -1;"><span class="verificacion-titulo">En desarrollo de su PPD</span><span id="statusPPD" class="status-badge"></span></div>
+          
+          <div class="dato-mixto-linea">
+            <div class="mixto-izq"><span id="statusPPD" class="status-badge"></span><span class="verificacion-titulo">En desarrollo de su PPD</span></div>
+          </div>
+          
           <div class="dato-mixto-linea">
             <div class="mixto-izq"><span id="statusValFinal" class="status-badge"></span><span class="verificacion-titulo">Valoración Final</span></div>
             <div id="boxFechaValFinal" class="dato-bloque hidden" style="text-align: right;"><span class="dato-label">Fecha de realización</span><span id="valFechaValFinal" class="dato-valor"></span></div>
@@ -125,13 +129,17 @@
       </div>
 
       <div class="seccion-reporte">
-        <h2>Desarrollo Personal Perfeccionamiento Continuo</h2>
+        <h2>Development Personal Perfeccionamiento Continuo</h2>
         <div class="grid-datos">
           <div class="dato-mixto-linea">
             <div class="mixto-izq"><span id="statusS4ValInicial" class="status-badge"></span><span class="verificacion-titulo">Valoración Inicial</span></div>
             <div id="boxFechaS4ValInicial" class="dato-bloque hidden" style="text-align: right;"><span class="dato-label">Fecha de realización</span><span id="valFechaS4ValInicial" class="dato-valor"></span></div>
           </div>
-          <div class="dato-verificacion" style="grid-column: 1 / -1;"><span class="verificacion-titulo">En desarrollo de su PPD</span><span id="statusS4PPD" class="status-badge"></span></div>
+          
+          <div class="dato-mixto-linea">
+            <div class="mixto-izq"><span id="statusS4PPD" class="status-badge"></span><span class="verificacion-titulo">En desarrollo de su PPD</span></div>
+          </div>
+          
           <div class="dato-mixto-linea">
             <div class="mixto-izq"><span id="statusS4ValFinal" class="status-badge"></span><span class="verificacion-titulo">Valoración Final</span></div>
             <div id="boxFechaS4ValFinal" class="dato-bloque hidden" style="text-align: right;"><span class="dato-label">Fecha de realización</span><span id="valFechaS4ValFinal" class="dato-valor"></span></div>
@@ -149,7 +157,7 @@
   </div>
 
   <script>
-    // 🔽 REEMPLAZA ESTO CON TU URL DE APPS SCRIPT REAL (/exec) 🔽
+    // URL DE LA API DE GOOGLE APPS SCRIPT OFICIAL E INYECTADA DIRECTAMENTE
     const API_URL = "https://script.google.com/macros/s/AKfycbw8nMZcJnVAyjYgFxL57TWl0I467x3lvC-fvbK4txd7iueD88nteozbir2hB4N9KRuV7g/exec"; 
     
     let baseDatosCompleta = [];
@@ -219,7 +227,6 @@
       document.getElementById('btnConsultar').disabled = (selectC === "");
     }
 
-    // Funciones de formateo y mapeo
     function extraerEstructuraFecha(strFecha) {
       if(!strFecha || strFecha === "N/A" || strFecha.toString().trim() === "") return null;
       let texto = strFecha.toString().trim();
@@ -319,7 +326,7 @@
       mapearIconoEstado('statusInduccion', res.moduloInduccion);
       mapearIconoEstado('statusAfiliacion', res.afiliacionVigente);
 
-      // SECCIÓN 3: PROPIEDADES ACTUALIZADAS
+      // SECCIÓN 3
       document.getElementById('valAsesorPersonal').textContent = res.asesorPersonal;
       mapearIconoEstado('statusPPD', res.desarrolloPPD);
       
@@ -334,7 +341,7 @@
       var fGestorFormateada = formatearFechaVisual(res.gestorNacionalFecha);
       if (fGestorFormateada && fGestorFormateada !== "N/A") { document.getElementById('valGestorFecha').textContent = "Fecha de registro: " + fGestorFormateada; document.getElementById('boxGestor').classList.remove('hidden'); } else { document.getElementById('boxGestor').classList.add('hidden'); }
 
-      // SECCIÓN 4: PROPIEDADES ACTUALIZADAS
+      // SECCIÓN 4
       mapearIconoEstado('statusS4PPD', res.s4DesarrolloPPD);
       
       var esS4ValInicialTrue = mapearIconoEstado('statusS4ValInicial', res.s4ValoracionInicial);
