@@ -131,8 +131,8 @@
   </div>
 
   <script>
-    // 🔽 PEGA AQUÍ TU ENLACE DE IMPLEMENTACIÓN (/exec) 🔽
-    const API_URL = "https://script.googleusercontent.com/macros/echo?user_content_key=AUkAhnTI-6Wf4COfl43oEbA4yq0coZKOgxgrUoikis4_jLF7gKoO2tgeA8rattDT-9w0L2hl6K_jGNE7jL4UzI1d7UJpJXQJfzt_432O0bQ6qzIxFDaUiDwroFHqarT_iQtgV-B8WoIDxAgxxQWfEdvzGyyBfwdHO3z08vvNH8Ro9GtD6-Bt7Cp4MTel8AqYzh3AhukgWn5xEXGQHaRbTvSNQbXoxjwRU4V5sz2Mh1CwDL85ihqRsoCCIAuBme0mfqDIGR-ATKVexSlgKUI53kCt0N2Qr80oig&lib=Me93YWTUFsF58WGbQ4BJkLLC8W8iNzlzf"; 
+    // 🔽 REEMPLAZA ESTO CON TU URL DE APPS SCRIPT (/exec) 🔽
+    const API_URL = "TU_URL_DE_APPS_SCRIPT_AQUÍ"; 
     
     let baseDatosCompleta = [];
 
@@ -201,11 +201,50 @@
       document.getElementById('btnConsultar').disabled = (selectC === "");
     }
 
+    // Nueva función robusta para limpiar cualquier formato extraño de fechas
+    function extraerEstructuraFecha(strFecha) {
+      if(!strFecha || strFecha === "N/A" || strFecha.toString().trim() === "") return null;
+      
+      let texto = strFecha.toString().trim();
+      
+      // Si viene con el formato ISO largo (ej: 02T07:00:00.000Z/05/2026 o similar)
+      if (texto.includes('T') && texto.includes('/')) {
+        let partesSlash = texto.split('/');
+        if (partesSlash.length === 3) {
+          let parteDia = partesSlash[0].split('T')[0];
+          let mes = parseInt(partesSlash[1], 10) - 1;
+          let anio = parseInt(partesSlash[2], 10);
+          let dia = parseInt(parteDia, 10);
+          return new Date(anio, mes, dia);
+        }
+      }
+      
+      // Intentar detectar si viene en formato estándar YYYY-MM-DD
+      if (texto.includes('-')) {
+        let partesDash = texto.split('-');
+        if (partesDash.length === 3) {
+          let anio = parseInt(partesDash[0], 10);
+          let mes = parseInt(partesDash[1], 10) - 1;
+          let dia = parseInt(partesDash[2], 10);
+          return new Date(anio, mes, dia);
+        }
+      }
+      
+      // Fallback por si acaso es una fecha nativa pasada a String directamente
+      let intentoDirecto = new Date(texto);
+      if (!isNaN(intentoDirecto.getTime())) return intentoDirecto;
+      
+      return null;
+    }
+
     function formatearFechaVisual(strFecha) {
-      if(!strFecha || strFecha === "N/A" || strFecha.trim() === "") return "";
-      var partes = strFecha.split("-");
-      if(partes.length !== 3) return strFecha;
-      return partes[2] + "/" + partes[1] + "/" + partes[0];
+      let objetoFecha = extraerEstructuraFecha(strFecha);
+      if (!objetoFecha) return strFecha || "N/A";
+      
+      let dia = String(objetoFecha.getDate()).padStart(2, '0');
+      let mes = String(objetoFecha.getMonth() + 1).padStart(2, '0');
+      let anio = objetoFecha.getFullYear();
+      return dia + "/" + mes + "/" + anio;
     }
 
     function mapearIconoEstado(idElemento, valorBooleano) {
@@ -234,6 +273,8 @@
       document.getElementById('valCargo').textContent = res.cargo;
       document.getElementById('valNombramiento').textContent = res.nombramiento;
       document.getElementById('valMetodologia').textContent = res.metodologia;
+      
+      // Mostrar fechas limpias en el formato dd/mm/aaaa
       document.getElementById('valFechaNom').textContent = formatearFechaVisual(res.fechaNombramiento);
       document.getElementById('valFechaFin').textContent = formatearFechaVisual(res.fechaFinalizacion);
 
@@ -245,24 +286,40 @@
         document.getElementById('valDuracion').textContent = txt || res.duracionMeses + " meses";
       } else { document.getElementById('valDuracion').textContent = "N/A"; }
 
-      if (res.fechaFinalizacion && res.fechaFinalizacion !== "N/A") {
-        var p = res.fechaFinalizacion.split("-");
-        var fechaFin = new Date(p[0], p[1] - 1, p[2]);
+      // Cálculo corregido del Tiempo Restante
+      let fechaFinObj = extraerEstructuraFecha(res.fechaFinalizacion);
+      if (fechaFinObj) {
         var fechaHoy = new Date(); fechaHoy.setHours(0,0,0,0);
 
-        if (fechaFin >= fechaHoy) {
-          var diffAnios = fechaFin.getFullYear() - fechaHoy.getFullYear();
-          var diffMeses = fechaFin.getMonth() - fechaHoy.getMonth();
-          var diffDias = fechaFin.getDate() - fechaHoy.getDate();
-          if (diffDias < 0) { diffMeses--; var diasMesAnterior = new Date(fechaFin.getFullYear(), fechaFin.getMonth(), 0).getDate(); diffDias += diasMesAnterior; }
-          if (diffMeses < 0) { diffAnios--; diffMeses += 12; }
+        if (fechaFinObj >= fechaHoy) {
+          var diffAnios = fechaFinObj.getFullYear() - fechaHoy.getFullYear();
+          var diffMeses = fechaFinObj.getMonth() - fechaHoy.getMonth();
+          var diffDias = fechaFinObj.getDate() - fechaHoy.getDate();
+          
+          if (diffDias < 0) { 
+            diffMeses--; 
+            var diasMesAnterior = new Date(fechaFinObj.getFullYear(), fechaFinObj.getMonth(), 0).getDate(); 
+            diffDias += diasMesAnterior; 
+          }
+          if (diffMeses < 0) { 
+            diffAnios--; 
+            diffMeses += 12; 
+          }
+          
           var textoRestante = "";
           if (diffAnios > 0) textoRestante += diffAnios + (diffAnios === 1 ? " año, " : " años, ");
           if (diffMeses > 0) textoRestante += diffMeses + (diffMeses === 1 ? " mes " : " meses ");
-          if (diffDias > 0) { if (textoRestante !== "") textoRestante += "y "; textoRestante += diffDias + (diffDias === 1 ? " día" : " días"); }
+          if (diffDias > 0) { 
+            if (textoRestante !== "") textoRestante += "y "; 
+            textoRestante += diffDias + (diffDias === 1 ? " día" : " días"); 
+          }
           document.getElementById('valTiempoRestante').textContent = textoRestante || "Finaliza hoy";
-        } else { document.getElementById('valTiempoRestante').textContent = "Período vencido / Cargo finalizado"; }
-      } else { document.getElementById('valTiempoRestante').textContent = "Sin fecha de finalización registrada"; }
+        } else { 
+          document.getElementById('valTiempoRestante').textContent = "Período vencido / Cargo finalizado"; 
+        }
+      } else { 
+        document.getElementById('valTiempoRestante').textContent = "Sin fecha de finalización registrada"; 
+      }
 
       mapearIconoEstado('statusAcuerdo', res.acuerdoMutuo);
       mapearIconoEstado('statusCurso1', res.cursoSfH1);
@@ -273,22 +330,22 @@
       mapearIconoEstado('statusPPD', res.desarrolloPPD);
       var esEva1True = mapearIconoEstado('statusEva1', res.evaluacion1);
       var f1Formateada = formatearFechaVisual(res.fechaEvaluacion1);
-      if (esEva1True && f1Formateada !== "") { document.getElementById('valFechaEva1').textContent = f1Formateada; document.getElementById('boxFechaEva1').classList.remove('hidden'); } else { document.getElementById('boxFechaEva1').classList.add('hidden'); }
+      if (esEva1True && f1Formateada !== "N/A") { document.getElementById('valFechaEva1').textContent = f1Formateada; document.getElementById('boxFechaEva1').classList.remove('hidden'); } else { document.getElementById('boxFechaEva1').classList.add('hidden'); }
       var esEva2True = mapearIconoEstado('statusEva2', res.evaluacion2);
       var f2Formateada = formatearFechaVisual(res.fechaEvaluacion2);
-      if (esEva2True && f2Formateada !== "") { document.getElementById('valFechaEva2').textContent = f2Formateada; document.getElementById('boxFechaEva2').classList.remove('hidden'); } else { document.getElementById('boxFechaEva2').classList.add('hidden'); }
+      if (esEva2True && f2Formateada !== "N/A") { document.getElementById('valFechaEva2').textContent = f2Formateada; document.getElementById('boxFechaEva2').classList.remove('hidden'); } else { document.getElementById('boxFechaEva2').classList.add('hidden'); }
       var fGestorFormateada = formatearFechaVisual(res.gestorNacionalFecha);
-      if (fGestorFormateada && fGestorFormateada !== "" && res.gestorNacionalFecha !== "N/A") { document.getElementById('valGestorFecha').textContent = "Fecha de registro: " + fGestorFormateada; document.getElementById('boxGestor').classList.remove('hidden'); } else { document.getElementById('boxGestor').classList.add('hidden'); }
+      if (fGestorFormateada && fGestorFormateada !== "N/A") { document.getElementById('valGestorFecha').textContent = "Fecha de registro: " + fGestorFormateada; document.getElementById('boxGestor').classList.remove('hidden'); } else { document.getElementById('boxGestor').classList.add('hidden'); }
 
       mapearIconoEstado('statusS4PPD', res.s4DesarrolloPPD);
       var esS4Eva1True = mapearIconoEstado('statusS4Eva1', res.s4Evaluacion1);
       var fS4Nom1 = formatearFechaVisual(res.s4FechaEvaluacion1);
-      if (esS4Eva1True && fS4Nom1 !== "") { document.getElementById('valFechaS4Eva1').textContent = fS4Nom1; document.getElementById('boxFechaS4Eva1').classList.remove('hidden'); } else { document.getElementById('boxFechaS4Eva1').classList.add('hidden'); }
+      if (esS4Eva1True && fS4Nom1 !== "N/A") { document.getElementById('valFechaS4Eva1').textContent = fS4Nom1; document.getElementById('boxFechaS4Eva1').classList.remove('hidden'); } else { document.getElementById('boxFechaS4Eva1').classList.add('hidden'); }
       var esS4Eva2True = mapearIconoEstado('statusS4Eva2', res.s4Evaluacion2);
       var fS4Nom2 = formatearFechaVisual(res.s4FechaEvaluacion2);
-      if (esS4Eva2True && fS4Nom2 !== "") { document.getElementById('valFechaS4Eva2').textContent = fS4Nom2; document.getElementById('boxFechaS4Eva2').classList.remove('hidden'); } else { document.getElementById('boxFechaS4Eva2').classList.add('hidden'); }
+      if (esS4Eva2True && fS4Nom2 !== "N/A") { document.getElementById('valFechaS4Eva2').textContent = fS4Nom2; document.getElementById('boxFechaS4Eva2').classList.remove('hidden'); } else { document.getElementById('boxFechaS4Eva2').classList.add('hidden'); }
       var fAAAFormateada = formatearFechaVisual(res.aaaFecha);
-      if (fAAAFormateada && fAAAFormateada !== "" && res.aaaFecha !== "N/A") { document.getElementById('valAAAFecha').textContent = "Fecha de acreditación: " + fAAAFormateada; document.getElementById('boxAAA').classList.remove('hidden'); } else { document.getElementById('boxAAA').classList.add('hidden'); }
+      if (fAAAFormateada && fAAAFormateada !== "N/A") { document.getElementById('valAAAFecha').textContent = "Fecha de acreditación: " + fAAAFormateada; document.getElementById('boxAAA').classList.remove('hidden'); } else { document.getElementById('boxAAA').classList.add('hidden'); }
 
       document.getElementById('loaderReporte').classList.add('hidden');
       document.getElementById('contenidoReporte').classList.remove('hidden');
