@@ -26,7 +26,7 @@
     .seccion-reporte { background-color: var(--bg); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; }
     .seccion-reporte h2 { font-size: 1.2rem; color: var(--primary); margin-top: 0; margin-bottom: 1rem; font-weight: 700; }
     .grid-datos { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; }
-    .dato-bloque { display: flex; flex-direction: column; }
+    .dato-bloque { flex-direction: column; }
     .dato-verificacion { display: flex; justify-content: space-between; align-items: center; background: var(--card-bg); padding: 0.75rem 1rem; border-radius: 8px; border: 1px solid var(--border); }
     .dato-mixto-linea { grid-column: 1 / -1; display: flex; align-items: center; justify-content: space-between; background: var(--card-bg); padding: 0.75rem 1rem; border-radius: 8px; border: 1px solid var(--border); }
     .mixto-izq { display: flex; align-items: center; gap: 0.75rem; }
@@ -91,6 +91,9 @@
           <div class="dato-verificacion"><span class="verificacion-titulo">Curso SfH1</span><span id="statusCurso1" class="status-badge"></span></div>
           <div class="dato-verificacion"><span class="verificacion-titulo">Curso SfH2</span><span id="statusCurso2" class="status-badge"></span></div>
           <div class="dato-verificacion"><span class="verificacion-titulo">Aval Asesor Personal</span><span id="statusAval" class="status-badge"></span></div>
+          
+          <div class="dato-verificacion"><span class="verificacion-titulo">Módulo de inducción</span><span id="statusInduccion" class="status-badge"></span></div>
+          <div class="dato-verificacion"><span class="verificacion-titulo">Afiliación vigente</span><span id="statusAfiliacion" class="status-badge"></span></div>
         </div>
       </div>
 
@@ -131,7 +134,7 @@
   </div>
 
   <script>
-    // 🔽 REEMPLAZA ESTO CON TU URL DE APPS SCRIPT (/exec) 🔽
+    // 🔽 REEMPLAZA ESTO CON TU URL DE APPS SCRIPT REAL (/exec) 🔽
     const API_URL = "https://script.google.com/macros/s/AKfycbz-rGMlo7nCfzS2GETN3dzoUokqQ1JsrjR29PtvM1RQrgXDvGO0L1BXdPaZ4FAgW66SsA/exec"; 
     
     let baseDatosCompleta = [];
@@ -201,13 +204,10 @@
       document.getElementById('btnConsultar').disabled = (selectC === "");
     }
 
-    // Nueva función robusta para limpiar cualquier formato extraño de fechas
     function extraerEstructuraFecha(strFecha) {
       if(!strFecha || strFecha === "N/A" || strFecha.toString().trim() === "") return null;
-      
       let texto = strFecha.toString().trim();
       
-      // Si viene con el formato ISO largo (ej: 02T07:00:00.000Z/05/2026 o similar)
       if (texto.includes('T') && texto.includes('/')) {
         let partesSlash = texto.split('/');
         if (partesSlash.length === 3) {
@@ -218,8 +218,6 @@
           return new Date(anio, mes, dia);
         }
       }
-      
-      // Intentar detectar si viene en formato estándar YYYY-MM-DD
       if (texto.includes('-')) {
         let partesDash = texto.split('-');
         if (partesDash.length === 3) {
@@ -229,18 +227,14 @@
           return new Date(anio, mes, dia);
         }
       }
-      
-      // Fallback por si acaso es una fecha nativa pasada a String directamente
       let intentoDirecto = new Date(texto);
       if (!isNaN(intentoDirecto.getTime())) return intentoDirecto;
-      
       return null;
     }
 
     function formatearFechaVisual(strFecha) {
       let objetoFecha = extraerEstructuraFecha(strFecha);
       if (!objetoFecha) return strFecha || "N/A";
-      
       let dia = String(objetoFecha.getDate()).padStart(2, '0');
       let mes = String(objetoFecha.getMonth() + 1).padStart(2, '0');
       let anio = objetoFecha.getFullYear();
@@ -273,8 +267,6 @@
       document.getElementById('valCargo').textContent = res.cargo;
       document.getElementById('valNombramiento').textContent = res.nombramiento;
       document.getElementById('valMetodologia').textContent = res.metodologia;
-      
-      // Mostrar fechas limpias en el formato dd/mm/aaaa
       document.getElementById('valFechaNom').textContent = formatearFechaVisual(res.fechaNombramiento);
       document.getElementById('valFechaFin').textContent = formatearFechaVisual(res.fechaFinalizacion);
 
@@ -286,7 +278,6 @@
         document.getElementById('valDuracion').textContent = txt || res.duracionMeses + " meses";
       } else { document.getElementById('valDuracion').textContent = "N/A"; }
 
-      // Cálculo corregido del Tiempo Restante
       let fechaFinObj = extraerEstructuraFecha(res.fechaFinalizacion);
       if (fechaFinObj) {
         var fechaHoy = new Date(); fechaHoy.setHours(0,0,0,0);
@@ -295,37 +286,26 @@
           var diffAnios = fechaFinObj.getFullYear() - fechaHoy.getFullYear();
           var diffMeses = fechaFinObj.getMonth() - fechaHoy.getMonth();
           var diffDias = fechaFinObj.getDate() - fechaHoy.getDate();
-          
-          if (diffDias < 0) { 
-            diffMeses--; 
-            var diasMesAnterior = new Date(fechaFinObj.getFullYear(), fechaFinObj.getMonth(), 0).getDate(); 
-            diffDias += diasMesAnterior; 
-          }
-          if (diffMeses < 0) { 
-            diffAnios--; 
-            diffMeses += 12; 
-          }
-          
+          if (diffDias < 0) { diffMeses--; var diasMesAnterior = new Date(fechaFinObj.getFullYear(), fechaFinObj.getMonth(), 0).getDate(); diffDias += diasMesAnterior; }
+          if (diffMeses < 0) { diffAnios--; diffMeses += 12; }
           var textoRestante = "";
           if (diffAnios > 0) textoRestante += diffAnios + (diffAnios === 1 ? " año, " : " años, ");
           if (diffMeses > 0) textoRestante += diffMeses + (diffMeses === 1 ? " mes " : " meses ");
-          if (diffDias > 0) { 
-            if (textoRestante !== "") textoRestante += "y "; 
-            textoRestante += diffDias + (diffDias === 1 ? " día" : " días"); 
-          }
+          if (diffDias > 0) { if (textoRestante !== "") textoRestante += "y "; textoRestante += diffDias + (diffDias === 1 ? " día" : " días"); }
           document.getElementById('valTiempoRestante').textContent = textoRestante || "Finaliza hoy";
-        } else { 
-          document.getElementById('valTiempoRestante').textContent = "Período vencido / Cargo finalizado"; 
-        }
-      } else { 
-        document.getElementById('valTiempoRestante').textContent = "Sin fecha de finalización registrada"; 
-      }
+        } else { document.getElementById('valTiempoRestante').textContent = "Período vencido / Cargo finalizado"; }
+      } else { document.getElementById('valTiempoRestante').textContent = "Sin fecha de finalización registrada"; }
 
+      // SECCIÓN 2
       mapearIconoEstado('statusAcuerdo', res.acuerdoMutuo);
       mapearIconoEstado('statusCurso1', res.cursoSfH1);
       mapearIconoEstado('statusCurso2', res.cursoSfH2);
       mapearIconoEstado('statusAval', res.avalAsesor);
+      // Renders de los nuevos campos de la sección 2
+      mapearIconoEstado('statusInduccion', res.moduloInduccion);
+      mapearIconoEstado('statusAfiliacion', res.afiliacionVigente);
 
+      // SECCIÓN 3
       document.getElementById('valAsesorPersonal').textContent = res.asesorPersonal;
       mapearIconoEstado('statusPPD', res.desarrolloPPD);
       var esEva1True = mapearIconoEstado('statusEva1', res.evaluacion1);
@@ -337,6 +317,7 @@
       var fGestorFormateada = formatearFechaVisual(res.gestorNacionalFecha);
       if (fGestorFormateada && fGestorFormateada !== "N/A") { document.getElementById('valGestorFecha').textContent = "Fecha de registro: " + fGestorFormateada; document.getElementById('boxGestor').classList.remove('hidden'); } else { document.getElementById('boxGestor').classList.add('hidden'); }
 
+      // SECCIÓN 4
       mapearIconoEstado('statusS4PPD', res.s4DesarrolloPPD);
       var esS4Eva1True = mapearIconoEstado('statusS4Eva1', res.s4Evaluacion1);
       var fS4Nom1 = formatearFechaVisual(res.s4FechaEvaluacion1);
