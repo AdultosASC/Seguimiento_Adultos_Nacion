@@ -87,7 +87,7 @@
           <div class="dato-bloque"><span class="dato-label">Fecha Finalización</span><span id="valFechaFin" class="dato-valor"></span></div>
           <div class="dato-bloque" style="grid-column: 1 / -1; background: #f3e8ff; padding: 1rem; border-radius: 8px; border-left: 4px solid var(--purple-light);">
             <span class="dato-label" style="color: var(--purple-dark);">Tiempo restante en el cargo</span>
-            <span id="valTiempoRestante" class="dato-valor" style="font-weight: 700; color: #5b21b6; font-size: 1.1rem;"></span>
+            <span id="valTiempoRestante" class="dato-valor"></span>
           </div>
         </div>
       </div>
@@ -153,7 +153,7 @@
   </div>
 
   <script>
-    // 🔽 PEGA TU ENLACE DE GOOGLE APPS SCRIPT MANUALMENTE ENTRE LAS COMILLAS 🔽
+    // 🔽 COLOQUE AQUÍ SU ENLACE DE APPS SCRIPT DE FORMA MANUAL 🔽
     const API_URL = "https://script.google.com/macros/s/AKfycbyuC68fEAzhwKV0kcT7kvY3hile47DnYmmtlE23i7GliYYQK9HVySRuiRKHpr8C95MDbQ/exec"; 
     
     let baseDatosCompleta = [];
@@ -314,7 +314,6 @@
         } else { document.getElementById('valTiempoRestante').textContent = "Período vencido / Cargo finalizado"; }
       } else { document.getElementById('valTiempoRestante').textContent = "Sin fecha de finalización registrada"; }
 
-      // SECCIÓN 2
       mapearIconoEstado('statusAcuerdo', res.acuerdoMutuo);
       mapearIconoEstado('statusCurso1', res.cursoSfH1);
       mapearIconoEstado('statusCurso2', res.cursoSfH2);
@@ -322,7 +321,6 @@
       mapearIconoEstado('statusInduccion', res.moduloInduccion);
       mapearIconoEstado('statusAfiliacion', res.afiliacionVigente);
 
-      // SECCIÓN 3
       document.getElementById('valAsesorPersonal').textContent = res.asesorPersonal;
       mapearIconoEstado('statusPPD', res.desarrolloPPD);
       
@@ -337,7 +335,6 @@
       var fGestorFormateada = formatearFechaVisual(res.gestorNacionalFecha);
       if (fGestorFormateada && fGestorFormateada !== "N/A") { document.getElementById('valGestorFecha').textContent = "Fecha de registro: " + fGestorFormateada; document.getElementById('boxGestor').classList.remove('hidden'); } else { document.getElementById('boxGestor').classList.add('hidden'); }
 
-      // SECCIÓN 4
       mapearIconoEstado('statusS4PPD', res.s4DesarrolloPPD);
       
       var esS4ValInicialTrue = mapearIconoEstado('statusS4ValInicial', res.s4ValoracionInicial);
@@ -351,7 +348,6 @@
       var fAAAFormateada = formatearFechaVisual(res.aaaFecha);
       if (fAAAFormateada && fAAAFormateada !== "N/A") { document.getElementById('valAAAFecha').textContent = "Fecha de acreditación: " + fAAAFormateada; document.getElementById('boxAAA').classList.remove('hidden'); } else { document.getElementById('boxAAA').classList.add('hidden'); }
 
-      // SECCIÓN 5
       var divDrive = document.getElementById('contenedorDrive');
       if (res.carpetaDrive && res.carpetaDrive.startsWith("http")) {
         divDrive.innerHTML = '<a href="' + res.carpetaDrive + '" target="_blank" class="btn-drive">📂 Abrir Carpeta en Google Drive</a>';
