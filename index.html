@@ -38,7 +38,6 @@
     .dato-label { font-size: 0.8rem; font-weight: 600; color: var(--text-light); text-transform: uppercase; margin-bottom: 0.2rem; }
     .dato-valor { font-size: 1rem; font-weight: 500; color: var(--text); }
     
-    /* Estilos del botón de Google Drive */
     .btn-drive { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; background-color: #0f9d58; color: white; border: none; padding: 0.75rem 1.2rem; border-radius: 8px; font-weight: 600; text-decoration: none; font-size: 0.95rem; margin-top: 0.25rem; width: fit-content; cursor: pointer; transition: background 0.2s; }
     .btn-drive:hover { background-color: #0b7b44; }
     .text-no-link { color: var(--text-light); font-style: italic; font-size: 0.95rem; }
@@ -113,13 +112,13 @@
             <span id="valAsesorPersonal" class="dato-valor" style="font-size: 1.1rem; font-weight: 600;"></span>
           </div>
           <div class="dato-mixto-linea">
-            <div class="mixto-izq"><span id="statusEva1" class="status-badge"></span><span class="verificacion-titulo">Evaluación 1</span></div>
-            <div id="boxFechaEva1" class="dato-bloque hidden" style="text-align: right;"><span class="dato-label">Fecha de realización</span><span id="valFechaEva1" class="dato-valor"></span></div>
+            <div class="mixto-izq"><span id="statusValInicial" class="status-badge"></span><span class="verificacion-titulo">Valoración Inicial</span></div>
+            <div id="boxFechaValInicial" class="dato-bloque hidden" style="text-align: right;"><span class="dato-label">Fecha de realización</span><span id="valFechaValInicial" class="dato-valor"></span></div>
           </div>
           <div class="dato-verificacion" style="grid-column: 1 / -1;"><span class="verificacion-titulo">En desarrollo de su PPD</span><span id="statusPPD" class="status-badge"></span></div>
           <div class="dato-mixto-linea">
-            <div class="mixto-izq"><span id="statusEva2" class="status-badge"></span><span class="verificacion-titulo">Evaluación 2</span></div>
-            <div id="boxFechaEva2" class="dato-bloque hidden" style="text-align: right;"><span class="dato-label">Fecha de realización</span><span id="valFechaEva2" class="dato-valor"></span></div>
+            <div class="mixto-izq"><span id="statusValFinal" class="status-badge"></span><span class="verificacion-titulo">Valoración Final</span></div>
+            <div id="boxFechaValFinal" class="dato-bloque hidden" style="text-align: right;"><span class="dato-label">Fecha de realización</span><span id="valFechaValFinal" class="dato-valor"></span></div>
           </div>
           <div id="boxGestor" class="dato-bloque hidden" style="grid-column: 1 / -1; background: #f8fafc; padding: 0.75rem; border-radius: 8px; border: 1px dashed var(--border); margin-top: 0.5rem;"><span class="dato-label">Gestor Nacional</span><span id="valGestorFecha" class="dato-valor" style="font-weight: 600;"></span></div>
         </div>
@@ -129,13 +128,13 @@
         <h2>Desarrollo Personal Perfeccionamiento Continuo</h2>
         <div class="grid-datos">
           <div class="dato-mixto-linea">
-            <div class="mixto-izq"><span id="statusS4Eva1" class="status-badge"></span><span class="verificacion-titulo">Evaluación 1</span></div>
-            <div id="boxFechaS4Eva1" class="dato-bloque hidden" style="text-align: right;"><span class="dato-label">Fecha de realización</span><span id="valFechaS4Eva1" class="dato-valor"></span></div>
+            <div class="mixto-izq"><span id="statusS4ValInicial" class="status-badge"></span><span class="verificacion-titulo">Valoración Inicial</span></div>
+            <div id="boxFechaS4ValInicial" class="dato-bloque hidden" style="text-align: right;"><span class="dato-label">Fecha de realización</span><span id="valFechaS4ValInicial" class="dato-valor"></span></div>
           </div>
           <div class="dato-verificacion" style="grid-column: 1 / -1;"><span class="verificacion-titulo">En desarrollo de su PPD</span><span id="statusS4PPD" class="status-badge"></span></div>
           <div class="dato-mixto-linea">
-            <div class="mixto-izq"><span id="statusS4Eva2" class="status-badge"></span><span class="verificacion-titulo">Evaluación 2</span></div>
-            <div id="boxFechaS4Eva2" class="dato-bloque hidden" style="text-align: right;"><span class="dato-label">Fecha de realización</span><span id="valFechaS4Eva2" class="dato-valor"></span></div>
+            <div class="mixto-izq"><span id="statusS4ValFinal" class="status-badge"></span><span class="verificacion-titulo">Valoración Final</span></div>
+            <div id="boxFechaS4ValFinal" class="dato-bloque hidden" style="text-align: right;"><span class="dato-label">Fecha de realización</span><span id="valFechaS4ValFinal" class="dato-valor"></span></div>
           </div>
           <div id="boxAAA" class="dato-bloque hidden" style="grid-column: 1 / -1; background: #f0fdf4; padding: 0.75rem; border-radius: 8px; border: 1px solid #bbf7d0; margin-top: 0.5rem;"><span class="dato-label" style="color: #166534;">AAA</span><span id="valAAAFecha" class="dato-valor" style="font-weight: 600; color: #14532d;"></span></div>
         </div>
@@ -143,8 +142,7 @@
 
       <div class="seccion-reporte">
         <h2>Carpeta Personal</h2>
-        <div id="contenedorDrive">
-          </div>
+        <div id="contenedorDrive"></div>
       </div>
     </div>
     <button class="btn-back" onclick="volverYRefrescarConsulta()">Volver a consultar</button>
@@ -221,6 +219,7 @@
       document.getElementById('btnConsultar').disabled = (selectC === "");
     }
 
+    // Funciones de formateo y mapeo
     function extraerEstructuraFecha(strFecha) {
       if(!strFecha || strFecha === "N/A" || strFecha.toString().trim() === "") return null;
       let texto = strFecha.toString().trim();
@@ -298,7 +297,6 @@
       let fechaFinObj = extraerEstructuraFecha(res.fechaFinalizacion);
       if (fechaFinObj) {
         var fechaHoy = new Date(); fechaHoy.setHours(0,0,0,0);
-
         if (fechaFinObj >= fechaHoy) {
           var diffAnios = fechaFinObj.getFullYear() - fechaHoy.getFullYear();
           var diffMeses = fechaFinObj.getMonth() - fechaHoy.getMonth();
@@ -321,30 +319,36 @@
       mapearIconoEstado('statusInduccion', res.moduloInduccion);
       mapearIconoEstado('statusAfiliacion', res.afiliacionVigente);
 
-      // SECCIÓN 3
+      // SECCIÓN 3: PROPIEDADES ACTUALIZADAS
       document.getElementById('valAsesorPersonal').textContent = res.asesorPersonal;
       mapearIconoEstado('statusPPD', res.desarrolloPPD);
-      var esEva1True = mapearIconoEstado('statusEva1', res.evaluacion1);
-      var f1Formateada = formatearFechaVisual(res.fechaEvaluacion1);
-      if (esEva1True && f1Formateada !== "N/A") { document.getElementById('valFechaEva1').textContent = f1Formateada; document.getElementById('boxFechaEva1').classList.remove('hidden'); } else { document.getElementById('boxFechaEva1').classList.add('hidden'); }
-      var esEva2True = mapearIconoEstado('statusEva2', res.evaluacion2);
-      var f2Formateada = formatearFechaVisual(res.fechaEvaluacion2);
-      if (esEva2True && f2Formateada !== "N/A") { document.getElementById('valFechaEva2').textContent = f2Formateada; document.getElementById('boxFechaEva2').classList.remove('hidden'); } else { document.getElementById('boxFechaEva2').classList.add('hidden'); }
+      
+      var esValInicialTrue = mapearIconoEstado('statusValInicial', res.valoracionInicial);
+      var f1Formateada = formatearFechaVisual(res.fechaValoracionInicial);
+      if (esValInicialTrue && f1Formateada !== "N/A") { document.getElementById('valFechaValInicial').textContent = f1Formateada; document.getElementById('boxFechaValInicial').classList.remove('hidden'); } else { document.getElementById('boxFechaValInicial').classList.add('hidden'); }
+      
+      var esValFinalTrue = mapearIconoEstado('statusValFinal', res.valoracionFinal);
+      var f2Formateada = formatearFechaVisual(res.fechaValoracionFinal);
+      if (esValFinalTrue && f2Formateada !== "N/A") { document.getElementById('valFechaValFinal').textContent = f2Formateada; document.getElementById('boxFechaValFinal').classList.remove('hidden'); } else { document.getElementById('boxFechaValFinal').classList.add('hidden'); }
+      
       var fGestorFormateada = formatearFechaVisual(res.gestorNacionalFecha);
       if (fGestorFormateada && fGestorFormateada !== "N/A") { document.getElementById('valGestorFecha').textContent = "Fecha de registro: " + fGestorFormateada; document.getElementById('boxGestor').classList.remove('hidden'); } else { document.getElementById('boxGestor').classList.add('hidden'); }
 
-      // SECCIÓN 4
+      // SECCIÓN 4: PROPIEDADES ACTUALIZADAS
       mapearIconoEstado('statusS4PPD', res.s4DesarrolloPPD);
-      var esS4Eva1True = mapearIconoEstado('statusS4Eva1', res.s4Evaluacion1);
-      var fS4Nom1 = formatearFechaVisual(res.s4FechaEvaluacion1);
-      if (esS4Eva1True && fS4Nom1 !== "N/A") { document.getElementById('valFechaS4Eva1').textContent = fS4Nom1; document.getElementById('boxFechaS4Eva1').classList.remove('hidden'); } else { document.getElementById('boxFechaS4Eva1').classList.add('hidden'); }
-      var esS4Eva2True = mapearIconoEstado('statusS4Eva2', res.s4Evaluacion2);
-      var fS4Nom2 = formatearFechaVisual(res.s4FechaEvaluacion2);
-      if (esS4Eva2True && fS4Nom2 !== "N/A") { document.getElementById('valFechaS4Eva2').textContent = fS4Nom2; document.getElementById('boxFechaS4Eva2').classList.remove('hidden'); } else { document.getElementById('boxFechaS4Eva2').classList.add('hidden'); }
+      
+      var esS4ValInicialTrue = mapearIconoEstado('statusS4ValInicial', res.s4ValoracionInicial);
+      var fS4Nom1 = formatearFechaVisual(res.s4FechaValoracionInicial);
+      if (esS4ValInicialTrue && fS4Nom1 !== "N/A") { document.getElementById('valFechaS4ValInicial').textContent = fS4Nom1; document.getElementById('boxFechaS4ValInicial').classList.remove('hidden'); } else { document.getElementById('boxFechaS4ValInicial').classList.add('hidden'); }
+      
+      var esS4ValFinalTrue = mapearIconoEstado('statusS4ValFinal', res.s4ValoracionFinal);
+      var fS4Nom2 = formatearFechaVisual(res.s4FechaValoracionFinal);
+      if (esS4ValFinalTrue && fS4Nom2 !== "N/A") { document.getElementById('valFechaS4ValFinal').textContent = fS4Nom2; document.getElementById('boxFechaS4ValFinal').classList.remove('hidden'); } else { document.getElementById('boxFechaS4ValFinal').classList.add('hidden'); }
+      
       var fAAAFormateada = formatearFechaVisual(res.aaaFecha);
       if (fAAAFormateada && fAAAFormateada !== "N/A") { document.getElementById('valAAAFecha').textContent = "Fecha de acreditación: " + fAAAFormateada; document.getElementById('boxAAA').classList.remove('hidden'); } else { document.getElementById('boxAAA').classList.add('hidden'); }
 
-      // SECCIÓN 5: CARPETA PERSONAL (Inyección dinámica del link de Drive)
+      // SECCIÓN 5
       var divDrive = document.getElementById('contenedorDrive');
       if (res.carpetaDrive && res.carpetaDrive.startsWith("http")) {
         divDrive.innerHTML = '<a href="' + res.carpetaDrive + '" target="_blank" class="btn-drive">📂 Abrir Carpeta en Google Drive</a>';
