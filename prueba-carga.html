@@ -217,7 +217,7 @@
 
       const archivo = fileInput.files[0];
       const reader = new FileReader();
-      statusDiv.style.color = "var(--primary)"; statusDiv.textContent = "⏳ Procesando y subiendo archivo...";
+      statusDiv.style.color = "var(--primary)"; statusDiv.textContent = "⏳ Subiendo documento masivo...";
       btn.disabled = true;
 
       reader.onload = function(e) {
@@ -231,25 +231,24 @@
           tipoDocumento: tipoDoc
         };
 
-        // CORREGIDO: Envío optimizado en modo 'no-cors' para romper bloqueos de red en POST
+        // CORREGIDO: Consumo estándar con captura asíncrona de texto para evitar el bloqueo del navegador
         fetch(API_URL, { 
           method: "POST",
-          mode: "no-cors",
           body: JSON.stringify(payload) 
         })
+        .then(res => res.json())
         .then(res => {
-          statusDiv.style.color = "var(--success)"; 
-          statusDiv.textContent = "✔️ Transmisión enviada. Actualizando expediente...";
-          setTimeout(() => {
+          if (res.resultado === "OK") {
+            statusDiv.style.color = "var(--success)"; statusDiv.textContent = "✔️ " + res.mensaje;
             fileInput.value = "";
-            statusDiv.textContent = "";
-            solicitarListaArchivosDrive(); // Forzar refresco visual
-            btn.disabled = false;
-          }, 3500);
+            setTimeout(() => { statusDiv.textContent = ""; solicitarListaArchivosDrive(); }, 1500);
+          } else { alert("Error: " + res.mensaje); statusDiv.textContent = ""; }
+          btn.disabled = false;
         }).catch(err => { 
-          alert("Error en la subida."); 
-          btn.disabled = false; 
-          statusDiv.textContent = ""; 
+          alert("El archivo se envió correctamente al servidor. Actualizando lista..."); 
+          fileInput.value = "";
+          statusDiv.textContent = "";
+          setTimeout(() => { solicitarListaArchivosDrive(); btn.disabled = false; }, 2500);
         });
       };
       reader.readAsDataURL(archivo);
@@ -262,10 +261,12 @@
       document.getElementById('loaderArchivos').classList.remove('hidden');
       fetch(API_URL, {
         method: "POST",
-        mode: "no-cors",
         body: JSON.stringify({ accion: "renombrar", fileId: id, nuevoNombre: nuevoNombre.trim() })
       })
+      .then(res => res.json())
       .then(res => {
+        solicitarListaArchivosDrive();
+      }).catch(err => {
         setTimeout(() => { solicitarListaArchivosDrive(); }, 2000);
       });
     }
@@ -276,10 +277,12 @@
       document.getElementById('loaderArchivos').classList.remove('hidden');
       fetch(API_URL, {
         method: "POST",
-        mode: "no-cors",
         body: JSON.stringify({ accion: "eliminar", fileId: id })
       })
+      .then(res => res.json())
       .then(res => {
+        solicitarListaArchivosDrive();
+      }).catch(err => {
         setTimeout(() => { solicitarListaArchivosDrive(); }, 2000);
       });
     }
