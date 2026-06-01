@@ -49,7 +49,6 @@
 </head>
 <body>
 
-  <!-- PÁGINA 1: FILTROS -->
   <div id="paginaFiltros" class="container">
     <div class="header-institucional">Dirección Nacional de Adultos en el Movimiento</div>
     <h1>Consulta de Información</h1>
@@ -71,13 +70,11 @@
     <button id="btnConsultar" disabled onclick="irAPaginaReporte()">Consultar</button>
   </div>
 
-  <!-- PÁGINA 2: REPORTE -->
   <div id="paginaReporte" class="container wide hidden">
     <div id="tituloColumnaA" class="titulo-principal-a"></div>
     <div id="loaderReporte" class="loader">Procesando información...</div>
     
     <div id="contenidoReporte" class="hidden">
-      <!-- SECCIÓN 1 -->
       <div class="seccion-reporte">
         <h2>Información General</h2>
         <div class="grid-datos">
@@ -95,7 +92,6 @@
         </div>
       </div>
 
-      <!-- SECCIÓN 2: VERIFICACIÓN DE DOCUMENTOS (NUEVAS ETIQUETAS E INSTALACIÓN DE ORDEN) -->
       <div class="seccion-reporte">
         <h2>Verificación de documentos</h2>
         <div class="grid-datos">
@@ -103,12 +99,11 @@
           <div class="dato-verificacion"><span class="verificacion-titulo">Curso SfH1</span><span id="statusCurso1" class="status-badge"></span></div>
           <div class="dato-verificacion"><span class="verificacion-titulo">Curso SfH2</span><span id="statusCurso2" class="status-badge"></span></div>
           <div class="dato-verificacion"><span class="verificacion-titulo">Aval Asesor Personal</span><span id="statusAval" class="status-badge"></span></div>
-          <div class="dato-verificacion"><span class="verificacion-titulo">Módulo inducción</span><span id="statusInduccion" class="status-badge"></span></div>
+          <div class="dato-verificacion"><span class="verificacion-titulo">Módulo de inducción</span><span id="statusInduccion" class="status-badge"></span></div>
           <div class="dato-verificacion"><span class="verificacion-titulo">Afiliación 2026</span><span id="statusAfiliacion" class="status-badge"></span></div>
         </div>
       </div>
 
-      <!-- SECCIÓN 3 -->
       <div class="seccion-reporte">
         <h2>Desarrollo Personal Formación Básica</h2>
         <div class="grid-datos">
@@ -131,7 +126,6 @@
         </div>
       </div>
 
-      <!-- SECCIÓN 4 -->
       <div class="seccion-reporte">
         <h2>Desarrollo Personal Perfeccionamiento Continuo</h2>
         <div class="grid-datos">
@@ -150,7 +144,6 @@
         </div>
       </div>
 
-      <!-- SECCIÓN 5 -->
       <div class="seccion-reporte">
         <h2>Carpeta Personal</h2>
         <div id="contenedorDrive"></div>
@@ -161,7 +154,7 @@
 
   <script>
     // 🔽 COLOCA TU ENLACE DE APPS SCRIPT DE FORMA MANUAL ENTRE LAS COMILLAS 🔽
-    const API_URL = "https://script.google.com/macros/s/AKfycbyuC68fEAzhwKV0kcT7kvY3hile47DnYmmtlE23i7GliYYQK9HVySRuiRKHpr8C95MDbQ/exec"; 
+    const API_URL = "https://script.google.com/macros/s/AKfycbx3siWZ3u6tGbTQk1LR-Gc03Oc2yJoASOsRUTYLlEhtzNSAA5dkW6wk4Xlqf0_Dc9H_Ng/exec"; 
     
     let baseDatosCompleta = [];
 
@@ -321,7 +314,7 @@
         } else { document.getElementById('valTiempoRestante').textContent = "Período vencido / Cargo finalizado"; }
       } else { document.getElementById('valTiempoRestante').textContent = "Sin fecha de finalización registrada"; }
 
-      // SECCIÓN 2
+      // Mapeos de la Sección 2
       mapearIconoEstado('statusAcuerdo', res.acuerdoMutuo);
       mapearIconoEstado('statusCurso1', res.cursoSfH1);
       mapearIconoEstado('statusCurso2', res.cursoSfH2);
@@ -329,7 +322,7 @@
       mapearIconoEstado('statusInduccion', res.moduloInduccion);
       mapearIconoEstado('statusAfiliacion', res.afiliacionVigente);
 
-      // SECCIÓN 3
+      // Mapeos de la Sección 3
       document.getElementById('valAsesorPersonal').textContent = res.asesorPersonal;
       mapearIconoEstado('statusPPD', res.desarrolloPPD);
       
@@ -344,7 +337,7 @@
       var fGestorFormateada = formatearFechaVisual(res.gestorNacionalFecha);
       if (fGestorFormateada && fGestorFormateada !== "N/A") { document.getElementById('valGestorFecha').textContent = "Fecha de registro: " + fGestorFormateada; document.getElementById('boxGestor').classList.remove('hidden'); } else { document.getElementById('boxGestor').classList.add('hidden'); }
 
-      // SECCIÓN 4
+      // Mapeos de la Sección 4
       mapearIconoEstado('statusS4PPD', res.s4DesarrolloPPD);
       
       var esS4ValInicialTrue = mapearIconoEstado('statusS4ValInicial', res.s4ValoracionInicial);
@@ -358,7 +351,7 @@
       var fAAAFormateada = formatearFechaVisual(res.aaaFecha);
       if (fAAAFormateada && fAAAFormateada !== "N/A") { document.getElementById('valAAAFecha').textContent = "Fecha de acreditación: " + fAAAFormateada; document.getElementById('boxAAA').classList.remove('hidden'); } else { document.getElementById('boxAAA').classList.add('hidden'); }
 
-      // SECCIÓN 5
+      // Mapeo de la Sección 5
       var divDrive = document.getElementById('contenedorDrive');
       if (res.carpetaDrive && res.carpetaDrive.startsWith("http")) {
         divDrive.innerHTML = '<a href="' + res.carpetaDrive + '" target="_blank" class="btn-drive">📂 Abrir Carpeta en Google Drive</a>';
