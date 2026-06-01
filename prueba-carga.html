@@ -26,7 +26,6 @@
     .seccion-reporte { background-color: var(--bg); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; }
     .seccion-reporte h2 { font-size: 1.2rem; color: var(--primary); margin-top: 0; margin-bottom: 1rem; font-weight: 700; }
     
-    /* Nueva tabla de archivos */
     .tabla-archivos { width: 100%; border-collapse: collapse; margin-top: 0.5rem; background: white; border-radius: 8px; overflow: hidden; border: 1px solid var(--border); }
     .tabla-archivos th, .tabla-archivos td { padding: 0.75rem 1rem; text-align: left; font-size: 0.9rem; border-bottom: 1px solid var(--border); }
     .tabla-archivos th { background-color: #f1f5f9; font-weight: 700; color: var(--purple-dark); }
@@ -114,7 +113,7 @@
   </div>
 
   <script>
-    // 🔽 PEGA AQUÍ TU ENLACE DE APPS SCRIPT DE COPIA MANUALMENTE 🔽
+    // 🔽 COLOQUE AQUÍ SU ENLACE DE APPS SCRIPT DE COPIA MANUALMENTE 🔽
     const API_URL = "https://script.google.com/macros/s/AKfycbx3siWZ3u6tGbTQk1LR-Gc03Oc2yJoASOsRUTYLlEhtzNSAA5dkW6wk4Xlqf0_Dc9H_Ng/exec"; 
     
     let baseDatosCompleta = [];
@@ -160,11 +159,9 @@
       document.getElementById('loaderReporte').classList.add('hidden');
       document.getElementById('contenidoReporte').classList.remove('hidden');
       
-      // Llamar a listar los archivos reales apenas abre el reporte
       solicitarListaArchivosDrive();
     }
 
-    // Consulta los archivos reales en Drive mediante GET
     function solicitarListaArchivosDrive() {
       const cuerpo = document.getElementById('cuerpoTablaArchivos');
       const loader = document.getElementById('loaderArchivos');
@@ -210,7 +207,6 @@
         });
     }
 
-    // Sube un archivo mediante POST
     function procesarSubidaArchivo() {
       const fileInput = document.getElementById('inputArchivo');
       const statusDiv = document.getElementById('statusEnvio');
@@ -235,21 +231,23 @@
           tipoDocumento: tipoDoc
         };
 
-        fetch(API_URL, { method: "POST", body: JSON.stringify(payload) })
+        fetch(API_URL, { 
+          method: "POST", 
+          body: JSON.stringify(payload) 
+        })
         .then(res => res.json())
         .then(res => {
           if (res.resultado === "OK") {
             statusDiv.style.color = "var(--success)"; statusDiv.textContent = "✔️ ¡Subido! Actualizando expediente...";
             fileInput.value = "";
-            solicitarListaArchivosDrive(); // Recarga la lista automáticamente
-          } else { alert("Error: " + res.mensaje); }
+            solicitarListaArchivosDrive(); 
+          } else { alert("Error: " + res.mensaje); statusDiv.textContent = ""; }
           btn.disabled = false;
-        }).catch(err => { btn.disabled = false; });
+        }).catch(err => { btn.disabled = false; statusDiv.textContent = ""; });
       };
       reader.readAsDataURL(archivo);
     }
 
-    // Función de Renombrado en vivo
     function renombrarArchivoModal(id, nombreActual) {
       let nuevoNombre = prompt("Modificar Nombre del Archivo:", nombreActual);
       if (!nuevoNombre || nuevoNombre.trim() === "" || nuevoNombre === nombreActual) return;
@@ -265,7 +263,6 @@
       });
     }
 
-    // Función de Eliminación en vivo
     function eliminarArchivoDrive(id) {
       if (!confirm("¿Está seguro de que desea eliminar este archivo? Se moverá a la papelera de Google Drive.")) return;
       
