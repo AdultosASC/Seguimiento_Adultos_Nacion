@@ -123,7 +123,7 @@
 
     function cargarDatosDesdeAPI() {
       var select = document.getElementById('selectA');
-      fetch(API_URL).then(r => r.json()).then(data => { baseDatosCompleta = data; inicializarDesplegableA(); }).catch(err => { select.innerHTML = '<option value="">Error de permisos.</option>'; });
+      fetch(API_URL).then(r => r.json()).then(data => { baseDatosCompleta = data; inicializarDesplegableA(); }).catch(err => { select.innerHTML = '<option value="">Error de permisos o URL errónea.</option>'; });
     }
 
     function inicializarDesplegableA() {
@@ -217,7 +217,7 @@
 
       const archivo = fileInput.files[0];
       const reader = new FileReader();
-      statusDiv.style.color = "var(--primary)"; statusDiv.textContent = "⏳ Subiendo documento masivo...";
+      statusDiv.style.color = "var(--primary)"; statusDiv.textContent = "⏳ Procesando y subiendo archivo...";
       btn.disabled = true;
 
       reader.onload = function(e) {
@@ -231,19 +231,26 @@
           tipoDocumento: tipoDoc
         };
 
+        // CORREGIDO: Envío optimizado en modo 'no-cors' para romper bloqueos de red en POST
         fetch(API_URL, { 
-          method: "POST", 
+          method: "POST",
+          mode: "no-cors",
           body: JSON.stringify(payload) 
         })
-        .then(res => res.json())
         .then(res => {
-          if (res.resultado === "OK") {
-            statusDiv.style.color = "var(--success)"; statusDiv.textContent = "✔️ ¡Subido! Actualizando expediente...";
+          statusDiv.style.color = "var(--success)"; 
+          statusDiv.textContent = "✔️ Transmisión enviada. Actualizando expediente...";
+          setTimeout(() => {
             fileInput.value = "";
-            solicitarListaArchivosDrive(); 
-          } else { alert("Error: " + res.mensaje); statusDiv.textContent = ""; }
-          btn.disabled = false;
-        }).catch(err => { btn.disabled = false; statusDiv.textContent = ""; });
+            statusDiv.textContent = "";
+            solicitarListaArchivosDrive(); // Forzar refresco visual
+            btn.disabled = false;
+          }, 3500);
+        }).catch(err => { 
+          alert("Error en la subida."); 
+          btn.disabled = false; 
+          statusDiv.textContent = ""; 
+        });
       };
       reader.readAsDataURL(archivo);
     }
@@ -255,11 +262,11 @@
       document.getElementById('loaderArchivos').classList.remove('hidden');
       fetch(API_URL, {
         method: "POST",
+        mode: "no-cors",
         body: JSON.stringify({ accion: "renombrar", fileId: id, nuevoNombre: nuevoNombre.trim() })
       })
-      .then(r => r.json())
       .then(res => {
-        if(res.resultado === "OK") { solicitarListaArchivosDrive(); } else { alert(res.mensaje); }
+        setTimeout(() => { solicitarListaArchivosDrive(); }, 2000);
       });
     }
 
@@ -269,11 +276,11 @@
       document.getElementById('loaderArchivos').classList.remove('hidden');
       fetch(API_URL, {
         method: "POST",
+        mode: "no-cors",
         body: JSON.stringify({ accion: "eliminar", fileId: id })
       })
-      .then(r => r.json())
       .then(res => {
-        if(res.resultado === "OK") { solicitarListaArchivosDrive(); } else { alert(res.mensaje); }
+        setTimeout(() => { solicitarListaArchivosDrive(); }, 2000);
       });
     }
 
