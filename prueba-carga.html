@@ -3,16 +3,16 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Laboratorio de Pruebas - Carga de Archivos</title>
+  <title>Laboratorio de Pruebas - Panel Documental Avanzado</title>
   <style>
     :root {
       --primary: #6366f1; --primary-hover: #4f46e5; --purple-dark: #4c1d95; --purple-light: #8b5cf6;
       --bg: #f8fafc; --card-bg: #ffffff; --text: #1e293b; --text-light: #64748b; --border: #e2e8f0;
-      --success: #10b981; --danger: #ef4444;
+      --success: #10b981; --danger: #ef4444; --warning: #f59e0b;
     }
     body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 2rem 1rem; display: flex; justify-content: center; align-items: center; min-height: 100vh; box-sizing: border-box; }
     .container { background-color: var(--card-bg); padding: 2.5rem; border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05); width: 100%; max-width: 450px; box-sizing: border-box; }
-    .container.wide { max-width: 800px; }
+    .container.wide { max-width: 850px; }
     .header-institucional { color: var(--purple-dark); font-size: 1.25rem; font-weight: 700; text-align: center; margin-bottom: 1.5rem; border-bottom: 2px dashed var(--border); padding-bottom: 1rem; }
     h1 { font-size: 1.4rem; font-weight: 700; margin: 0 0 1.5rem 0; text-align: center; }
     .form-group { margin-bottom: 1.5rem; }
@@ -25,30 +25,27 @@
     .titulo-principal-a { color: var(--purple-dark); font-weight: bold; font-size: 1.8rem; margin-bottom: 1.5rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; }
     .seccion-reporte { background-color: var(--bg); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; }
     .seccion-reporte h2 { font-size: 1.2rem; color: var(--primary); margin-top: 0; margin-bottom: 1rem; font-weight: 700; }
-    .grid-datos { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; }
-    .dato-bloque { display: flex; flex-direction: column; }
     
-    .dato-verificacion { display: flex; justify-content: space-between; align-items: center; background: var(--card-bg); padding: 0.75rem 1rem; border-radius: 8px; border: 1px solid var(--border); gap: 1.5rem; }
-    .dato-mixto-linea { grid-column: 1 / -1; display: flex; align-items: center; justify-content: space-between; background: var(--card-bg); padding: 0.75rem 1rem; border-radius: 8px; border: 1px solid var(--border); gap: 1.5rem; }
-    .mixto-izq { display: flex; align-items: center; gap: 0.85rem; }
+    /* Nueva tabla de archivos */
+    .tabla-archivos { width: 100%; border-collapse: collapse; margin-top: 0.5rem; background: white; border-radius: 8px; overflow: hidden; border: 1px solid var(--border); }
+    .tabla-archivos th, .tabla-archivos td { padding: 0.75rem 1rem; text-align: left; font-size: 0.9rem; border-bottom: 1px solid var(--border); }
+    .tabla-archivos th { background-color: #f1f5f9; font-weight: 700; color: var(--purple-dark); }
+    .acciones-btn-group { display: flex; gap: 0.5rem; }
+    .btn-mini { padding: 0.4rem 0.6rem; font-size: 0.8rem; font-weight: bold; border-radius: 4px; width: auto; margin: 0; display: inline-block; }
+    .btn-ver { background-color: var(--primary); }
+    .btn-edit { background-color: var(--warning); }
+    .btn-del { background-color: var(--danger); }
     
-    .box-carga { background: #f0fdf4; border: 2px dashed #bbf7d0; padding: 1.25rem; border-radius: 12px; margin-top: 1rem; }
-    .box-carga h3 { margin: 0 0 0.75rem 0; font-size: 1.05rem; color: #166534; }
-    .btn-subir { background-color: #166534; margin-top: 0.75rem; }
-    .btn-subir:hover { background-color: #14532d; }
-    
-    .btn-drive { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; background-color: #0f9d58; color: white; border: none; padding: 0.75rem 1.2rem; border-radius: 8px; font-weight: 600; text-decoration: none; font-size: 0.95rem; margin-top: 0.25rem; width: fit-content; cursor: pointer; }
-    .text-no-link { color: var(--text-light); font-style: italic; font-size: 0.95rem; }
+    .box-carga { background: #f8fafc; border: 1px solid var(--border); padding: 1.25rem; border-radius: 12px; margin-bottom: 1.5rem; }
     .btn-back { background-color: transparent; color: var(--text-light); border: 1px solid var(--border); margin-top: 1rem; }
     .loader { text-align: center; color: var(--text-light); font-style: italic; padding: 2rem 0; }
   </style>
 </head>
 <body>
 
-  <!-- PÁGINA 1: FILTROS -->
   <div id="paginaFiltros" class="container">
-    <div class="header-institucional">🧪 Laboratorio de Pruebas: Filtros</div>
-    <h1>Consulta e Interacción</h1>
+    <div class="header-institucional">🧪 Laboratorio: Gestor de Archivos</div>
+    <h1>Consulta y Control</h1>
     
     <div class="form-group">
       <label for="selectA" class="label-filtro">Seleccione Área Estratégica</label>
@@ -67,59 +64,58 @@
     <button id="btnConsultar" disabled onclick="irAPaginaReporte()">Consultar</button>
   </div>
 
-  <!-- PÁGINA 2: REPORTE + COMPONENTE DE CARGA -->
   <div id="paginaReporte" class="container wide hidden">
     <div id="tituloColumnaA" class="titulo-principal-a"></div>
     <div id="loaderReporte" class="loader">Procesando información...</div>
     
     <div id="contenidoReporte" class="hidden">
-      <!-- INFO GENERAL -->
-      <div class="seccion-reporte">
-        <h2>Información General</h2>
-        <div class="grid-datos">
-          <div class="dato-bloque"><span class="dato-label">Nombre</span><span id="valNombre" class="dato-valor"></span></div>
-          <div class="dato-bloque"><span class="dato-label">Cargo</span><span id="valCargo" class="dato-valor"></span></div>
-          <div class="dato-bloque"><span class="dato-label">Fecha Finalización</span><span id="valFechaFin" class="dato-valor"></span></div>
-          <div class="dato-bloque" style="grid-column: 1 / -1; background: #f3e8ff; padding: 1rem; border-radius: 8px;"><span class="dato-label">Tiempo Restante</span><span id="valTiempoRestante" class="dato-valor"></span></div>
-        </div>
-      </div>
-
-      <!-- SECCIÓN DE CARGA EXPERIMENTAL -->
+      
       <div class="seccion-reporte box-carga">
-        <h3>📤 Formulario Inteligente de Carga (Prueba)</h3>
-        <p style="margin: 0 0 1rem 0; font-size: 0.85rem; color: #14532d;">Elige el documento. El sistema lo guardará en el Drive del usuario con un renombrado automático institucional.</p>
+        <h2>📤 Cargar Nuevo Archivo Documental</h2>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; align-items: end;">
+          <div>
+            <label class="label-filtro">Tipo Documento:</label>
+            <select id="tipoDocCarga">
+              <option value="Modulo de induccion">Módulo de Inducción</option>
+              <option value="Acuerdo mutuo">Acuerdo Mutuo</option>
+              <option value="Afiliacion 2026">Afiliación 2026</option>
+              <option value="PPD Formacion">PPD Formación</option>
+            </select>
+          </div>
+          <div>
+            <label class="label-filtro">Seleccionar archivo:</label>
+            <input type="file" id="inputArchivo">
+          </div>
+          <div>
+            <button style="margin:0;" id="btnSubirArchivo" onclick="procesarSubidaArchivo()">Subir Documento</button>
+          </div>
+        </div>
+        <div id="statusEnvio" style="margin-top: 0.75rem; font-size: 0.9rem; font-weight: bold;"></div>
+      </div>
+
+      <div class="seccion-reporte">
+        <h2>📁 Expediente Documental en Google Drive (Archivos Reales)</h2>
+        <div id="loaderArchivos" class="loader hidden">Consultando contenido de la carpeta de Drive...</div>
         
-        <div class="form-group">
-          <label class="label-filtro" style="color: #14532d;">Tipo de Documento a Subir:</label>
-          <select id="tipoDocCarga">
-            <option value="Modulo de induccion">Módulo de Inducción</option>
-            <option value="Acuerdo mutuo">Acuerdo Mutuo</option>
-            <option value="Afiliacion 2026">Afiliación 2026</option>
-            <option value="PPD Formacion">PPD Formación</option>
-          </select>
-        </div>
-
-        <div class="form-group">
-          <label class="label-filtro" style="color: #14532d;">Seleccione el archivo (PDF, Word, Excel, Imagen):</label>
-          <input type="file" id="inputArchivo">
-        </div>
-
-        <button class="btn-subir" id="btnSubirArchivo" onclick="procesarSubidaArchivo()">Subir y Renombrar en Drive</button>
-        <div id="statusEnvio" style="margin-top: 0.75rem; font-size: 0.9rem; font-weight: bold; text-align: center;"></div>
+        <table class="tabla-archivos" id="tablaFiles">
+          <thead>
+            <tr>
+              <th>Nombre del Archivo en Drive</th>
+              <th style="width: 220px; text-align: center;">Acciones Disponibles</th>
+            </tr>
+          </thead>
+          <tbody id="cuerpoTablaArchivos">
+            </tbody>
+        </table>
       </div>
 
-      <!-- CARPETA PERSONAL -->
-      <div class="seccion-reporte" style="margin-top:1.5rem;">
-        <h2>Carpeta Personal</h2>
-        <div id="contenedorDrive"></div>
-      </div>
     </div>
     <button class="btn-back" onclick="volverYRefrescarConsulta()">Volver a consultar</button>
   </div>
 
   <script>
     // 🔽 PEGA AQUÍ TU ENLACE DE APPS SCRIPT DE COPIA MANUALMENTE 🔽
-    const API_URL = "https://script.google.com/macros/s/AKfycbxg6vaqC8w8IsCjHHy9UX9TTyf2nJKhlA1J37nvQEJb6ERK4nSQM5pAO7o8bqBYUj-0SQ/exec"; 
+    const API_URL = "TU_URL_DE_APPS_SCRIPT_AQUÍ"; 
     
     let baseDatosCompleta = [];
     let usuarioSeleccionado = null;
@@ -128,8 +124,7 @@
 
     function cargarDatosDesdeAPI() {
       var select = document.getElementById('selectA');
-      select.innerHTML = '<option value="">Conectando con la base de datos de pruebas...</option>';
-      fetch(API_URL).then(r => r.json()).then(data => { baseDatosCompleta = data; inicializarDesplegableA(); }).catch(err => { select.innerHTML = '<option value="">Error de permisos o URL errónea.</option>'; });
+      fetch(API_URL).then(r => r.json()).then(data => { baseDatosCompleta = data; inicializarDesplegableA(); }).catch(err => { select.innerHTML = '<option value="">Error de permisos.</option>'; });
     }
 
     function inicializarDesplegableA() {
@@ -161,44 +156,76 @@
       document.getElementById('paginaFiltros').classList.add('hidden');
       document.getElementById('paginaReporte').classList.remove('hidden');
       document.getElementById('tituloColumnaA').textContent = usuarioSeleccionado.columnaA;
-      document.getElementById('valNombre').textContent = usuarioSeleccionado.nombre;
-      document.getElementById('valCargo').textContent = usuarioSeleccionado.cargo;
-      document.getElementById('valFechaFin').textContent = usuarioSeleccionado.fechaFinalizacion;
-      document.getElementById('valTiempoRestante').textContent = "Calculando entorno...";
-
-      var divDrive = document.getElementById('contenedorDrive');
-      if (usuarioSeleccionado.carpetaDrive && usuarioSeleccionado.carpetaDrive.startsWith("http")) {
-        divDrive.innerHTML = '<a href="' + usuarioSeleccionado.carpetaDrive + '" target="_blank" class="btn-drive">📂 Abrir Carpeta en Drive</a>';
-      } else {
-        divDrive.innerHTML = '<span class="text-no-link">No hay carpeta registrada para pruebas.</span>';
-      }
+      
       document.getElementById('loaderReporte').classList.add('hidden');
       document.getElementById('contenidoReporte').classList.remove('hidden');
+      
+      // Llamar a listar los archivos reales apenas abre el reporte
+      solicitarListaArchivosDrive();
     }
 
-    // 🚀 LÓGICA FRONTEND: Convertir archivo físico a Base64 y empujarlo por POST
+    // Consulta los archivos reales en Drive mediante GET
+    function solicitarListaArchivosDrive() {
+      const cuerpo = document.getElementById('cuerpoTablaArchivos');
+      const loader = document.getElementById('loaderArchivos');
+      
+      cuerpo.innerHTML = "";
+      loader.classList.remove('hidden');
+      
+      if (!usuarioSeleccionado.carpetaDrive) {
+        cuerpo.innerHTML = '<tr><td colspan="2" style="color:var(--danger); text-align:center;">No hay carpeta registrada para este usuario.</td></tr>';
+        loader.classList.add('hidden');
+        return;
+      }
+
+      fetch(API_URL + "?accion=listarFiles&urlCarpeta=" + encodeURIComponent(usuarioSeleccionado.carpetaDrive))
+        .then(res => res.json())
+        .then(res => {
+          loader.classList.add('hidden');
+          if (res.resultado === "OK") {
+            if (res.archivos.length === 0) {
+              cuerpo.innerHTML = '<tr><td colspan="2" style="text-align:center; color:var(--text-light); font-style:italic;">La carpeta está vacía. Sube un archivo arriba.</td></tr>';
+              return;
+            }
+            res.archivos.forEach(file => {
+              let fila = document.createElement('tr');
+              fila.innerHTML = `
+                <td><strong>${file.nombre}</strong></td>
+                <td style="text-align:center;">
+                  <div class="acciones-btn-group">
+                    <button class="btn-mini btn-ver" onclick="window.open('${file.url}', '_blank')">👁️ Ver</button>
+                    <button class="btn-mini btn-edit" onclick="renombrarArchivoModal('${file.id}', '${file.nombre}')">✏️ Renombrar</button>
+                    <button class="btn-mini btn-del" onclick="eliminarArchivoDrive('${file.id}')">🗑️ Borrar</button>
+                  </div>
+                </td>
+              `;
+              cuerpo.appendChild(fila);
+            });
+          } else {
+            cuerpo.innerHTML = '<tr><td colspan="2" style="color:var(--danger);">Error: ' + res.mensaje + '</td></tr>';
+          }
+        }).catch(err => {
+          loader.classList.add('hidden');
+          cuerpo.innerHTML = '<tr><td colspan="2" style="color:var(--danger); text-align:center;">Error de conexión de red al listar archivos.</td></tr>';
+        });
+    }
+
+    // Sube un archivo mediante POST
     function procesarSubidaArchivo() {
       const fileInput = document.getElementById('inputArchivo');
       const statusDiv = document.getElementById('statusEnvio');
       const btn = document.getElementById('btnSubirArchivo');
       const tipoDoc = document.getElementById('tipoDocCarga').value;
 
-      if (!fileInput.files || fileInput.files.length === 0) {
-        statusDiv.style.color = "var(--danger)"; statusDiv.textContent = "❌ Por favor, selecciona un archivo primero."; return;
-      }
-      if (!usuarioSeleccionado || !usuarioSeleccionado.carpetaDrive) {
-        statusDiv.style.color = "var(--danger)"; statusDiv.textContent = "❌ Este usuario de prueba no tiene carpeta de Drive asignada."; return;
-      }
+      if (!fileInput.files || fileInput.files.length === 0) { alert("Selecciona un archivo."); return; }
 
       const archivo = fileInput.files[0];
       const reader = new FileReader();
-      
-      statusDiv.style.color = "var(--primary)"; statusDiv.textContent = "⏳ Leyendo y convirtiendo archivo...";
+      statusDiv.style.color = "var(--primary)"; statusDiv.textContent = "⏳ Subiendo documento masivo...";
       btn.disabled = true;
 
       reader.onload = function(e) {
         const base64String = e.target.result.split(',')[1];
-        
         const payload = {
           archivoBase64: base64String,
           tipoMime: archivo.type,
@@ -208,30 +235,49 @@
           tipoDocumento: tipoDoc
         };
 
-        statusDiv.textContent = "🚀 Subiendo a Google Drive y renombrando...";
-
-        fetch(API_URL, {
-          method: "POST",
-          body: JSON.stringify(payload)
-        })
+        fetch(API_URL, { method: "POST", body: JSON.stringify(payload) })
         .then(res => res.json())
-        .then(resAnálisis => {
-          if (resAnálisis.resultado === "OK") {
-            statusDiv.style.color = "var(--success)";
-            statusDiv.innerHTML = "✔️ " + resAnálisis.mensaje + '<br><a href="'+resAnálisis.enlace+'" target="_blank" style="color:#166534; font-weight:bold;">Ver archivo subido</a>';
-            fileInput.value = ""; // Limpiar selector
-          } else {
-            statusDiv.style.color = "var(--danger)"; statusDiv.textContent = "❌ Error: " + resAnálisis.mensaje;
-          }
+        .then(res => {
+          if (res.resultado === "OK") {
+            statusDiv.style.color = "var(--success)"; statusDiv.textContent = "✔️ ¡Subido! Actualizando expediente...";
+            fileInput.value = "";
+            solicitarListaArchivosDrive(); // Recarga la lista automáticamente
+          } else { alert("Error: " + res.mensaje); }
           btn.disabled = false;
-        })
-        .catch(err => {
-          statusDiv.style.color = "var(--danger)"; statusDiv.textContent = "❌ Error de conexión con la API de pruebas.";
-          btn.disabled = false;
-        });
+        }).catch(err => { btn.disabled = false; });
       };
-
       reader.readAsDataURL(archivo);
+    }
+
+    // Función de Renombrado en vivo
+    function renombrarArchivoModal(id, nombreActual) {
+      let nuevoNombre = prompt("Modificar Nombre del Archivo:", nombreActual);
+      if (!nuevoNombre || nuevoNombre.trim() === "" || nuevoNombre === nombreActual) return;
+      
+      document.getElementById('loaderArchivos').classList.remove('hidden');
+      fetch(API_URL, {
+        method: "POST",
+        body: JSON.stringify({ accion: "renombrar", fileId: id, nuevoNombre: nuevoNombre.trim() })
+      })
+      .then(r => r.json())
+      .then(res => {
+        if(res.resultado === "OK") { solicitarListaArchivosDrive(); } else { alert(res.mensaje); }
+      });
+    }
+
+    // Función de Eliminación en vivo
+    function eliminarArchivoDrive(id) {
+      if (!confirm("¿Está seguro de que desea eliminar este archivo? Se moverá a la papelera de Google Drive.")) return;
+      
+      document.getElementById('loaderArchivos').classList.remove('hidden');
+      fetch(API_URL, {
+        method: "POST",
+        body: JSON.stringify({ accion: "eliminar", fileId: id })
+      })
+      .then(r => r.json())
+      .then(res => {
+        if(res.resultado === "OK") { solicitarListaArchivosDrive(); } else { alert(res.mensaje); }
+      });
     }
 
     function volverYRefrescarConsulta() {
