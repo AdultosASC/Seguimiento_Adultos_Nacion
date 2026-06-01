@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Laboratorio de Pruebas - Carga de Archivos</title>
+  <style>
+    :root {
+      --primary: #6366f1; --primary-hover: #4f46e5; --purple-dark: #4c1d95; --purple-light: #8b5cf6;
+      --bg: #f8fafc; --card-bg: #ffffff; --text: #1e293b; --text-light: #64748b; --border: #e2e8f0;
+      --success: #10b981; --danger: #ef4444;
+    }
+    body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 2rem 1rem; display: flex; justify-content: center; align-items: center; min-height: 100vh; box-sizing: border-box; }
+    .container { background-color: var(--card-bg); padding: 2.5rem; border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05); width: 100%; max-width: 450px; box-sizing: border-box; }
+    .container.wide { max-width: 800px; }
+    .header-institucional { color: var(--purple-dark); font-size: 1.25rem; font-weight: 700; text-align: center; margin-bottom: 1.5rem; border-bottom: 2px dashed var(--border); padding-bottom: 1rem; }
+    h1 { font-size: 1.4rem; font-weight: 700; margin: 0 0 1.5rem 0; text-align: center; }
+    .form-group { margin-bottom: 1.5rem; }
+    .label-filtro { display: block; font-size: 0.9rem; font-weight: 700; color: var(--purple-dark); margin-bottom: 0.6rem; }
+    select, input[type="file"] { width: 100%; padding: 0.75rem 1rem; font-size: 1rem; background-color: var(--bg); border: 1px solid var(--border); border-radius: 8px; color: var(--text); outline: none; box-sizing: border-box; }
+    button { width: 100%; padding: 0.75rem 1rem; font-size: 1rem; font-weight: 600; color: white; background-color: var(--primary); border: none; border-radius: 8px; cursor: pointer; margin-top: 1rem; }
+    button:hover { background-color: var(--primary-hover); }
+    button:disabled { background-color: var(--border); cursor: not-allowed; }
+    .hidden { display: none !important; }
+    .titulo-principal-a { color: var(--purple-dark); font-weight: bold; font-size: 1.8rem; margin-bottom: 1.5rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; }
+    .seccion-reporte { background-color: var(--bg); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; }
+    .seccion-reporte h2 { font-size: 1.2rem; color: var(--primary); margin-top: 0; margin-bottom: 1rem; font-weight: 700; }
+    .grid-datos { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; }
+    .dato-bloque { display: flex; flex-direction: column; }
+    
+    .dato-verificacion { display: flex; justify-content: space-between; align-items: center; background: var(--card-bg); padding: 0.75rem 1rem; border-radius: 8px; border: 1px solid var(--border); gap: 1.5rem; }
+    .dato-mixto-linea { grid-column: 1 / -1; display: flex; align-items: center; justify-content: space-between; background: var(--card-bg); padding: 0.75rem 1rem; border-radius: 8px; border: 1px solid var(--border); gap: 1.5rem; }
+    .mixto-izq { display: flex; align-items: center; gap: 0.85rem; }
+    
+    .box-carga { background: #f0fdf4; border: 2px dashed #bbf7d0; padding: 1.25rem; border-radius: 12px; margin-top: 1rem; }
+    .box-carga h3 { margin: 0 0 0.75rem 0; font-size: 1.05rem; color: #166534; }
+    .btn-subir { background-color: #166534; margin-top: 0.75rem; }
+    .btn-subir:hover { background-color: #14532d; }
+    
+    .btn-drive { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; background-color: #0f9d58; color: white; border: none; padding: 0.75rem 1.2rem; border-radius: 8px; font-weight: 600; text-decoration: none; font-size: 0.95rem; margin-top: 0.25rem; width: fit-content; cursor: pointer; }
+    .text-no-link { color: var(--text-light); font-style: italic; font-size: 0.95rem; }
+    .btn-back { background-color: transparent; color: var(--text-light); border: 1px solid var(--border); margin-top: 1rem; }
+    .loader { text-align: center; color: var(--text-light); font-style: italic; padding: 2rem 0; }
+  </style>
+</head>
+<body>
+
+  <!-- PÁGINA 1: FILTROS -->
+  <div id="paginaFiltros" class="container">
+    <div class="header-institucional">🧪 Laboratorio de Pruebas: Filtros</div>
+    <h1>Consulta e Interacción</h1>
+    
+    <div class="form-group">
+      <label for="selectA" class="label-filtro">Seleccione Área Estratégica</label>
+      <select id="selectA" onchange="cambioArea()">
+        <option value="">Conectando con la base de datos de pruebas...</option>
+      </select>
+    </div>
+
+    <div id="grupoC" class="form-group hidden">
+      <label for="selectC" class="label-filtro">Seleccione Nombre</label>
+      <select id="selectC" onchange="activarBotonConsultar()">
+        <option value="">-- Seleccione un nombre --</option>
+      </select>
+    </div>
+
+    <button id="btnConsultar" disabled onclick="irAPaginaReporte()">Consultar</button>
+  </div>
+
+  <!-- PÁGINA 2: REPORTE + COMPONENTE DE CARGA -->
+  <div id="paginaReporte" class="container wide hidden">
+    <div id="tituloColumnaA" class="titulo-principal-a"></div>
+    <div id="loaderReporte" class="loader">Procesando información...</div>
+    
+    <div id="contenidoReporte" class="hidden">
+      <!-- INFO GENERAL -->
+      <div class="seccion-reporte">
+        <h2>Información General</h2>
+        <div class="grid-datos">
+          <div class="dato-bloque"><span class="dato-label">Nombre</span><span id="valNombre" class="dato-valor"></span></div>
+          <div class="dato-bloque"><span class="dato-label">Cargo</span><span id="valCargo" class="dato-valor"></span></div>
+          <div class="dato-bloque"><span class="dato-label">Fecha Finalización</span><span id="valFechaFin" class="dato-valor"></span></div>
+          <div class="dato-bloque" style="grid-column: 1 / -1; background: #f3e8ff; padding: 1rem; border-radius: 8px;"><span class="dato-label">Tiempo Restante</span><span id="valTiempoRestante" class="dato-valor"></span></div>
+        </div>
+      </div>
+
+      <!-- SECCIÓN DE CARGA EXPERIMENTAL -->
+      <div class="seccion-reporte box-carga">
+        <h3>📤 Formulario Inteligente de Carga (Prueba)</h3>
+        <p style="margin: 0 0 1rem 0; font-size: 0.85rem; color: #14532d;">Elige el documento. El sistema lo guardará en el Drive del usuario con un renombrado automático institucional.</p>
+        
+        <div class="form-group">
+          <label class="label-filtro" style="color: #14532d;">Tipo de Documento a Subir:</label>
+          <select id="tipoDocCarga">
+            <option value="Modulo de induccion">Módulo de Inducción</option>
+            <option value="Acuerdo mutuo">Acuerdo Mutuo</option>
+            <option value="Afiliacion 2026">Afiliación 2026</option>
+            <option value="PPD Formacion">PPD Formación</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="label-filtro" style="color: #14532d;">Seleccione el archivo (PDF, Word, Excel, Imagen):</label>
+          <input type="file" id="inputArchivo">
+        </div>
+
+        <button class="btn-subir" id="btnSubirArchivo" onclick="procesarSubidaArchivo()">Subir y Renombrar en Drive</button>
+        <div id="statusEnvio" style="margin-top: 0.75rem; font-size: 0.9rem; font-weight: bold; text-align: center;"></div>
+      </div>
+
+      <!-- CARPETA PERSONAL -->
+      <div class="seccion-reporte" style="margin-top:1.5rem;">
+        <h2>Carpeta Personal</h2>
+        <div id="contenedorDrive"></div>
+      </div>
+    </div>
+    <button class="btn-back" onclick="volverYRefrescarConsulta()">Volver a consultar</button>
+  </div>
+
+  <script>
+    // 🔽 PEGA AQUÍ TU ENLACE DE APPS SCRIPT DE COPIA MANUALMENTE 🔽
+    const API_URL = "https://script.google.com/macros/s/AKfycbxg6vaqC8w8IsCjHHy9UX9TTyf2nJKhlA1J37nvQEJb6ERK4nSQM5pAO7o8bqBYUj-0SQ/exec"; 
+    
+    let baseDatosCompleta = [];
+    let usuarioSeleccionado = null;
+
+    window.onload = function() { cargarDatosDesdeAPI(); };
+
+    function cargarDatosDesdeAPI() {
+      var select = document.getElementById('selectA');
+      select.innerHTML = '<option value="">Conectando con la base de datos de pruebas...</option>';
+      fetch(API_URL).then(r => r.json()).then(data => { baseDatosCompleta = data; inicializarDesplegableA(); }).catch(err => { select.innerHTML = '<option value="">Error de permisos o URL errónea.</option>'; });
+    }
+
+    function inicializarDesplegableA() {
+      var select = document.getElementById('selectA');
+      let areas = [...new Set(baseDatosCompleta.map(item => item.columnaA))].filter(Boolean).sort();
+      select.innerHTML = '<option value="">-- Seleccione un Área --</option>';
+      areas.forEach(area => { var el = document.createElement('option'); el.value = area; el.textContent = area; select.appendChild(el); });
+    }
+
+    function cambioArea() {
+      var valorA = document.getElementById('selectA').value;
+      var grupoC = document.getElementById('grupoC');
+      var selectC = document.getElementById('selectC');
+      if (!valorA) { grupoC.classList.add('hidden'); document.getElementById('btnConsultar').disabled = true; return; }
+      let nombresFiltrados = baseDatosCompleta.filter(item => item.columnaA === valorA).map(item => item.nombre).filter(Boolean).sort();
+      selectC.innerHTML = '<option value="">-- Seleccione un nombre --</option>';
+      nombresFiltrados.forEach(nom => { var el = document.createElement('option'); el.value = nom; el.textContent = nom; selectC.appendChild(el); });
+      grupoC.classList.remove('hidden');
+    }
+
+    function activarBotonConsultar() { document.getElementById('btnConsultar').disabled = (document.getElementById('selectC').value === ""); }
+
+    function irAPaginaReporte() {
+      var valorA = document.getElementById('selectA').value;
+      var valorC = document.getElementById('selectC').value;
+      usuarioSeleccionado = baseDatosCompleta.find(item => item.columnaA === valorA && item.nombre === valorC);
+      if(!usuarioSeleccionado) return;
+
+      document.getElementById('paginaFiltros').classList.add('hidden');
+      document.getElementById('paginaReporte').classList.remove('hidden');
+      document.getElementById('tituloColumnaA').textContent = usuarioSeleccionado.columnaA;
+      document.getElementById('valNombre').textContent = usuarioSeleccionado.nombre;
+      document.getElementById('valCargo').textContent = usuarioSeleccionado.cargo;
+      document.getElementById('valFechaFin').textContent = usuarioSeleccionado.fechaFinalizacion;
+      document.getElementById('valTiempoRestante').textContent = "Calculando entorno...";
+
+      var divDrive = document.getElementById('contenedorDrive');
+      if (usuarioSeleccionado.carpetaDrive && usuarioSeleccionado.carpetaDrive.startsWith("http")) {
+        divDrive.innerHTML = '<a href="' + usuarioSeleccionado.carpetaDrive + '" target="_blank" class="btn-drive">📂 Abrir Carpeta en Drive</a>';
+      } else {
+        divDrive.innerHTML = '<span class="text-no-link">No hay carpeta registrada para pruebas.</span>';
+      }
+      document.getElementById('loaderReporte').classList.add('hidden');
+      document.getElementById('contenidoReporte').classList.remove('hidden');
+    }
+
+    // 🚀 LÓGICA FRONTEND: Convertir archivo físico a Base64 y empujarlo por POST
+    function procesarSubidaArchivo() {
+      const fileInput = document.getElementById('inputArchivo');
+      const statusDiv = document.getElementById('statusEnvio');
+      const btn = document.getElementById('btnSubirArchivo');
+      const tipoDoc = document.getElementById('tipoDocCarga').value;
+
+      if (!fileInput.files || fileInput.files.length === 0) {
+        statusDiv.style.color = "var(--danger)"; statusDiv.textContent = "❌ Por favor, selecciona un archivo primero."; return;
+      }
+      if (!usuarioSeleccionado || !usuarioSeleccionado.carpetaDrive) {
+        statusDiv.style.color = "var(--danger)"; statusDiv.textContent = "❌ Este usuario de prueba no tiene carpeta de Drive asignada."; return;
+      }
+
+      const archivo = fileInput.files[0];
+      const reader = new FileReader();
+      
+      statusDiv.style.color = "var(--primary)"; statusDiv.textContent = "⏳ Leyendo y convirtiendo archivo...";
+      btn.disabled = true;
+
+      reader.onload = function(e) {
+        const base64String = e.target.result.split(',')[1];
+        
+        const payload = {
+          archivoBase64: base64String,
+          tipoMime: archivo.type,
+          nombreOriginal: archivo.name,
+          urlCarpeta: usuarioSeleccionado.carpetaDrive,
+          nombreUsuario: usuarioSeleccionado.nombre,
+          tipoDocumento: tipoDoc
+        };
+
+        statusDiv.textContent = "🚀 Subiendo a Google Drive y renombrando...";
+
+        fetch(API_URL, {
+          method: "POST",
+          body: JSON.stringify(payload)
+        })
+        .then(res => res.json())
+        .then(resAnálisis => {
+          if (resAnálisis.resultado === "OK") {
+            statusDiv.style.color = "var(--success)";
+            statusDiv.innerHTML = "✔️ " + resAnálisis.mensaje + '<br><a href="'+resAnálisis.enlace+'" target="_blank" style="color:#166534; font-weight:bold;">Ver archivo subido</a>';
+            fileInput.value = ""; // Limpiar selector
+          } else {
+            statusDiv.style.color = "var(--danger)"; statusDiv.textContent = "❌ Error: " + resAnálisis.mensaje;
+          }
+          btn.disabled = false;
+        })
+        .catch(err => {
+          statusDiv.style.color = "var(--danger)"; statusDiv.textContent = "❌ Error de conexión con la API de pruebas.";
+          btn.disabled = false;
+        });
+      };
+
+      reader.readAsDataURL(archivo);
+    }
+
+    function volverYRefrescarConsulta() {
+      document.getElementById('paginaReporte').classList.add('hidden'); document.getElementById('paginaFiltros').classList.remove('hidden');
+      document.getElementById('selectA').value = ""; document.getElementById('grupoC').classList.add('hidden');
+      document.getElementById('statusEnvio').textContent = ""; document.getElementById('inputArchivo').value = "";
+      document.getElementById('btnConsultar').disabled = true; cargarDatosDesdeAPI();
+    }
+  </script>
+</body>
+</html>
