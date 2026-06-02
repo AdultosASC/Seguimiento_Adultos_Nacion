@@ -4,11 +4,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dirección Nacional de Adultos</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <style>
     :root {
       --primary: #6366f1; --primary-hover: #4f46e5; --purple-dark: #4c1d95; --purple-light: #8b5cf6;
       --bg: #f8fafc; --card-bg: #ffffff; --text: #1e293b; --text-light: #64748b; --border: #e2e8f0;
-      --success: #10b981; --danger: #ef4444;
+      --success: #10b981; --danger: #ef4444; --warning: #f59e0b;
     }
     body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 2rem 1rem; display: flex; justify-content: center; align-items: center; min-height: 100vh; box-sizing: border-box; }
     .container { background-color: var(--card-bg); padding: 2.5rem; border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05); width: 100%; max-width: 450px; box-sizing: border-box; }
@@ -45,17 +46,26 @@
     .btn-ver { background-color: var(--primary); }
     .btn-del { background-color: var(--danger); }
     
-    .btn-informe { padding: 0.6rem 1.2rem; font-size: 0.9rem; font-weight: bold; border-radius: 6px; width: auto; margin-top: 0.5rem; display: inline-flex; align-items: center; gap: 0.5rem; border: none; color: white; cursor: pointer; }
-    .btn-inf-ver { background-color: var(--purple-light); }
-    .btn-inf-ver:hover { background-color: var(--purple-dark); }
-    .btn-inf-desc { background-color: #0f9d58; }
-    .btn-inf-desc:hover { background-color: #0b7b44; }
+    /* Botones de acción institucional */
+    .btn-panel-accion { width: auto; padding: 0.65rem 1.25rem; font-size: 0.9rem; font-weight: 700; border-radius: 6px; border: none; color: white; cursor: pointer; display: inline-flex; align-items: center; gap: 0.5rem; }
+    .btn-acc-informe { background-color: var(--purple-light); }
+    .btn-acc-informe:hover { background-color: var(--purple-dark); }
+    .btn-acc-pdf { background-color: #e11d48; }
+    .btn-acc-pdf:hover { background-color: #9f1239; }
 
     .box-carga { background: #f8fafc; border: 1px solid var(--border); padding: 1.25rem; border-radius: 12px; margin-bottom: 1.5rem; }
-    .btn-back { background-color: transparent; color: var(--text-light); border: 1px solid var(--border); margin-top: 1rem; }
-    .loader { text-align: center; color: var(--text-light); font-style: italic; padding: 2rem 0; }
-    .contenedor-progreso { display: flex; align-items: center; gap: 1rem; background: #e2e8f0; border-radius: 9999px; height: 1.25rem; overflow: hidden; position: relative; margin-top: 0.5rem; margin-bottom: 1rem; }
+    .btn-back { background-color: transparent; color: var(--text-light); border: 1px solid var(--border); margin-top: 1rem; width: auto; padding: 0.5rem 1rem; }
+    .contenedor-progreso { display: flex; align-items: center; gap: 1rem; background: #e2e8f0; border-radius: 9999px; height: 1.25rem; overflow: hidden; position: relative; margin-top: 0.4rem; }
     .barra-interna { background: linear-gradient(90deg, var(--purple-light), var(--primary)); height: 100%; width: 0%; transition: width 0.5s ease-in-out; }
+
+    /* ESTILOS DEL INFORME CONSOLIDADO */
+    .reporte-consolidado-box { background: white; border: 1px solid var(--border); padding: 2rem; border-radius: 12px; margin-top: 1rem; }
+    .bloque-usuario-informe { border-bottom: 2px dashed var(--border); padding: 1.5rem 0; }
+    .bloque-usuario-informe:last-child { border-bottom: none; }
+    .nombre-usuario-inf { font-size: 1.3rem; font-weight: 700; color: var(--purple-dark); margin-bottom: 0.75rem; }
+    .tabla-archivos-inf { width: 100%; border-collapse: collapse; margin-top: 0.5rem; }
+    .tabla-archivos-inf th, .tabla-archivos-inf td { border: 1px solid var(--border); padding: 0.5rem 0.75rem; font-size: 0.85rem; }
+    .tabla-archivos-inf th { background-color: #f8fafc; text-align: left; font-weight: 700; }
   </style>
 </head>
 <body>
@@ -99,13 +109,24 @@
           
           <div class="dato-bloque" style="grid-column: 1 / -1; background: #f3e8ff; padding: 1rem; border-radius: 8px; border-left: 4px solid var(--purple-light);">
             <span class="dato-label" style="color: var(--purple-dark);">Tiempo restante en el cargo</span>
-            <span id="valTiempoRestante" class="dato-valor" style="font-weight: 700; color: #5b21b6; font-size: 1.1rem; display:block; margin-bottom:0.25rem;"></span>
-            
-            <div id="boxBotonesInforme" class="hidden" style="display:none; gap:0.75rem; margin-top:0.5rem; border-top:1px dashed #d8b4fe; padding-top:0.5rem;">
-              <button class="btn-informe btn-inf-ver" onclick="ejecutarVerInforme()">👁️ Ver informe</button>
-              <button class="btn-informe btn-inf-desc" onclick="alert('Iniciando descarga del informe institucional...')">📥 Descargar</button>
+            <span id="valTiempoRestante" class="dato-valor" style="font-weight: 700; color: #5b21b6; font-size: 1.1rem; display:block;"></span>
+          </div>
+
+          <div id="boxBotonesAuditoria" class="dato-bloque hidden" style="grid-column: 1 / -1; display:none; gap:0.75rem; margin-top:0.25rem;">
+            <button class="btn-panel-accion btn-acc-informe" onclick="generarInformeConsolidado()">📝 Generar informe</button>
+            <button class="btn-panel-accion btn-acc-pdf" onclick="generarInformeYDescargarPDF()">📄 Generar PDF</button>
+          </div>
+
+          <div class="dato-bloque" style="grid-column: 1 / -1; margin-top: 0.5rem; background: #fafafa; padding: 0.85rem; border-radius: 8px; border: 1px solid var(--border);">
+            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem; font-weight: bold; color: var(--purple-dark);">
+              <span>Progreso de archivos</span>
+              <span id="textoMetrica">0 de 6 archivos (0%)</span>
+            </div>
+            <div class="contenedor-progreso">
+              <div class="barra-interna" id="barraMetrica"></div>
             </div>
           </div>
+
         </div>
       </div>
 
@@ -151,13 +172,6 @@
 
       <div class="seccion-reporte">
         <h2>📁 Expediente Documental</h2>
-        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem; font-weight: bold; color: var(--purple-dark); margin-bottom:0.25rem;">
-          <span>Progreso de Auditoría Obligatoria</span>
-          <span id="textoMetrica">0 de 6 archivos (0%)</span>
-        </div>
-        <div class="contenedor-progreso">
-          <div class="barra-interna" id="barraMetrica"></div>
-        </div>
         <div id="loaderArchivos" class="loader hidden">Consultando carpeta...</div>
         <table class="tabla-archivos" id="tablaFiles">
           <thead>
@@ -197,6 +211,20 @@
 
     </div>
     <button class="btn-back" onclick="volverYRefrescarConsulta()">Volver a consultar</button>
+  </div>
+
+  <div id="paginaInformeConsolidado" class="container wide hidden">
+    <div class="header-institucional">Dirección Nacional de Adultos en el Movimiento</div>
+    <h1 style="text-align:left; color: var(--purple-dark);" id="tituloAreaInforme"></h1>
+    <p style="color:var(--text-light); margin-top:-1rem;">Auditoría General Integrada y Grado de Cumplimiento Técnico por Bloque</p>
+    
+    <div id="boxContenedorNativoInforme" class="reporte-consolidado-box">
+      </div>
+
+    <div style="display:flex; gap:1rem; margin-top:1.5rem;">
+      <button class="btn-panel-accion btn-acc-pdf" id="btnDescargarPdfInforme" onclick="exportarContenedorAPDF()">📥 Descargar PDF Oficial</button>
+      <button class="btn-back" style="margin:0;" onclick="cerrarVistaInformeYVolver()">Volver al expediente</button>
+    </div>
   </div>
 
   <script>
@@ -303,11 +331,13 @@
         } else { document.getElementById('valTiempoRestante').textContent = "Período vencido / Cargo finalizado"; }
       } else { document.getElementById('valTiempoRestante').textContent = "Sin fecha de finalización registrada"; }
 
+      // MODIFICADO: Activación condicional exacta de los dos nuevos botones de auditoría masiva
       var tieneAcceso = (usuarioSeleccionado.accesoInforme === true || usuarioSeleccionado.accesoInforme === "VERDADERO" || usuarioSeleccionado.accesoInforme === "true");
-      var boxInforme = document.getElementById('boxBotonesInforme');
+      var boxInforme = document.getElementById('boxBotonesAuditoria');
       if (tieneAcceso) { boxInforme.style.display = "flex"; boxInforme.classList.remove('hidden'); } 
       else { boxInforme.style.display = "none"; boxInforme.classList.add('hidden'); }
 
+      // Carga Formación Básica
       document.getElementById('valAsesorPersonal').textContent = usuarioSeleccionado.asesorPersonal;
       mapearIconoEstado('statusPPD', usuarioSeleccionado.desarrolloPPD);
       var esValInicialTrue = mapearIconoEstado('statusValInicial', usuarioSeleccionado.valoracionInicial);
@@ -319,6 +349,7 @@
       var fGestorFormateada = formatearFechaVisual(usuarioSeleccionado.gestorNacionalFecha);
       if (fGestorFormateada && fGestorFormateada !== "N/A") { document.getElementById('valGestorFecha').textContent = "Fecha de registro: " + fGestorFormateada; document.getElementById('boxGestor').classList.remove('hidden'); } else { document.getElementById('boxGestor').classList.add('hidden'); }
 
+      // Carga Perfeccionamiento Continuo
       mapearIconoEstado('statusS4PPD', usuarioSeleccionado.s4DesarrolloPPD);
       var esS4ValInicialTrue = mapearIconoEstado('statusS4ValInicial', usuarioSeleccionado.s4ValoracionInicial);
       var fS4Nom1 = formatearFechaVisual(usuarioSeleccionado.s4FechaValoracionInicial);
@@ -329,9 +360,6 @@
       var fAAAFormateada = formatearFechaVisual(usuarioSeleccionado.aaaFecha);
       if (fAAAFormateada && fAAAFormateada !== "N/A") { document.getElementById('valAAAFecha').textContent = "Fecha de acreditación: " + fAAAFormateada; document.getElementById('boxAAA').classList.remove('hidden'); } else { document.getElementById('boxAAA').classList.add('hidden'); }
 
-      document.getElementById('loaderReporte').classList.add('hidden');
-      document.getElementById('contenidoReporte').classList.remove('hidden');
-      
       solicitarListaArchivosDrive();
     }
 
@@ -380,6 +408,108 @@
       document.getElementById('textoMetrica').textContent = `${cantidadArchivos} de ${MAX_ARCHIVOS} archivos (${porcentaje}%)`;
     }
 
+    // LÓGICA DE AUDITORÍA: Genera la vista cruzada mapeando todas las personas del Área (Columna A)
+    function generarInformeConsolidado(callbackAlFinalizar = null) {
+      if(!usuarioSeleccionado) return;
+      let areaActual = usuarioSeleccionado.columnaA;
+      
+      document.getElementById('tituloAreaInforme').textContent = "Informe de Área: " + areaActual;
+      const contenedor = document.getElementById('boxContenedorNativoInforme');
+      contenedor.innerHTML = '<div class="loader">Efectuando lectura cruzada de carpetas en Google Drive...</div>';
+
+      // Filtrar integrantes de la misma Área Estratégica
+      let integrantes = baseDatosCompleta.filter(item => item.columnaA === areaActual);
+      
+      // Mapear URLs para consulta masiva en lote
+      var mapaUrls = {};
+      integrantes.forEach(user => { mapaUrls[user.nombre] = user.carpetaDrive; });
+
+      // Ocultar páneles principales y saltar a la nueva sección del informe
+      document.getElementById('paginaReporte').classList.add('hidden');
+      document.getElementById('paginaInformeConsolidado').classList.remove('hidden');
+
+      fetch(API_URL + "?accion=obtenerMetricasArea&urlCarpetaMasiva=" + encodeURIComponent(JSON.stringify(mapaUrls)))
+        .then(r => r.json())
+        .then(res => {
+          if (res.resultado === "OK") {
+            contenedor.innerHTML = "";
+            
+            integrantes.forEach(user => {
+              var listaArchivosCargados = res.datosUsuarios[user.nombre] || [];
+              var cant = listaArchivosCargados.length;
+              var calculoConteo = cant > 6 ? 6 : cant;
+              var porcentaje = Math.round((calculoConteo / 6) * 100);
+              
+              var bloqueUsuario = document.createElement('div');
+              bloqueUsuario.className = "bloque-usuario-informe";
+              
+              var nombresArchivosTexto = listaArchivosCargados.length > 0 ? listaArchivosCargados.join(", ") : "Ningún archivo cargado";
+
+              bloqueUsuario.innerHTML = `
+                <div class="nombre-usuario-inf">${user.nombre}</div>
+                <table class="tabla-archivos-inf">
+                  <thead>
+                    <tr>
+                      <th>Cargo</th>
+                      <th>Nombramiento</th>
+                      <th>Metodología</th>
+                      <th>Fecha Nombramiento</th>
+                      <th>Fecha Finalización</th>
+                      <th>Documentos en Drive</th>
+                      <th>% Cumplimiento</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td><strong>${user.cargo}</strong></td>
+                      <td>${user.nombramiento}</td>
+                      <td>${user.metodologia}</td>
+                      <td>${formatearFechaVisual(user.fechaNombramiento)}</td>
+                      <td>${formatearFechaVisual(user.fechaFinalizacion)}</td>
+                      <td style="color:var(--text-light); max-width:250px;"><em>${nombresArchivosTexto}</em></td>
+                      <td style="text-align:center;"><span style="background:${porcentaje === 100 ? '#d1fae5' : '#fee2e2'}; color:${porcentaje === 100 ? '#065f46' : '#991b1b'}; padding:0.25rem 0.5rem; border-radius:4px; font-weight:bold;">${porcentaje}%</span></td>
+                    </tr>
+                  </tbody>
+                </table>
+              `;
+              contenedor.appendChild(bloqueUsuario);
+            });
+
+            if (callbackAlFinalizar) callbackAlFinalizar();
+
+          } else { contenedor.innerHTML = "<p style='color:var(--danger);'>Fallo al mapear el informe consolidado.</p>"; }
+        }).catch(err => { contenedor.innerHTML = "<p style='color:var(--danger);'>Error de conexión de red.</p>"; });
+    }
+
+    // LÓGICA DE PDF AUTOMÁTICA: Genera el informe y lo descarga directamente sin interacción adicional
+    function generarInformeYDescargarPDF() {
+      alert("Generando el informe y estructurando el archivo PDF de alta definición...");
+      generarInformeConsolidado(function() {
+        // Ejecución diferida para dar tiempo a que los estilos se asimilen antes de imprimir
+        setTimeout(() => { exportarContenedorAPDF(); }, 1200);
+      });
+    }
+
+    function exportarContenedorAPDF() {
+      const elementoAImpresion = document.getElementById('boxContenedorNativoInforme');
+      let areaActual = usuarioSeleccionado ? usuarioSeleccionado.columnaA.replace(/\s+/g, '_') : "Informe_Area";
+      
+      var opcionesConfig = {
+        margin:       [0.5, 0.5, 0.5, 0.5],
+        filename:     `Informe_Auditoria_${areaActual}.pdf`,
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  { scale: 2, useCORS: true },
+        jsPDF:        { unit: 'in', format: 'letter', orientation: 'landscape' } // Formato horizontal ideal para tablas largas
+      };
+      
+      html2pdf().set(opcionesConfig).from(elementoAImpresion).save();
+    }
+
+    function cerrarVistaInformeYVolver() {
+      document.getElementById('paginaInformeConsolidado').classList.add('hidden');
+      document.getElementById('paginaReporte').classList.remove('hidden');
+    }
+
     function procesarSubidaArchivo() {
       const fileInput = document.getElementById('inputArchivo');
       const statusDiv = document.getElementById('statusEnvio');
@@ -421,19 +551,6 @@
       fetch(API_URL, { method: "POST", body: JSON.stringify({ accion: "eliminar", fileId: id }) })
       .then(res => res.json()).then(res => { solicitarListaArchivosDrive(); })
       .catch(err => { setTimeout(() => { solicitarListaArchivosDrive(); }, 1500); });
-    }
-
-    function ejecutarVerInforme() {
-      if(!usuarioSeleccionado) return;
-      let areaActual = usuarioSeleccionado.columnaA;
-      let integrantesArea = baseDatosCompleta
-        .filter(item => item.columnaA === areaActual)
-        .map(item => "• " + item.nombre);
-        
-      let mensajeAlerta = `📊 VALIDACIÓN DE INFORME DEL ÁREA:\n"${areaActual}"\n\n`;
-      mensajeAlerta += `Se han encontrado ${integrantesArea.length} registros para validar en este bloque:\n\n`;
-      mensajeAlerta += integrantesArea.join("\n");
-      alert(mensajeAlerta);
     }
 
     function volverYRefrescarConsulta() {
