@@ -8,7 +8,7 @@
     :root {
       --primary: #6366f1; --primary-hover: #4f46e5; --purple-dark: #4c1d95; --purple-light: #8b5cf6;
       --bg: #f8fafc; --card-bg: #ffffff; --text: #1e293b; --text-light: #64748b; --border: #e2e8f0;
-      --success: #10b981; --danger: #ef4444; --warning: #f59e0b;
+      --success: #10b981; --danger: #ef4444;
     }
     body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 2rem 1rem; display: flex; justify-content: center; align-items: center; min-height: 100vh; box-sizing: border-box; }
     .container { background-color: var(--card-bg); padding: 2.5rem; border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05); width: 100%; max-width: 450px; box-sizing: border-box; }
@@ -29,10 +29,9 @@
     .tabla-archivos { width: 100%; border-collapse: collapse; margin-top: 0.5rem; background: white; border-radius: 8px; overflow: hidden; border: 1px solid var(--border); }
     .tabla-archivos th, .tabla-archivos td { padding: 0.75rem 1rem; text-align: left; font-size: 0.9rem; border-bottom: 1px solid var(--border); }
     .tabla-archivos th { background-color: #f1f5f9; font-weight: 700; color: var(--purple-dark); }
-    .acciones-btn-group { display: flex; gap: 0.5rem; }
-    .btn-mini { padding: 0.4rem 0.6rem; font-size: 0.8rem; font-weight: bold; border-radius: 4px; width: auto; margin: 0; display: inline-block; }
+    .acciones-btn-group { display: flex; gap: 0.5rem; justify-content: center; }
+    .btn-mini { padding: 0.4rem 0.8rem; font-size: 0.8rem; font-weight: bold; border-radius: 4px; width: auto; margin: 0; display: inline-block; }
     .btn-ver { background-color: var(--primary); }
-    .btn-edit { background-color: var(--warning); }
     .btn-del { background-color: var(--danger); }
     
     .box-carga { background: #f8fafc; border: 1px solid var(--border); padding: 1.25rem; border-radius: 12px; margin-bottom: 1.5rem; }
@@ -71,7 +70,7 @@
       
       <div class="seccion-reporte box-carga">
         <h2>📤 Cargar Nuevo Archivo Documental</h2>
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 100fr)); gap: 1rem; align-items: end;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; align-items: end;">
           <div>
             <label class="label-filtro">Tipo Documento:</label>
             <select id="tipoDocCarga">
@@ -100,7 +99,7 @@
           <thead>
             <tr>
               <th>Nombre del Archivo en Drive</th>
-              <th style="width: 220px; text-align: center;">Acciones Disponibles</th>
+              <th style="width: 180px; text-align: center;">Acciones Disponibles</th>
             </tr>
           </thead>
           <tbody id="cuerpoTablaArchivos">
@@ -162,7 +161,6 @@
       solicitarListaArchivosDrive();
     }
 
-    // AJUSTADO: Captura controlada de carpetas vacías o fallos sin lanzar error
     function solicitarListaArchivosDrive() {
       const cuerpo = document.getElementById('cuerpoTablaArchivos');
       const loader = document.getElementById('loaderArchivos');
@@ -181,12 +179,11 @@
         .then(res => {
           loader.classList.add('hidden');
           if (res && res.resultado === "OK") {
-            // CONTROL REQUERIDO: Si la lista de archivos está vacía
             if (!res.archivos || res.archivos.length === 0) {
               cuerpo.innerHTML = '<tr><td colspan="2" style="text-align:center; color:var(--text-light); font-style:italic; padding: 2rem 0;">La carpeta está vacía. Sube un archivo arriba.</td></tr>';
               return;
             }
-            // Si tiene archivos los dibuja
+            // MODIFICADO: Lista limpia solo con botones de Ver y Borrar
             res.archivos.forEach(file => {
               let fila = document.createElement('tr');
               fila.innerHTML = `
@@ -194,7 +191,6 @@
                 <td style="text-align:center;">
                   <div class="acciones-btn-group">
                     <button class="btn-mini btn-ver" onclick="window.open('${file.url}', '_blank')">👁️ Ver</button>
-                    <button class="btn-mini btn-edit" onclick="renombrarArchivoModal('${file.id}', '${file.nombre}')">✏️ Renombrar</button>
                     <button class="btn-mini btn-del" onclick="eliminarArchivoDrive('${file.id}')">🗑️ Borrar</button>
                   </div>
                 </td>
@@ -202,7 +198,6 @@
               cuerpo.appendChild(fila);
             });
           } else {
-            // Fallo controlado suave
             cuerpo.innerHTML = '<tr><td colspan="2" style="text-align:center; color:var(--text-light); font-style:italic; padding: 2rem 0;">La carpeta está vacía. Sube un archivo arriba.</td></tr>';
           }
         }).catch(err => {
@@ -246,49 +241,36 @@
             fileInput.value = "";
             setTimeout(() => { statusDiv.textContent = ""; solicitarListaArchivosDrive(); }, 1500);
           } else { 
-            // Manejo de respuesta de texto alternativa
             statusDiv.style.color = "var(--success)"; statusDiv.textContent = "✔️ Archivo procesado correctamente.";
             fileInput.value = "";
-            setTimeout(() => { statusDiv.textContent = ""; solicitarListaArchivosDrive(); }, 2000);
+            setTimeout(() => { statusDiv.textContent = ""; solicitarListaArchivosDrive(); }, 1500);
           }
           btn.disabled = false;
         }).catch(err => { 
-          // Captura alternativa por redirección de red segura
           statusDiv.style.color = "var(--success)"; statusDiv.textContent = "✔️ Archivo creado con éxito en Google Drive.";
           fileInput.value = "";
-          setTimeout(() => { statusDiv.textContent = ""; solicitarListaArchivosDrive(); btn.disabled = false; }, 2000);
+          setTimeout(() => { statusDiv.textContent = ""; solicitarListaArchivosDrive(); btn.disabled = false; }, 1500);
         });
       };
       reader.readAsDataURL(archivo);
     }
 
-    function renombrarArchivoModal(id, nombreActual) {
-      let nuevoNombre = prompt("Modificar Nombre del Archivo:", nombreActual);
-      if (!nuevoNombre || nuevoNombre.trim() === "" || nuevoNombre === nombreActual) return;
-      
-      document.getElementById('loaderArchivos').classList.remove('hidden');
-      fetch(API_URL, {
-        method: "POST",
-        body: JSON.stringify({ accion: "renombrar", fileId: id, nuevoNombre: nuevoNombre.trim() })
-      })
-      .then(res => {
-        setTimeout(() => { solicitarListaArchivosDrive(); }, 1500);
-      }).catch(err => {
-        setTimeout(() => { solicitarListaArchivosDrive(); }, 1500);
-      });
-    }
-
+    // CORREGIDO: Envío seguro estructurado para la acción de borrado directo
     function eliminarArchivoDrive(id) {
       if (!confirm("¿Está seguro de que desea eliminar este archivo? Se moverá a la papelera de Google Drive.")) return;
       
       document.getElementById('loaderArchivos').classList.remove('hidden');
+      
       fetch(API_URL, {
         method: "POST",
         body: JSON.stringify({ accion: "eliminar", fileId: id })
       })
+      .then(res => res.json())
       .then(res => {
-        setTimeout(() => { solicitarListaArchivosDrive(); }, 1500);
-      }).catch(err => {
+        solicitarListaArchivosDrive(); // Recarga el expediente automáticamente
+      })
+      .catch(err => {
+        // Forzar recarga visual amortiguada en caso de retardo de respuesta
         setTimeout(() => { solicitarListaArchivosDrive(); }, 1500);
       });
     }
