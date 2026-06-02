@@ -8,7 +8,7 @@
     :root {
       --primary: #6366f1; --primary-hover: #4f46e5; --purple-dark: #4c1d95; --purple-light: #8b5cf6;
       --bg: #f8fafc; --card-bg: #ffffff; --text: #1e293b; --text-light: #64748b; --border: #e2e8f0;
-      --success: #10b981; --danger: #ef4444; --warning: #f59e0b;
+      --success: #10b981; --danger: #ef4444;
     }
     body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 2rem 1rem; display: flex; justify-content: center; align-items: center; min-height: 100vh; box-sizing: border-box; }
     .container { background-color: var(--card-bg); padding: 2.5rem; border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05); width: 100%; max-width: 450px; box-sizing: border-box; }
@@ -26,7 +26,6 @@
     .seccion-reporte { background-color: var(--bg); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; }
     .seccion-reporte h2 { font-size: 1.2rem; color: var(--primary); margin-top: 0; margin-bottom: 1rem; font-weight: 700; }
     
-    /* MODIFICADO: Forzado estricto a Dos Columnas */
     .grid-dos-columnas { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.25rem; }
     .dato-bloque { display: flex; flex-direction: column; }
     
@@ -46,7 +45,6 @@
     .btn-ver { background-color: var(--primary); }
     .btn-del { background-color: var(--danger); }
     
-    /* Nuevos botones de informe */
     .btn-informe { padding: 0.6rem 1.2rem; font-size: 0.9rem; font-weight: bold; border-radius: 6px; width: auto; margin-top: 0.5rem; display: inline-flex; align-items: center; gap: 0.5rem; border: none; color: white; cursor: pointer; }
     .btn-inf-ver { background-color: var(--purple-light); }
     .btn-inf-ver:hover { background-color: var(--purple-dark); }
@@ -103,7 +101,7 @@
             <span class="dato-label" style="color: var(--purple-dark);">Tiempo restante en el cargo</span>
             <span id="valTiempoRestante" class="dato-valor" style="font-weight: 700; color: #5b21b6; font-size: 1.1rem; display:block; margin-bottom:0.25rem;"></span>
             
-            <div id="boxBotonesInforme" class="hidden" style="display:flex; gap:0.75rem; margin-top:0.5rem; border-top:1px dashed #d8b4fe; padding-top:0.5rem;">
+            <div id="boxBotonesInforme" class="hidden" style="display:none; gap:0.75rem; margin-top:0.5rem; border-top:1px dashed #d8b4fe; padding-top:0.5rem;">
               <button class="btn-informe btn-inf-ver" onclick="ejecutarVerInforme()">👁️ Ver informe</button>
               <button class="btn-informe btn-inf-desc" onclick="alert('Iniciando descarga del informe institucional...')">📥 Descargar</button>
             </div>
@@ -134,7 +132,7 @@
       </div>
 
       <div class="seccion-reporte">
-        <h2>Development Personal Perfeccionamiento Continuo</h2>
+        <h2>Desarrollo Personal Perfeccionamiento Continuo</h2>
         <div class="grid-dos-columnas">
           <div class="dato-mixto-linea">
             <div class="mixto-izq"><span id="statusS4ValInicial" class="status-badge"></span><span class="verificacion-titulo">Valoración Inicial</span></div>
@@ -157,6 +155,19 @@
           <span>Progreso de Auditoría Obligatoria</span>
           <span id="textoMetrica">0 de 6 archivos (0%)</span>
         </div>
+        <div class="contenedor-progreso">
+          <div class="barra-interna" id="barraMetrica"></div>
+        </div>
+        <div id="loaderArchivos" class="loader hidden">Consultando carpeta...</div>
+        <table class="tabla-archivos" id="tablaFiles">
+          <thead>
+            <tr>
+              <th>Nombre del Archivo en Drive</th>
+              <th style="width: 180px; text-align: center;">Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="cuerpoTablaArchivos"></tbody>
+        </table>
       </div>
 
       <div class="seccion-reporte box-carga">
@@ -189,7 +200,7 @@
   </div>
 
   <script>
-    const API_URL = "https://script.google.com/macros/s/AKfycbxg6vaqC8w8IsCjHHy9UX9TTyf2nJKhlA1J37nvQEJb6ERK4nSQM5pAO7o8bqBYUj-0SQ/exec"; 
+    const API_URL = "TU_URL_DE_APPS_SCRIPT_AQUÍ"; 
     let baseDatosCompleta = [];
     let usuarioSeleccionado = null;
 
@@ -292,7 +303,7 @@
         } else { document.getElementById('valTiempoRestante').textContent = "Período vencido / Cargo finalizado"; }
       } else { document.getElementById('valTiempoRestante').textContent = "Sin fecha de finalización registrada"; }
 
-      // LÓGICA MODIFICADA: Validar columna J (accesoInforme) para activar botones ocultos
+      // Mostrar botones si accesoInforme está en verdadero
       var tieneAcceso = (usuarioSeleccionado.accesoInforme === true || usuarioSeleccionado.accesoInforme === "VERDADERO" || usuarioSeleccionado.accesoInforme === "true");
       var boxInforme = document.getElementById('boxBotonesInforme');
       if (tieneAcceso) { boxInforme.style.display = "flex"; boxInforme.classList.remove('hidden'); } 
@@ -367,8 +378,6 @@
       const MAX_ARCHIVOS = 6;
       let conteoCalculo = cantidadArchivos > MAX_ARCHIVOS ? MAX_ARCHIVOS : cantidadArchivos;
       let porcentaje = Math.round((conteoCalculo / MAX_ARCHIVOS) * 100);
-      
-      // Intentar inyectar la barra dinámica si existe el elemento contenedor-progreso
       let barra = document.getElementById('barraMetrica');
       if(barra) { barra.style.width = porcentaje + "%"; }
       document.getElementById('textoMetrica').textContent = `${cantidadArchivos} de ${MAX_ARCHIVOS} archivos (${porcentaje}%)`;
@@ -417,12 +426,9 @@
       .catch(err => { setTimeout(() => { solicitarListaArchivosDrive(); }, 1500); });
     }
 
-    // NUEVA FUNCIÓN: Lógica para "Ver Informe" de forma masiva según el Área (Columna A)
     function ejecutarVerInforme() {
       if(!usuarioSeleccionado) return;
       let areaActual = usuarioSeleccionado.columnaA;
-      
-      // Filtrar todas las personas que pertenezcan a la misma área estratégica
       let integrantesArea = baseDatosCompleta
         .filter(item => item.columnaA === areaActual)
         .map(item => "• " + item.nombre);
@@ -430,7 +436,6 @@
       let mensajeAlerta = `📊 VALIDACIÓN DE INFORME DEL ÁREA:\n"${areaActual}"\n\n`;
       mensajeAlerta += `Se han encontrado ${integrantesArea.length} registros para validar en este bloque:\n\n`;
       mensajeAlerta += integrantesArea.join("\n");
-      
       alert(mensajeAlerta);
     }
 
