@@ -303,13 +303,11 @@
         } else { document.getElementById('valTiempoRestante').textContent = "Período vencido / Cargo finalizado"; }
       } else { document.getElementById('valTiempoRestante').textContent = "Sin fecha de finalización registrada"; }
 
-      // Mostrar botones si accesoInforme está en verdadero
       var tieneAcceso = (usuarioSeleccionado.accesoInforme === true || usuarioSeleccionado.accesoInforme === "VERDADERO" || usuarioSeleccionado.accesoInforme === "true");
       var boxInforme = document.getElementById('boxBotonesInforme');
       if (tieneAcceso) { boxInforme.style.display = "flex"; boxInforme.classList.remove('hidden'); } 
       else { boxInforme.style.display = "none"; boxInforme.classList.add('hidden'); }
 
-      // Carga Formación Básica
       document.getElementById('valAsesorPersonal').textContent = usuarioSeleccionado.asesorPersonal;
       mapearIconoEstado('statusPPD', usuarioSeleccionado.desarrolloPPD);
       var esValInicialTrue = mapearIconoEstado('statusValInicial', usuarioSeleccionado.valoracionInicial);
@@ -321,7 +319,6 @@
       var fGestorFormateada = formatearFechaVisual(usuarioSeleccionado.gestorNacionalFecha);
       if (fGestorFormateada && fGestorFormateada !== "N/A") { document.getElementById('valGestorFecha').textContent = "Fecha de registro: " + fGestorFormateada; document.getElementById('boxGestor').classList.remove('hidden'); } else { document.getElementById('boxGestor').classList.add('hidden'); }
 
-      // Carga Perfeccionamiento Continuo
       mapearIconoEstado('statusS4PPD', usuarioSeleccionado.s4DesarrolloPPD);
       var esS4ValInicialTrue = mapearIconoEstado('statusS4ValInicial', usuarioSeleccionado.s4ValoracionInicial);
       var fS4Nom1 = formatearFechaVisual(usuarioSeleccionado.s4FechaValoracionInicial);
