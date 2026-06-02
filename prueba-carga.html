@@ -192,7 +192,7 @@
   </div>
 
   <script>
-    // 🔽 COLOQUE AQUÍ SU ENLACE DE APPS SCRIPT MANUALMENTE 🔽
+    // Coloca tu enlace de ejecución aquí entre las comillas
     const API_URL = "https://script.google.com/macros/s/AKfycbxg6vaqC8w8IsCjHHy9UX9TTyf2nJKhlA1J37nvQEJb6ERK4nSQM5pAO7o8bqBYUj-0SQ/exec"; 
     let baseDatosCompleta = [];
     let usuarioSeleccionado = null;
@@ -270,7 +270,7 @@
       document.getElementById('valCargo').textContent = usuarioSeleccionado.cargo;
       document.getElementById('valNombramiento').textContent = usuarioSeleccionado.nombramiento;
       document.getElementById('valMetodologia').textContent = usuarioSeleccionado.metodologia;
-      document.getElementById('valFechaNom').textContent = formatearFechaVisual(usuarioSeleccionado.fechaNombramiento);
+      document.getElementById('valFechaNom').textContent = formatearVisual = formatearFechaVisual(usuarioSeleccionado.fechaNombramiento);
       document.getElementById('valFechaFin').textContent = formatearFechaVisual(usuarioSeleccionado.fechaFinalizacion);
 
       if (usuarioSeleccionado.duracionMeses && !isNaN(usuarioSeleccionado.duracionMeses)) {
@@ -296,6 +296,7 @@
         } else { document.getElementById('valTiempoRestante').textContent = "Período vencido / Cargo finalizado"; }
       } else { document.getElementById('valTiempoRestante').textContent = "Sin fecha de finalización registrada"; }
 
+      // Carga Formación Básica
       document.getElementById('valAsesorPersonal').textContent = usuarioSeleccionado.asesorPersonal;
       mapearIconoEstado('statusPPD', usuarioSeleccionado.desarrolloPPD);
       var esValInicialTrue = mapearIconoEstado('statusValInicial', usuarioSeleccionado.valoracionInicial);
@@ -307,6 +308,7 @@
       var fGestorFormateada = formatearFechaVisual(usuarioSeleccionado.gestorNacionalFecha);
       if (fGestorFormateada && fGestorFormateada !== "N/A") { document.getElementById('valGestorFecha').textContent = "Fecha de registro: " + fGestorFormateada; document.getElementById('boxGestor').classList.remove('hidden'); } else { document.getElementById('boxGestor').classList.add('hidden'); }
 
+      // Carga Perfeccionamiento Continuo
       mapearIconoEstado('statusS4PPD', usuarioSeleccionado.s4DesarrolloPPD);
       var esS4ValInicialTrue = mapearIconoEstado('statusS4ValInicial', usuarioSeleccionado.s4ValoracionInicial);
       var fS4Nom1 = formatearFechaVisual(usuarioSeleccionado.s4FechaValoracionInicial);
