@@ -18,8 +18,8 @@
     .form-group { margin-bottom: 1.5rem; }
     .label-filtro { display: block; font-size: 0.9rem; font-weight: 700; color: var(--purple-dark); margin-bottom: 0.6rem; }
     select, input[type="file"] { width: 100%; padding: 0.75rem 1rem; font-size: 1rem; background-color: var(--bg); border: 1px solid var(--border); border-radius: 8px; color: var(--text); outline: none; box-sizing: border-box; }
-    button { width: 100%; padding: 0.75rem 1rem; font-size: 1rem; font-weight: 600; color: white; background-color: var(--primary); border: none; border-radius: 8px; cursor: pointer; margin-top: 1rem; }
-    button:hover { background-color: var(--primary-hover); }
+    button, input[type="submit"] { width: 100%; padding: 0.75rem 1rem; font-size: 1rem; font-weight: 600; color: white; background-color: var(--primary); border: none; border-radius: 8px; cursor: pointer; margin-top: 1rem; }
+    button:hover, input[type="submit"]:hover { background-color: var(--primary-hover); }
     button:disabled { background-color: var(--border); cursor: not-allowed; }
     .hidden { display: none !important; }
     .titulo-principal-a { color: var(--purple-dark); font-weight: bold; font-size: 1.8rem; margin-bottom: 1.5rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; }
@@ -71,25 +71,32 @@
       
       <div class="seccion-reporte box-carga">
         <h2>📤 Cargar Nuevo Archivo Documental</h2>
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; align-items: end;">
-          <div>
-            <label class="label-filtro">Tipo Documento:</label>
-            <select id="tipoDocCarga">
-              <option value="Modulo de induccion">Módulo de Inducción</option>
-              <option value="Acuerdo mutuo">Acuerdo Mutuo</option>
-              <option value="Afiliacion 2026">Afiliación 2026</option>
-              <option value="PPD Formacion">PPD Formación</option>
-            </select>
+        <form id="formCargaNativo" method="POST" enctype="multipart/form-data" onsubmit="prepararFormularioAntesDeEnviar()">
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; align-items: end;">
+            
+            <input type="hidden" name="urlCarpeta" id="hiddenUrlCarpeta">
+            <input type="hidden" name="nombreUsuario" id="hiddenNombreUsuario">
+            <input type="hidden" name="redirectUrl" id="hiddenRedirectUrl">
+
+            <div>
+              <label class="label-filtro">Tipo Documento:</label>
+              <select name="tipoDocumento" id="tipoDocCarga">
+                <option value="Modulo de induccion">Módulo de Inducción</option>
+                <option value="Acuerdo mutuo">Acuerdo Mutuo</option>
+                <option value="Afiliacion 2026">Afiliación 2026</option>
+                <option value="PPD Formacion">PPD Formación</option>
+              </select>
+            </div>
+            <div>
+              <label class="label-filtro">Seleccionar archivo:</label>
+              <input type="file" name="inputArchivo" id="inputArchivo" required>
+            </div>
+            <div>
+              <input type="submit" value="Subir Documento" style="margin:0; background-color:#166534;">
+            </div>
           </div>
-          <div>
-            <label class="label-filtro">Seleccionar archivo:</label>
-            <input type="file" id="inputArchivo">
-          </div>
-          <div>
-            <button style="margin:0;" id="btnSubirArchivo" onclick="procesarSubidaArchivo()">Subir Documento</button>
-          </div>
-        </div>
-        <div id="statusEnvio" style="margin-top: 0.75rem; font-size: 0.9rem; font-weight: bold;"></div>
+        </form>
+        <div id="statusEnvio" style="margin-top: 0.75rem; font-size: 0.9rem; font-weight: bold; color: var(--primary);"></div>
       </div>
 
       <div class="seccion-reporte">
@@ -114,7 +121,7 @@
 
   <script>
     // 🔽 COLOQUE AQUÍ SU ENLACE DE APPS SCRIPT DE COPIA MANUALMENTE 🔽
-    const API_URL = "https://script.google.com/macros/s/AKfycbx3siWZ3u6tGbTQk1LR-Gc03Oc2yJoASOsRUTYLlEhtzNSAA5dkW6wk4Xlqf0_Dc9H_Ng/exec"; 
+    const API_URL = "https://script.google.com/macros/s/AKfycbxg6vaqC8w8IsCjHHy9UX9TTyf2nJKhlA1J37nvQEJb6ERK4nSQM5pAO7o8bqBYUj-0SQ/exec"; 
     
     let baseDatosCompleta = [];
     let usuarioSeleccionado = null;
@@ -162,6 +169,7 @@
       solicitarListaArchivosDrive();
     }
 
+    // SOLUCIÓN DEFINITIVA DE LECTURA: JSONP para evadir restricciones de red del navegador
     function solicitarListaArchivosDrive() {
       const cuerpo = document.getElementById('cuerpoTablaArchivos');
       const loader = document.getElementById('loaderArchivos');
@@ -175,83 +183,52 @@
         return;
       }
 
-      fetch(API_URL + "?accion=listarFiles&urlCarpeta=" + encodeURIComponent(usuarioSeleccionado.carpetaDrive))
-        .then(res => res.json())
-        .then(res => {
-          loader.classList.add('hidden');
-          if (res.resultado === "OK") {
-            if (res.archivos.length === 0) {
-              cuerpo.innerHTML = '<tr><td colspan="2" style="text-align:center; color:var(--text-light); font-style:italic;">La carpeta está vacía. Sube un archivo arriba.</td></tr>';
-              return;
-            }
-            res.archivos.forEach(file => {
-              let fila = document.createElement('tr');
-              fila.innerHTML = `
-                <td><strong>${file.nombre}</strong></td>
-                <td style="text-align:center;">
-                  <div class="acciones-btn-group">
-                    <button class="btn-mini btn-ver" onclick="window.open('${file.url}', '_blank')">👁️ Ver</button>
-                    <button class="btn-mini btn-edit" onclick="renombrarArchivoModal('${file.id}', '${file.nombre}')">✏️ Renombrar</button>
-                    <button class="btn-mini btn-del" onclick="eliminarArchivoDrive('${file.id}')">🗑️ Borrar</button>
-                  </div>
-                </td>
-              `;
-              cuerpo.appendChild(fila);
-            });
-          } else {
-            cuerpo.innerHTML = '<tr><td colspan="2" style="color:var(--danger);">Error: ' + res.mensaje + '</td></tr>';
+      // Creamos una función temporal global para recibir la respuesta JSONP
+      var nombreScriptTemporal = "jsonp_callback_" + Math.round(100000 * Math.random());
+      window[nombreScriptTemporal] = function(res) {
+        loader.classList.add('hidden');
+        delete window[nombreScriptTemporal]; // Limpiamos memoria
+        document.getElementById(nombreScriptTemporal).remove(); // Borramos etiqueta html temporal
+        
+        if (res.resultado === "OK") {
+          if (res.archivos.length === 0) {
+            cuerpo.innerHTML = '<tr><td colspan="2" style="text-align:center; color:var(--text-light); font-style:italic;">La carpeta está vacía. Selecciona un archivo y súbelo.</td></tr>';
+            return;
           }
-        }).catch(err => {
-          loader.classList.add('hidden');
-          cuerpo.innerHTML = '<tr><td colspan="2" style="color:var(--danger); text-align:center;">Error de conexión de red al listar archivos.</td></tr>';
-        });
+          res.archivos.forEach(file => {
+            let fila = document.createElement('tr');
+            fila.innerHTML = `
+              <td><strong>${file.nombre}</strong></td>
+              <td style="text-align:center;">
+                <div class="acciones-btn-group">
+                  <button class="btn-mini btn-ver" onclick="window.open('${file.url}', '_blank')">👁️ Ver</button>
+                  <button class="btn-mini btn-edit" onclick="renombrarArchivoModal('${file.id}', '${file.nombre}')">✏️ Renombrar</button>
+                  <button class="btn-mini btn-del" onclick="eliminarArchivoDrive('${file.id}')">🗑️ Borrar</button>
+                </div>
+              </td>
+            `;
+            cuerpo.appendChild(fila);
+          });
+        } else {
+          cuerpo.innerHTML = '<tr><td colspan="2" style="color:var(--danger);">Error: ' + res.mensaje + '</td></tr>';
+        }
+      };
+
+      // Inyectamos el tag script dinámico para saltar las restricciones de red
+      var srcUrl = API_URL + "?accion=listarFiles&urlCarpeta=" + encodeURIComponent(usuarioSeleccionado.carpetaDrive) + "&callback=" + nombreScriptTemporal;
+      var scriptElement = document.createElement('script');
+      scriptElement.id = nombreScriptTemporal;
+      scriptElement.src = srcUrl;
+      document.body.appendChild(scriptElement);
     }
 
-    function procesarSubidaArchivo() {
-      const fileInput = document.getElementById('inputArchivo');
-      const statusDiv = document.getElementById('statusEnvio');
-      const btn = document.getElementById('btnSubirArchivo');
-      const tipoDoc = document.getElementById('tipoDocCarga').value;
-
-      if (!fileInput.files || fileInput.files.length === 0) { alert("Selecciona un archivo."); return; }
-
-      const archivo = fileInput.files[0];
-      const reader = new FileReader();
-      statusDiv.style.color = "var(--primary)"; statusDiv.textContent = "⏳ Subiendo documento masivo...";
-      btn.disabled = true;
-
-      reader.onload = function(e) {
-        const base64String = e.target.result.split(',')[1];
-        const payload = {
-          archivoBase64: base64String,
-          tipoMime: archivo.type,
-          nombreOriginal: archivo.name,
-          urlCarpeta: usuarioSeleccionado.carpetaDrive,
-          nombreUsuario: usuarioSeleccionado.nombre,
-          tipoDocumento: tipoDoc
-        };
-
-        // CORREGIDO: Consumo estándar con captura asíncrona de texto para evitar el bloqueo del navegador
-        fetch(API_URL, { 
-          method: "POST",
-          body: JSON.stringify(payload) 
-        })
-        .then(res => res.json())
-        .then(res => {
-          if (res.resultado === "OK") {
-            statusDiv.style.color = "var(--success)"; statusDiv.textContent = "✔️ " + res.mensaje;
-            fileInput.value = "";
-            setTimeout(() => { statusDiv.textContent = ""; solicitarListaArchivosDrive(); }, 1500);
-          } else { alert("Error: " + res.mensaje); statusDiv.textContent = ""; }
-          btn.disabled = false;
-        }).catch(err => { 
-          alert("El archivo se envió correctamente al servidor. Actualizando lista..."); 
-          fileInput.value = "";
-          statusDiv.textContent = "";
-          setTimeout(() => { solicitarListaArchivosDrive(); btn.disabled = false; }, 2500);
-        });
-      };
-      reader.readAsDataURL(archivo);
+    // Inyecta las variables ocultas al formulario nativo justo antes de lanzarse a la pasarela de Google
+    function prepararFormularioAntesDeEnviar() {
+      document.getElementById('statusEnvio').textContent = "⏳ Transfiriendo archivo de gran tamaño hacia el servidor de Google...";
+      document.getElementById('formCargaNativo').action = API_URL;
+      document.getElementById('hiddenUrlCarpeta').value = usuarioSeleccionado.carpetaDrive;
+      document.getElementById('hiddenNombreUsuario').value = usuarioSeleccionado.nombre;
+      document.getElementById('hiddenRedirectUrl').value = window.location.href; // Retorno automático
     }
 
     function renombrarArchivoModal(id, nombreActual) {
@@ -259,15 +236,14 @@
       if (!nuevoNombre || nuevoNombre.trim() === "" || nuevoNombre === nombreActual) return;
       
       document.getElementById('loaderArchivos').classList.remove('hidden');
+      
+      // Como el renombrado envía datos pequeños en texto plano, viaja de forma transparente
       fetch(API_URL, {
         method: "POST",
         body: JSON.stringify({ accion: "renombrar", fileId: id, nuevoNombre: nuevoNombre.trim() })
       })
-      .then(res => res.json())
       .then(res => {
-        solicitarListaArchivosDrive();
-      }).catch(err => {
-        setTimeout(() => { solicitarListaArchivosDrive(); }, 2000);
+        setTimeout(() => { solicitarListaArchivosDrive(); }, 1500);
       });
     }
 
@@ -279,11 +255,8 @@
         method: "POST",
         body: JSON.stringify({ accion: "eliminar", fileId: id })
       })
-      .then(res => res.json())
       .then(res => {
-        solicitarListaArchivosDrive();
-      }).catch(err => {
-        setTimeout(() => { solicitarListaArchivosDrive(); }, 2000);
+        setTimeout(() => { solicitarListaArchivosDrive(); }, 1500);
       });
     }
 
