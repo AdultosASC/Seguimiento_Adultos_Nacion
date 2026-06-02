@@ -47,10 +47,16 @@
     .box-carga { background: #f8fafc; border: 1px solid var(--border); padding: 1.25rem; border-radius: 12px; margin-bottom: 1.5rem; }
     .btn-back { background-color: transparent; color: var(--text-light); border: 1px solid var(--border); margin-top: 1rem; }
     .loader { text-align: center; color: var(--text-light); font-style: italic; padding: 2rem 0; }
+
+    /* Barra de progreso analítica */
+    .contenedor-progreso { display: flex; align-items: center; gap: 1rem; background: #e2e8f0; border-radius: 9999px; height: 1.25rem; overflow: hidden; position: relative; margin-top: 0.5rem; margin-bottom: 1rem; }
+    .barra-interna { background: linear-gradient(90deg, var(--purple-light), var(--primary)); height: 100%; width: 0%; transition: width 0.5s ease-in-out; }
+    .texto-porcentaje { font-size: 0.85rem; font-weight: 800; color: var(--purple-dark); margin-left: 0.5rem; }
   </style>
 </head>
 <body>
 
+  <!-- PÁGINA 1: FILTROS -->
   <div id="paginaFiltros" class="container">
     <div class="header-institucional">Dirección Nacional de Adultos en el Movimiento</div>
     <h1>Consulta de Información</h1>
@@ -72,11 +78,13 @@
     <button id="btnConsultar" disabled onclick="irAPaginaReporte()">Consultar</button>
   </div>
 
+  <!-- PÁGINA 2: REPORTE UNIFICADO -->
   <div id="paginaReporte" class="container wide hidden">
     <div id="tituloColumnaA" class="titulo-principal-a"></div>
     <div id="loaderReporte" class="loader">Procesando información...</div>
     
     <div id="contenidoReporte" class="hidden">
+      <!-- SECCIÓN 1: INFORMACIÓN GENERAL -->
       <div class="seccion-reporte">
         <h2>Información General</h2>
         <div class="grid-datos">
@@ -94,6 +102,7 @@
         </div>
       </div>
 
+      <!-- SECCIÓN 3: DESARROLLO PERSONAL FORMACIÓN BÁSICA -->
       <div class="seccion-reporte">
         <h2>Desarrollo Personal Formación Básica</h2>
         <div class="grid-datos">
@@ -116,6 +125,7 @@
         </div>
       </div>
 
+      <!-- SECCIÓN 4: DESARROLLO PERSONAL PERFECCIONAMIENTO CONTINUO -->
       <div class="seccion-reporte">
         <h2>Desarrollo Personal Perfeccionamiento Continuo</h2>
         <div class="grid-datos">
@@ -134,16 +144,47 @@
         </div>
       </div>
 
+      <!-- MODIFICADO: EL EXPEDIENTE DOCUMENTAL AHORA VA ANTES DE LA CARGA -->
+      <div class="seccion-reporte">
+        <h2>📁 Expediente Documental</h2>
+        
+        <!-- Indicador de porcentaje analítico automático -->
+        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem; font-weight: bold; color: var(--purple-dark);">
+          <span>Progreso de Auditoría Obligatoria</span>
+          <span id="textoMetrica">0 de 6 archivos (0%)</span>
+        </div>
+        <div class="contenedor-progreso">
+          <div class="barra-interna" id="barraMetrica"></div>
+        </div>
+
+        <div id="loaderArchivos" class="loader hidden">Consultando contenido de la carpeta de Drive...</div>
+        <table class="tabla-archivos" id="tablaFiles">
+          <thead>
+            <tr>
+              <th>Nombre del Archivo en Drive</th>
+              <th style="width: 180px; text-align: center;">Acciones Disponibles</th>
+            </tr>
+          </thead>
+          <tbody id="cuerpoTablaArchivos">
+            <!-- Rellenado dinámico -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- MODIFICADO: CARGAR NUEVO ARCHIVO DOCUMENTAL AHORA VA DE ÚLTIMO -->
       <div class="seccion-reporte box-carga">
         <h2>📤 Cargar Nuevo Archivo Documental</h2>
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; align-items: end;">
           <div>
             <label class="label-filtro">Tipo Documento:</label>
+            <!-- MODIFICADO: Lista oficial y purificada de opciones solicitadas -->
             <select id="tipoDocCarga">
-              <option value="Modulo de induccion">Módulo de Inducción</option>
-              <option value="Acuerdo mutuo">Acuerdo Mutuo</option>
-              <option value="Afiliacion 2026">Afiliación 2026</option>
-              <option value="PPD Formacion">PPD Formación</option>
+              <option value="Resolucion nombramiento">Resolución nombramiento</option>
+              <option value="Acuerdo Mutuo">Acuerdo Mutuo</option>
+              <option value="Curso SfH1">Curso SfH1</option>
+              <option value="Curso SfH2">Curso SfH2</option>
+              <option value="Modulo induccion">Módulo inducción</option>
+              <option value="Aval AP">Aval AP</option>
             </select>
           </div>
           <div>
@@ -155,21 +196,6 @@
           </div>
         </div>
         <div id="statusEnvio" style="margin-top: 0.75rem; font-size: 0.9rem; font-weight: bold;"></div>
-      </div>
-
-      <div class="seccion-reporte">
-        <h2>📁 Expediente Documental en Google Drive (Archivos Reales)</h2>
-        <div id="loaderArchivos" class="loader hidden">Consultando contenido de la carpeta de Drive...</div>
-        <table class="tabla-archivos" id="tablaFiles">
-          <thead>
-            <tr>
-              <th>Nombre del Archivo en Drive</th>
-              <th style="width: 180px; text-align: center;">Acciones Disponibles</th>
-            </tr>
-          </thead>
-          <tbody id="cuerpoTablaArchivos">
-            </tbody>
-        </table>
       </div>
 
     </div>
@@ -232,6 +258,7 @@
       return String(objetoFecha.getDate()).padStart(2, '0') + "/" + String(objetoFecha.getMonth() + 1).padStart(2, '0') + "/" + objetoFecha.getFullYear();
     }
 
+    // Ubicación de checkmarks (chulos) al inicio de la línea de texto
     function mapearIconoEstado(idElemento, valorBooleano) {
       var el = document.getElementById(idElemento);
       var esVerdadero = (valorBooleano === true || valorBooleano === "true" || valorBooleano === "VERDADERO");
@@ -251,7 +278,6 @@
       document.getElementById('paginaFiltros').classList.add('hidden');
       document.getElementById('paginaReporte').classList.remove('hidden');
 
-      // Carga Sección 1
       document.getElementById('tituloColumnaA').textContent = usuarioSeleccionado.columnaA;
       document.getElementById('valNombre').textContent = usuarioSeleccionado.nombre;
       document.getElementById('valCargo').textContent = usuarioSeleccionado.cargo;
@@ -283,7 +309,6 @@
         } else { document.getElementById('valTiempoRestante').textContent = "Período vencido / Cargo finalizado"; }
       } else { document.getElementById('valTiempoRestante').textContent = "Sin fecha de finalización registrada"; }
 
-      // Carga Sección 3
       document.getElementById('valAsesorPersonal').textContent = usuarioSeleccionado.asesorPersonal;
       mapearIconoEstado('statusPPD', usuarioSeleccionado.desarrolloPPD);
       
@@ -298,7 +323,6 @@
       var fGestorFormateada = formatearFechaVisual(usuarioSeleccionado.gestorNacionalFecha);
       if (fGestorFormateada && fGestorFormateada !== "N/A") { document.getElementById('valGestorFecha').textContent = "Fecha de registro: " + fGestorFormateada; document.getElementById('boxGestor').classList.remove('hidden'); } else { document.getElementById('boxGestor').classList.add('hidden'); }
 
-      // Carga Sección 4
       mapearIconoEstado('statusS4PPD', usuarioSeleccionado.s4DesarrolloPPD);
       var esS4ValInicialTrue = mapearIconoEstado('statusS4ValInicial', usuarioSeleccionado.s4ValoracionInicial);
       var fS4Nom1 = formatearFechaVisual(usuarioSeleccionado.s4FechaValoracionInicial);
@@ -314,7 +338,6 @@
       document.getElementById('loaderReporte').classList.add('hidden');
       document.getElementById('contenidoReporte').classList.remove('hidden');
       
-      // Llamada inmediata al expediente en Drive en tiempo real
       solicitarListaArchivosDrive();
     }
 
@@ -326,7 +349,9 @@
       
       if (!usuarioSeleccionado || !usuarioSeleccionado.carpetaDrive) {
         cuerpo.innerHTML = '<tr><td colspan="2" style="color:var(--danger); text-align:center;">No hay carpeta de Drive vinculada a este usuario.</td></tr>';
-        loader.classList.add('hidden'); return;
+        loader.classList.add('hidden'); 
+        actualizarBarraMetrica(0); // Forzar 0% si no hay carpeta
+        return;
       }
 
       fetch(API_URL + "?accion=listarFiles&urlCarpeta=" + encodeURIComponent(usuarioSeleccionado.carpetaDrive))
@@ -335,9 +360,12 @@
           loader.classList.add('hidden');
           if (res && res.resultado === "OK") {
             if (!res.archivos || res.archivos.length === 0) {
-              cuerpo.innerHTML = '<tr><td colspan="2" style="text-align:center; color:var(--text-light); font-style:italic; padding: 2rem 0;">La carpeta está vacía. Sube un archivo arriba.</td></tr>';
+              cuerpo.innerHTML = '<tr><td colspan="2" style="text-align:center; color:var(--text-light); font-style:italic; padding: 2rem 0;">La carpeta está vacía. Sube un archivo abajo.</td></tr>';
+              actualizarBarraMetrica(0);
               return;
             }
+            
+            // Dibujar archivos en la tabla
             res.archivos.forEach(file => {
               let fila = document.createElement('tr');
               fila.innerHTML = `
@@ -351,13 +379,30 @@
               `;
               cuerpo.appendChild(fila);
             });
+
+            // 🚀 Métrica automática basada en 6 documentos obligatorios
+            actualizarBarraMetrica(res.archivos.length);
+
           } else {
-            cuerpo.innerHTML = '<tr><td colspan="2" style="text-align:center; color:var(--text-light); font-style:italic; padding: 2rem 0;">La carpeta está vacía. Sube un archivo arriba.</td></tr>';
+            cuerpo.innerHTML = '<tr><td colspan="2" style="text-align:center; color:var(--text-light); font-style:italic; padding: 2rem 0;">La carpeta está vacía. Sube un archivo abajo.</td></tr>';
+            actualizarBarraMetrica(0);
           }
         }).catch(err => {
           loader.classList.add('hidden');
-          cuerpo.innerHTML = '<tr><td colspan="2" style="text-align:center; color:var(--text-light); font-style:italic; padding: 2rem 0;">La carpeta está vacía. Sube un archivo arriba.</td></tr>';
+          cuerpo.innerHTML = '<tr><td colspan="2" style="text-align:center; color:var(--text-light); font-style:italic; padding: 2rem 0;">La carpeta está vacía. Sube un archivo abajo.</td></tr>';
+          actualizarBarraMetrica(0);
         });
+    }
+
+    // Lógica matemática y visual de porcentaje
+    function actualizarBarraMetrica(cantidadArchivos) {
+      const MAX_ARCHIVOS = 6;
+      // Capar el conteo máximo a 6 en el cálculo para evitar barras mayores al 100% si suben extras
+      let conteoCalculo = cantidadArchivos > MAX_ARCHIVOS ? MAX_ARCHIVOS : cantidadArchivos;
+      let porcentaje = Math.round((conteoCalculo / MAX_ARCHIVOS) * 100);
+
+      document.getElementById('barraMetrica').style.width = porcentaje + "%";
+      document.getElementById('textoMetrica').textContent = `${cantidadArchivos} de ${MAX_ARCHIVOS} archivos (${porcentaje}%)`;
     }
 
     function procesarSubidaArchivo() {
