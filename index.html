@@ -5,163 +5,131 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dirección Nacional de Adultos</title>
   <style>
-    :root {
-      --primary: #6366f1; --primary-hover: #4f46e5; --purple-dark: #4c1d95; --purple-light: #8b5cf6;
-      --bg: #f8fafc; --card-bg: #ffffff; --text: #1e293b; --text-light: #64748b; --border: #e2e8f0;
-      --success: #10b981; --danger: #ef4444;
-    }
-    body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 2rem 1rem; display: flex; justify-content: center; align-items: center; min-height: 100vh; box-sizing: border-box; }
-    .container { background-color: var(--card-bg); padding: 2.5rem; border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05); width: 100%; max-width: 450px; box-sizing: border-box; }
-    .container.wide { max-width: 850px; }
-    .header-institucional { color: var(--purple-dark); font-size: 1.25rem; font-weight: 700; text-align: center; margin-bottom: 1.5rem; border-bottom: 2px dashed var(--border); padding-bottom: 1rem; }
-    h1 { font-size: 1.4rem; font-weight: 700; margin: 0 0 1.5rem 0; text-align: center; }
-    .form-group { margin-bottom: 1.5rem; }
-    .label-filtro { display: block; font-size: 0.9rem; font-weight: 700; color: var(--purple-dark); margin-bottom: 0.6rem; }
-    select, input[type="file"] { width: 100%; padding: 0.75rem 1rem; font-size: 1rem; background-color: var(--bg); border: 1px solid var(--border); border-radius: 8px; color: var(--text); outline: none; box-sizing: border-box; }
-    button { width: 100%; padding: 0.75rem 1rem; font-size: 1rem; font-weight: 600; color: white; background-color: var(--primary); border: none; border-radius: 8px; cursor: pointer; margin-top: 1rem; }
-    button:hover { background-color: var(--primary-hover); }
-    button:disabled { background-color: var(--border); cursor: not-allowed; }
+    :root { --primary: #6366f1; --purple-dark: #4c1d95; --bg: #f8fafc; --text: #1e293b; --border: #e2e8f0; --danger: #ef4444; }
+    body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); color: var(--text); padding: 2rem 1rem; }
+    .container { background-color: white; padding: 2.5rem; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); width: 100%; max-width: 850px; margin: auto; }
     .hidden { display: none !important; }
-    .titulo-principal-a { color: var(--purple-dark); font-weight: bold; font-size: 1.8rem; margin-bottom: 1.5rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; }
-    .seccion-reporte { background-color: var(--bg); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; }
-    .tabla-archivos { width: 100%; border-collapse: collapse; margin-top: 0.5rem; background: white; border-radius: 8px; overflow: hidden; border: 1px solid var(--border); }
-    .tabla-archivos th, .tabla-archivos td { padding: 0.75rem 1rem; text-align: left; font-size: 0.9rem; border-bottom: 1px solid var(--border); }
-    .btn-mini { padding: 0.4rem 0.8rem; font-size: 0.8rem; font-weight: bold; border-radius: 4px; cursor: pointer; }
-    .btn-del { background-color: var(--danger); }
-    .contenedor-progreso { display: flex; align-items: center; gap: 1rem; background: #e2e8f0; border-radius: 9999px; height: 1.25rem; overflow: hidden; margin-top: 0.4rem; }
-    .barra-interna { background: linear-gradient(90deg, var(--purple-light), var(--primary)); height: 100%; width: 0%; }
+    .form-group { margin-bottom: 1.5rem; }
+    .label-filtro { font-weight: 700; color: var(--purple-dark); display: block; margin-bottom: 0.5rem; }
+    select, input { width: 100%; padding: 0.75rem; border: 1px solid var(--border); border-radius: 8px; }
+    button { padding: 0.75rem 1.5rem; border: none; border-radius: 8px; cursor: pointer; color: white; background: var(--primary); font-weight: 600; }
+    .seccion { background: #f1f5f9; padding: 1.5rem; border-radius: 12px; margin-bottom: 1.5rem; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .tabla-archivos { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+    .tabla-archivos td { padding: 0.75rem; border-bottom: 1px solid var(--border); }
   </style>
 </head>
 <body>
   <div id="paginaFiltros" class="container">
-    <div class="header-institucional">Dirección Nacional de Adultos</div>
-    <h1>Consulta de Información</h1>
+    <h1>Dirección Nacional de Adultos</h1>
     <div class="form-group">
-      <label for="selectA" class="label-filtro">Seleccione Área</label>
+      <label class="label-filtro">Área</label>
       <select id="selectA" onchange="cambioArea()"><option value="">Cargando...</option></select>
     </div>
     <div id="grupoC" class="form-group hidden">
-      <label for="selectC" class="label-filtro">Seleccione Nombre</label>
-      <select id="selectC" onchange="activarBotonConsultar()"><option value="">-- Seleccione --</option></select>
+      <label class="label-filtro">Nombre</label>
+      <select id="selectC" onchange="document.getElementById('btnConsultar').disabled = false"><option value="">-- Seleccione --</option></select>
     </div>
     <div style="display: flex; gap: 10px;">
         <button id="btnConsultar" disabled onclick="irAPaginaReporte()">Consultar</button>
-        <button id="btnInforme" style="background-color: var(--purple-dark);" onclick="generarInforme()">Generar Informe</button>
+        <button style="background: var(--purple-dark);" onclick="generarInforme()">Generar Informe</button>
     </div>
   </div>
 
-  <div id="paginaReporte" class="container wide hidden">
-    <div id="tituloColumnaA" class="titulo-principal-a"></div>
-    <div id="contenidoReporte">
-      <div class="seccion-reporte">
-        <h2>Progreso de archivos</h2>
-        <div class="contenedor-progreso"><div class="barra-interna" id="barraMetrica"></div></div>
-        <div id="textoMetrica" style="margin-top:0.5rem; font-weight: bold;">0 de 6 archivos (0%)</div>
-      </div>
-      <div class="seccion-reporte">
-        <h2>📁 Expediente Documental</h2>
-        <table class="tabla-archivos"><tbody id="cuerpoTablaArchivos"></tbody></table>
-      </div>
-      <div class="seccion-reporte">
-        <h2>📤 Cargar Nuevo Archivo</h2>
-        <select id="tipoDocCarga"><option value="Resolucion">Resolución</option><option value="Acuerdo">Acuerdo</option></select>
-        <input type="file" id="inputArchivo">
-        <button onclick="procesarSubidaArchivo()">Subir Documento</button>
+  <div id="paginaReporte" class="container hidden">
+    <h2 id="tituloColumnaA"></h2>
+    <div class="seccion">
+      <h3>Información General</h3>
+      <div class="grid">
+        <p><strong>Nombre:</strong> <span id="valNombre"></span></p>
+        <p><strong>Cargo:</strong> <span id="valCargo"></span></p>
+        <p><strong>Fecha Fin:</strong> <span id="valFechaFin"></span></p>
       </div>
     </div>
-    <button onclick="volver()">Volver a consultar</button>
+    <div class="seccion">
+      <h3>Formación Básica</h3>
+      <div id="datosBasica"></div>
+    </div>
+    <div class="seccion">
+      <h3>Perfeccionamiento Continuo</h3>
+      <div id="datosPerf"></div>
+    </div>
+    <div class="seccion">
+      <h3>📁 Expediente Documental</h3>
+      <table class="tabla-archivos"><tbody id="cuerpoTablaArchivos"></tbody></table>
+      <div style="margin-top:1rem;">
+        <select id="tipoDocCarga"><option value="Resolucion">Resolución</option><option value="Acuerdo">Acuerdo</option></select>
+        <input type="file" id="inputArchivo">
+        <button onclick="procesarSubidaArchivo()">Subir Archivo</button>
+      </div>
+    </div>
+    <button onclick="volver()">Volver</button>
   </div>
 
   <script>
-    const API_URL = "https://script.google.com/macros/s/AKfycbxg6vaqC8w8IsCjHHy9UX9TTyf2nJKhlA1J37nvQEJb6ERK4nSQM5pAO7o8bqBYUj-0SQ/exec";
-    let baseDatosCompleta = []; let usuarioSeleccionado = null;
+    const API_URL = "TU_URL_AQUÍ";
+    let baseDatos = []; let usuario = null;
 
-    window.onload = cargarDatosDesdeAPI;
+    window.onload = () => { fetch(API_URL).then(r => r.json()).then(d => { baseDatos = d; inicializarA(); }); };
 
-    function cargarDatosDesdeAPI() {
-      fetch(API_URL).then(r => r.json()).then(data => { baseDatosCompleta = data; inicializarDesplegableA(); });
-    }
-
-    function inicializarDesplegableA() {
-      let selA = document.getElementById('selectA');
-      let areas = [...new Set(baseDatosCompleta.map(i => i.columnaA))].sort();
-      selA.innerHTML = '<option value="">-- Seleccione --</option>';
-      areas.forEach(a => { let o = document.createElement('option'); o.value = a; o.textContent = a; selA.appendChild(o); });
+    function inicializarA() {
+      let sel = document.getElementById('selectA');
+      let areas = [...new Set(baseDatos.map(i => i.columnaA))].sort();
+      areas.forEach(a => { let o = document.createElement('option'); o.value = a; o.textContent = a; sel.appendChild(o); });
     }
 
     function cambioArea() {
-      let selA = document.getElementById('selectA').value;
+      let area = document.getElementById('selectA').value;
       let selC = document.getElementById('selectC');
-      let grupoC = document.getElementById('grupoC');
-      if (!selA) { grupoC.classList.add('hidden'); return; }
-      let nombres = baseDatosCompleta.filter(i => i.columnaA === selA).map(i => i.nombre).sort();
       selC.innerHTML = '<option value="">-- Seleccione --</option>';
-      nombres.forEach(n => { let o = document.createElement('option'); o.value = n; o.textContent = n; selC.appendChild(o); });
-      grupoC.classList.remove('hidden');
+      baseDatos.filter(i => i.columnaA === area).forEach(i => { let o = document.createElement('option'); o.value = i.nombre; o.textContent = i.nombre; selC.appendChild(o); });
+      document.getElementById('grupoC').classList.remove('hidden');
     }
-
-    function activarBotonConsultar() { document.getElementById('btnConsultar').disabled = !document.getElementById('selectC').value; }
 
     function irAPaginaReporte() {
-      usuarioSeleccionado = baseDatosCompleta.find(i => i.columnaA === document.getElementById('selectA').value && i.nombre === document.getElementById('selectC').value);
+      usuario = baseDatos.find(i => i.nombre === document.getElementById('selectC').value);
       document.getElementById('paginaFiltros').classList.add('hidden');
       document.getElementById('paginaReporte').classList.remove('hidden');
-      solicitarListaArchivosDrive();
+      
+      document.getElementById('valNombre').textContent = usuario.nombre;
+      document.getElementById('valCargo').textContent = usuario.cargo;
+      document.getElementById('valFechaFin').textContent = usuario.fechaFinalizacion;
+      
+      // Mostrar estados de Formación
+      document.getElementById('datosBasica').innerHTML = `Inicial: ${usuario.valoracionInicial?'✅':'❌'} | PPD: ${usuario.desarrolloPPD?'✅':'❌'} | Final: ${usuario.valoracionFinal?'✅':'❌'}`;
+      document.getElementById('datosPerf').innerHTML = `Inicial: ${usuario.s4ValoracionInicial?'✅':'❌'} | PPD: ${usuario.s4DesarrolloPPD?'✅':'❌'} | Final: ${usuario.s4ValoracionFinal?'✅':'❌'}`;
+      
+      solicitarArchivos();
     }
 
-    function volver() {
-      document.getElementById('paginaReporte').classList.add('hidden');
-      document.getElementById('paginaFiltros').classList.remove('hidden');
-    }
-
-    // --- LÓGICA DE ARCHIVOS DRIVE ORIGINAL ---
-    function solicitarListaArchivosDrive() {
-      fetch(API_URL + "?accion=listarFiles&urlCarpeta=" + encodeURIComponent(usuarioSeleccionado.carpetaDrive))
+    function solicitarArchivos() {
+      fetch(API_URL + "?accion=listarFiles&urlCarpeta=" + encodeURIComponent(usuario.carpetaDrive))
         .then(r => r.json()).then(res => {
           let tbody = document.getElementById('cuerpoTablaArchivos');
           tbody.innerHTML = "";
           res.archivos.forEach(f => {
-            let tr = document.createElement('tr');
-            tr.innerHTML = `<td>${f.nombre}</td><td><button class="btn-mini btn-del" onclick="eliminarArchivo('${f.id}')">🗑️</button></td>`;
-            tbody.appendChild(tr);
+            tbody.innerHTML += `<tr><td>${f.nombre}</td><td><button class="btn-mini" onclick="eliminar('${f.id}')">🗑️</button></td></tr>`;
           });
-          actualizarBarra(res.archivos.length);
         });
     }
 
-    function actualizarBarra(c) {
-      let p = Math.round((c / 6) * 100);
-      document.getElementById('barraMetrica').style.width = p + "%";
-      document.getElementById('textoMetrica').textContent = c + " de 6 archivos (" + p + "%)";
-    }
-
-    function procesarSubidaArchivo() {
-      // (Tu lógica original de subida)
-      alert("Subiendo...");
-    }
-
-    function eliminarArchivo(id) {
-       // (Tu lógica original de eliminación)
-    }
-
-    // --- NUEVA FUNCIÓN INFORME ---
     function generarInforme() {
       let area = document.getElementById('selectA').value;
       if (!area) return;
-      let filtrados = baseDatosCompleta.filter(u => u.columnaA === area);
+      let filtrados = baseDatos.filter(u => u.columnaA === area);
       let win = window.open('', '_blank');
       let html = `<html><body><h1>Informe: ${area}</h1>`;
       filtrados.forEach(u => {
-        let fin = new Date(u.fechaFinalizacion);
-        let hoy = new Date();
-        let diff = Math.floor((fin - hoy) / (1000 * 60 * 60 * 24 * 30));
-        html += `<div><h3>${u.nombre}</h3><p>Meses restantes: ${diff}</p>
-                 <p>Básica: ${u.valoracionInicial ? '✅' : '❌'} | PPD: ${u.desarrolloPPD ? '✅' : '❌'}</p>
-                 <p>Perfeccionamiento: ${u.s4ValoracionInicial ? '✅' : '❌'} | PPD: ${u.s4DesarrolloPPD ? '✅' : '❌'}</p></div><hr>`;
+        let cant = 0; // Aquí deberías integrar la lógica de conteo real si tienes acceso a las carpetas
+        html += `<div><h3>${u.nombre}</h3><p>Básica: ${u.valoracionInicial?'✅':'❌'} | Perf: ${u.s4ValoracionInicial?'✅':'❌'}</p><p>Cumplimiento carga: ${cant}/6</p></div><hr>`;
       });
       win.document.write(html + "</body></html>");
       win.print();
     }
+
+    function volver() { document.getElementById('paginaReporte').classList.add('hidden'); document.getElementById('paginaFiltros').classList.remove('hidden'); }
+    function procesarSubidaArchivo() { alert("Subiendo..."); }
+    function eliminar(id) { alert("Eliminando..."); }
   </script>
 </body>
 </html>
