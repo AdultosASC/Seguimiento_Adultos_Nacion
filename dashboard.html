@@ -1,61 +1,97 @@
-<div class="container wide">
-    <h1 class="titulo-principal-a">Resumen Dirección Nacional de Adultos</h1>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - Dirección Nacional</title>
+  <style>
+    /* Mismos estilos de tu sistema para coherencia visual */
+    :root { --primary: #6366f1; --purple-dark: #4c1d95; --border: #e2e8f0; --bg: #f8fafc; --success: #10b981; --danger: #ef4444; }
+    body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); padding: 2rem 1rem; }
+    .container { max-width: 1000px; margin: auto; background: white; padding: 2rem; border-radius: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
     
-    <div class="form-group">
-        <select id="filtroArea" onchange="renderDashboard()">
-            <option value="GENERAL">--- Ver Resumen General ---</option>
-            </select>
-    </div>
+    /* Navegación de botones */
+    .nav-tabs { display: flex; gap: 10px; margin-bottom: 2rem; }
+    .btn-tab { padding: 0.75rem 1.5rem; border: 1px solid var(--primary); background: transparent; color: var(--primary); border-radius: 8px; cursor: pointer; font-weight: bold; }
+    .btn-tab.active { background: var(--primary); color: white; }
+    
+    /* Grids */
+    .section-content { display: none; }
+    .section-content.active { display: block; }
+    .tabla-container { overflow-x: auto; margin-top: 1rem; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 12px; border-bottom: 1px solid var(--border); text-align: left; font-size: 0.9rem; }
+  </style>
+</head>
+<body>
 
-    <div id="displayArea"></div>
+<div class="container">
+  <div class="nav-tabs">
+    <button class="btn-tab active" onclick="showSection('general')">Información General</button>
+    <button class="btn-tab" onclick="showSection('area')">Información por Área</button>
+  </div>
+
+  <div id="general" class="section-content active">
+    <h2>Resumen Nacional</h2>
+    <div id="statsGeneral">Cargando datos...</div>
+  </div>
+
+  <div id="area" class="section-content">
+    <select id="selectArea" onchange="renderTablaArea()">
+      <option value="">Seleccione un Área...</option>
+    </select>
+    <div id="tablaAreaContainer" class="tabla-container"></div>
+  </div>
 </div>
 
 <script>
-    // Función para renderizar según la selección
-    function renderDashboard() {
-        const area = document.getElementById('filtroArea').value;
-        const display = document.getElementById('displayArea');
-        
-        if (area === "GENERAL") {
-            renderGeneral(baseDatosCompleta);
-        } else {
-            renderPorArea(baseDatosCompleta.filter(i => i.columnaA === area));
-        }
-    }
+  const API_URL = "https://script.google.com/macros/s/AKfycbxg6vaqC8w8IsCjHHy9UX9TTyf2nJKhlA1J37nvQEJb6ERK4nSQM5pAO7o8bqBYUj-0SQ/exec";
+  let baseDatosCompleta = [];
 
-    function renderPorArea(data) {
-        let html = `<h2>Miembros en el Área: ${data.length}</h2>`;
-        html += `<table class="tabla-area"><thead><tr><th>Nombre</th><th>Cargo</th><th>FB: VI | PPD | VF | GN</th><th>PC: VI | PPD | VF | AAA</th></tr></thead><tbody>`;
-        
-        data.forEach(p => {
-            html += `<tr>
-                <td>${p.nombre}</td>
-                <td>${p.cargo}</td>
-                <td>${check(p.columnaL)} ${check(p.columnaN)} ${check(p.columnaO)} ${check(p.columnaQ)}</td>
-                <td>${check(p.columnaS)} ${check(p.columnaU)} ${check(p.columnaV)} ${check(p.columnaX)}</td>
-            </tr>`;
-        });
-        html += `</tbody></table>`;
-        document.getElementById('displayArea').innerHTML = html;
-    }
+  window.onload = () => {
+    fetch(API_URL).then(r => r.json()).then(data => {
+      baseDatosCompleta = data;
+      inicializarDashboard();
+    });
+  };
 
-    // Utilidad para los iconos
-    function check(val) {
-        const isTrue = (val === true || val === "VERDADERO" || val === "true");
-        return `<span class="badge" style="color:${isTrue ? 'var(--success)' : 'var(--danger)'}">${isTrue ? '✔️' : '❌'}</span>`;
-    }
+  function showSection(id) {
+    document.querySelectorAll('.section-content').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.btn-tab').forEach(b => b.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    event.target.classList.add('active');
+  }
 
-    function renderGeneral(data) {
-        // Lógica para contar totales
-        const total = data.length;
-        const count = (col) => data.filter(i => i[col] === true || i[col] === "VERDADERO").length;
-        
-        document.getElementById('displayArea').innerHTML = `
-            <div class="kpi-container">
-                <div class="card-stats"><h3>Formación Básica</h3>
-                VI: ${count('columnaL')} | PPD: ${count('columnaN')} | VF: ${count('columnaO')} | GN: ${count('columnaQ')}</div>
-                <div class="card-stats"><h3>Perfeccionamiento Continuo</h3>
-                VI: ${count('columnaS')} | PPD: ${count('columnaU')} | VF: ${count('columnaV')} | AAA: ${count('columnaX')}</div>
-            </div>`;
-    }
+  function inicializarDashboard() {
+    // Llenar select de áreas
+    const areas = [...new Set(baseDatosCompleta.map(i => i.columnaA))];
+    const sel = document.getElementById('selectArea');
+    areas.forEach(a => sel.innerHTML += `<option value="${a}">${a}</option>`);
+    
+    // Calcular General
+    const count = (col) => baseDatosCompleta.filter(i => i[col] == true || i[col] == "VERDADERO").length;
+    document.getElementById('statsGeneral').innerHTML = `
+      <h3>Formación Básica</h3>
+      <p>VI: ${count('columnaL')} | PPD: ${count('columnaN')} | VF: ${count('columnaO')} | GN: ${count('columnaQ')}</p>
+      <h3>Perfeccionamiento Continuo</h3>
+      <p>VI: ${count('columnaS')} | PPD: ${count('columnaU')} | VF: ${count('columnaV')} | AAA: ${count('columnaX')}</p>
+    `;
+  }
+
+  function renderTablaArea() {
+    const area = document.getElementById('selectArea').value;
+    const filtrados = baseDatosCompleta.filter(i => i.columnaA === area);
+    let html = `<table><thead><tr><th>Nombre</th><th>Cargo</th><th>FB (VI,PPD,VF,GN)</th><th>PC (VI,PPD,VF,AAA)</th></tr></thead><tbody>`;
+    
+    filtrados.forEach(p => {
+      html += `<tr><td>${p.nombre}</td><td>${p.cargo}</td>
+               <td>${check(p.columnaL)} ${check(p.columnaN)} ${check(p.columnaO)} ${check(p.columnaQ)}</td>
+               <td>${check(p.columnaS)} ${check(p.columnaU)} ${check(p.columnaV)} ${check(p.columnaX)}</td></tr>`;
+    });
+    document.getElementById('tablaAreaContainer').innerHTML = html + "</tbody></table>";
+  }
+
+  function check(v) { return (v == true || v == "VERDADERO") ? "✔️" : "❌"; }
 </script>
+</body>
+</html>
