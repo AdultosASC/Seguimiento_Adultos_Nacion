@@ -2,96 +2,82 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dirección Nacional de Adultos</title>
+  <title>Dashboard - Dirección Nacional</title>
   <style>
-    /* Mantenemos exactamente tus estilos originales */
-    :root { --primary: #6366f1; --primary-hover: #4f46e5; --purple-dark: #4c1d95; --bg: #f8fafc; --card-bg: #ffffff; --text: #1e293b; --border: #e2e8f0; --success: #10b981; --danger: #ef4444; }
-    body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 2rem 1rem; }
-    .container { background-color: var(--card-bg); padding: 2.5rem; border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05); width: 100%; max-width: 850px; margin: auto; }
-    .nav-tabs { display: flex; gap: 10px; margin-bottom: 2rem; border-bottom: 2px solid var(--border); padding-bottom: 1rem; }
-    .btn-tab { padding: 0.75rem 1.5rem; border: none; background: var(--border); border-radius: 8px; cursor: pointer; font-weight: 600; }
+    :root { --primary: #6366f1; --purple-dark: #4c1d95; --bg: #f8fafc; --success: #10b981; --danger: #ef4444; }
+    body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); padding: 2rem 1rem; }
+    .container { max-width: 1000px; margin: auto; background: white; padding: 2rem; border-radius: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+    .nav-tabs { display: flex; gap: 10px; margin-bottom: 2rem; }
+    .btn-tab { padding: 0.75rem 1.5rem; border: 1px solid var(--primary); background: white; color: var(--primary); border-radius: 8px; cursor: pointer; font-weight: bold; }
     .btn-tab.active { background: var(--primary); color: white; }
-    .tab-content { display: none; }
-    .tab-content.active { display: block; }
-    /* Estilos de tabla y dashboard */
+    .section-content { display: none; }
+    .section-content.active { display: block; }
     table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
-    th, td { padding: 12px; border: 1px solid var(--border); text-align: center; }
+    th, td { padding: 10px; border: 1px solid #e2e8f0; text-align: center; font-size: 0.9rem; }
     th { background: #f1f5f9; }
-    .hidden { display: none !important; }
   </style>
 </head>
 <body>
 
 <div class="container">
   <div class="nav-tabs">
-    <button id="btnGeneral" class="btn-tab active" onclick="mostrarTab('general')">Información General</button>
-    <button id="btnArea" class="btn-tab" onclick="mostrarTab('area')">Información por Área</button>
+    <button id="btnG" class="btn-tab active" onclick="tab('general', 'btnG')">Información General</button>
+    <button id="btnA" class="btn-tab" onclick="tab('area', 'btnA')">Información por Área</button>
   </div>
 
-  <div id="tab-general" class="tab-content active">
+  <div id="general" class="section-content active">
     <h2>Resumen Nacional</h2>
-    <div id="resumenContenido">Cargando datos...</div>
+    <div id="stats">Cargando...</div>
   </div>
 
-  <div id="tab-area" class="tab-content">
-    <select id="selectAreaDashboard" onchange="dibujarTablaDashboard()">
-      <option value="">Seleccione una Área...</option>
-    </select>
-    <div id="tablaDashboardContainer"></div>
+  <div id="area" class="section-content">
+    <select id="selArea" onchange="render()"><option value="">Seleccione Área...</option></select>
+    <div id="tablaDiv"></div>
   </div>
 </div>
 
 <script>
   const API_URL = "https://script.google.com/macros/s/AKfycbxg6vaqC8w8IsCjHHy9UX9TTyf2nJKhlA1J37nvQEJb6ERK4nSQM5pAO7o8bqBYUj-0SQ/exec";
-  let baseDatosCompleta = [];
+  let db = [];
 
-  // Iniciamos la carga de datos al abrir
-  window.onload = function() {
-    fetch(API_URL).then(r => r.json()).then(data => {
-      baseDatosCompleta = data;
-      inicializarDashboard();
-    });
-  };
-
-  function mostrarTab(tab) {
-    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-    document.querySelectorAll('.btn-tab').forEach(b => b.classList.remove('active'));
-    document.getElementById('tab-' + tab).classList.add('active');
-    document.getElementById('btn' + tab.charAt(0).toUpperCase() + tab.slice(1)).classList.add('active');
+  // Función que ya tienes probada en tu sistema
+  function mapearIconoEstado(valor) {
+    var esVerdadero = (valor === true || valor === "true" || valor === "VERDADERO" || valor === "TRUE");
+    return esVerdadero ? "✔️" : "❌";
   }
 
-  function inicializarDashboard() {
-    // 1. Llenar Select de Áreas
-    const areas = [...new Set(baseDatosCompleta.map(i => i.columnaA).filter(Boolean))].sort();
-    const sel = document.getElementById('selectAreaDashboard');
-    areas.forEach(a => { sel.innerHTML += `<option value="${a}">${a}</option>`; });
-
-    // 2. Calcular Totales Generales
-    const count = (col) => baseDatosCompleta.filter(i => String(i[col]).toUpperCase() === "VERDADERO").length;
-    document.getElementById('resumenContenido').innerHTML = `
-      <p><b>Formación Básica:</b> VI(${count('columnaL')}) | PPD(${count('columnaN')}) | VF(${count('columnaO')}) | GN(${count('columnaQ')})</p>
-      <p><b>Perfeccionamiento Continuo:</b> VI(${count('columnaS')}) | PPD(${count('columnaU')}) | VF(${count('columnaV')}) | AAA(${count('columnaX')})</p>
-    `;
-  }
-
-  function dibujarTablaDashboard() {
-    const area = document.getElementById('selectAreaDashboard').value;
-    const filtrados = baseDatosCompleta.filter(i => i.columnaA === area && i.nombre && i.nombre.trim() !== "");
+  fetch(API_URL).then(r => r.json()).then(data => {
+    db = data;
+    const areas = [...new Set(db.map(i => i.columnaA).filter(Boolean))].sort();
+    const sel = document.getElementById('selArea');
+    areas.forEach(a => sel.innerHTML += `<option value="${a}">${a}</option>`);
     
-    let html = `<table><thead>
-      <tr><th>Nombre</th><th>Cargo</th><th>FB: VI</th><th>FB: PPD</th><th>FB: VF</th><th>FB: GN</th><th>PC: VI</th><th>PC: PPD</th><th>PC: VF</th><th>PC: AAA</th></tr>
-      </thead><tbody>`;
+    const count = (col) => db.filter(i => mapearIconoEstado(i[col]) === "✔️").length;
+    document.getElementById('stats').innerHTML = `
+      <p><b>FB:</b> VI(${count('columnaL')}) PPD(${count('columnaN')}) VF(${count('columnaO')}) GN(${count('columnaQ')})</p>
+      <p><b>PC:</b> VI(${count('columnaS')}) PPD(${count('columnaU')}) VF(${count('columnaV')}) AAA(${count('columnaX')})</p>
+    `;
+  });
+
+  function tab(id, btn) {
+    document.querySelectorAll('.section-content').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.btn-tab').forEach(b => b.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    document.getElementById(btn).classList.add('active');
+  }
+
+  function render() {
+    const area = document.getElementById('selArea').value;
+    const filtrados = db.filter(i => i.columnaA === area && i.nombre && i.nombre.trim() !== "");
+    let html = `<table><tr><th>Nombre</th><th>Cargo</th><th>FB: VI</th><th>FB: PPD</th><th>FB: VF</th><th>FB: GN</th><th>PC: VI</th><th>PC: PPD</th><th>PC: VF</th><th>PC: AAA</th></tr>`;
     
     filtrados.forEach(p => {
       html += `<tr><td>${p.nombre}</td><td>${p.cargo}</td>
-      <td>${check(p.columnaL)}</td><td>${check(p.columnaN)}</td><td>${check(p.columnaO)}</td><td>${check(p.columnaQ)}</td>
-      <td>${check(p.columnaS)}</td><td>${check(p.columnaU)}</td><td>${check(p.columnaV)}</td><td>${check(p.columnaX)}</td></tr>`;
+      <td>${mapearIconoEstado(p.columnaL)}</td><td>${mapearIconoEstado(p.columnaN)}</td><td>${mapearIconoEstado(p.columnaO)}</td><td>${mapearIconoEstado(p.columnaQ)}</td>
+      <td>${mapearIconoEstado(p.columnaS)}</td><td>${mapearIconoEstado(p.columnaU)}</td><td>${mapearIconoEstado(p.columnaV)}</td><td>${mapearIconoEstado(p.columnaX)}</td></tr>`;
     });
-    document.getElementById('tablaDashboardContainer').innerHTML = html + "</tbody></table>";
+    document.getElementById('tablaDiv').innerHTML = html + "</table>";
   }
-
-  function check(v) { return (String(v).toUpperCase() === "VERDADERO") ? "✔️" : "❌"; }
 </script>
 </body>
 </html>
