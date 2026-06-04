@@ -54,10 +54,16 @@
   let baseDatosCompleta = [];
 
   window.onload = () => {
-    fetch(API_URL).then(r => r.json()).then(data => {
-      baseDatosCompleta = data;
-      inicializarDashboard();
-    });
+    fetch(API_URL)
+      .then(response => response.json())
+      .then(data => {
+        // Asignamos la respuesta de la API directamente
+        baseDatosCompleta = data;
+        inicializarDashboard();
+      })
+      .catch(err => {
+        document.getElementById('statsGeneral').innerHTML = "Error al cargar los datos: " + err;
+      });
   };
 
   function showSection(id) {
@@ -68,11 +74,14 @@
   }
 
   function inicializarDashboard() {
+    // Extraer áreas únicas de columnaA
     const areas = [...new Set(baseDatosCompleta.map(i => i.columnaA).filter(Boolean))].sort();
     const sel = document.getElementById('selectArea');
     areas.forEach(a => sel.innerHTML += `<option value="${a}">${a}</option>`);
     
-    const count = (col) => baseDatosCompleta.filter(i => i[col] == true || i[col] == "VERDADERO").length;
+    // Función para contar valores verdaderos
+    const count = (col) => baseDatosCompleta.filter(i => i[col] === true || i[col] === "VERDADERO" || i[col] === "true").length;
+    
     document.getElementById('statsGeneral').innerHTML = `
       <h3>Formación Básica</h3>
       <p>VI: ${count('columnaL')} | PPD: ${count('columnaN')} | VF: ${count('columnaO')} | GN: ${count('columnaQ')}</p>
@@ -83,6 +92,8 @@
 
   function renderTablaArea() {
     const area = document.getElementById('selectArea').value;
+    if (!area) return;
+
     // Filtro: solo miembros con nombre y del área seleccionada
     const filtrados = baseDatosCompleta.filter(i => i.columnaA === area && i.nombre && i.nombre.trim() !== "");
     
@@ -95,7 +106,8 @@
     
     filtrados.forEach(p => {
       html += `<tr>
-                <td class="col-nombre">${p.nombre}</td><td>${p.cargo}</td>
+                <td class="col-nombre">${p.nombre}</td>
+                <td>${p.cargo}</td>
                 <td>${check(p.columnaL)}</td><td>${check(p.columnaN)}</td><td>${check(p.columnaO)}</td><td>${check(p.columnaQ)}</td>
                 <td>${check(p.columnaS)}</td><td>${check(p.columnaU)}</td><td>${check(p.columnaV)}</td><td>${check(p.columnaX)}</td>
                </tr>`;
@@ -103,7 +115,9 @@
     document.getElementById('tablaAreaContainer').innerHTML = html + "</tbody></table>";
   }
 
-  function check(v) { return (v == true || v == "VERDADERO") ? "✔️" : "❌"; }
+  function check(v) { 
+    return (v === true || v === "VERDADERO" || v === "true") ? "✔️" : "❌"; 
+  }
 </script>
 </body>
 </html>
