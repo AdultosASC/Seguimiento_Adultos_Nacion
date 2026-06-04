@@ -3,24 +3,29 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dashboard - Dirección Nacional</title>
+  <title>Dashboard - Dirección Nacional de Adultos</title>
   <style>
-    /* Mismos estilos de tu sistema para coherencia visual */
-    :root { --primary: #6366f1; --purple-dark: #4c1d95; --border: #e2e8f0; --bg: #f8fafc; --success: #10b981; --danger: #ef4444; }
-    body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); padding: 2rem 1rem; }
-    .container { max-width: 1000px; margin: auto; background: white; padding: 2rem; border-radius: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+    :root { 
+      --primary: #6366f1; --purple-dark: #4c1d95; --border: #e2e8f0; 
+      --bg: #f8fafc; --success: #10b981; --danger: #ef4444; 
+    }
+    body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); padding: 2rem 1rem; color: #1e293b; }
+    .container { max-width: 1100px; margin: auto; background: white; padding: 2rem; border-radius: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
     
-    /* Navegación de botones */
     .nav-tabs { display: flex; gap: 10px; margin-bottom: 2rem; }
     .btn-tab { padding: 0.75rem 1.5rem; border: 1px solid var(--primary); background: transparent; color: var(--primary); border-radius: 8px; cursor: pointer; font-weight: bold; }
     .btn-tab.active { background: var(--primary); color: white; }
     
-    /* Grids */
     .section-content { display: none; }
     .section-content.active { display: block; }
+    
     .tabla-container { overflow-x: auto; margin-top: 1rem; }
-    table { width: 100%; border-collapse: collapse; }
-    th, td { padding: 12px; border-bottom: 1px solid var(--border); text-align: left; font-size: 0.9rem; }
+    table { width: 100%; border-collapse: collapse; border: 1px solid var(--border); }
+    th { background: #f1f5f9; padding: 10px; text-align: center; border: 1px solid var(--border); font-size: 0.85rem; }
+    td { padding: 10px; border: 1px solid var(--border); text-align: center; font-size: 0.9rem; }
+    
+    .col-nombre { text-align: left !important; font-weight: 600; }
+    .header-group { border-bottom: 2px solid var(--purple-dark); }
   </style>
 </head>
 <body>
@@ -63,12 +68,10 @@
   }
 
   function inicializarDashboard() {
-    // Llenar select de áreas
-    const areas = [...new Set(baseDatosCompleta.map(i => i.columnaA))];
+    const areas = [...new Set(baseDatosCompleta.map(i => i.columnaA).filter(Boolean))].sort();
     const sel = document.getElementById('selectArea');
     areas.forEach(a => sel.innerHTML += `<option value="${a}">${a}</option>`);
     
-    // Calcular General
     const count = (col) => baseDatosCompleta.filter(i => i[col] == true || i[col] == "VERDADERO").length;
     document.getElementById('statsGeneral').innerHTML = `
       <h3>Formación Básica</h3>
@@ -80,13 +83,22 @@
 
   function renderTablaArea() {
     const area = document.getElementById('selectArea').value;
-    const filtrados = baseDatosCompleta.filter(i => i.columnaA === area);
-    let html = `<table><thead><tr><th>Nombre</th><th>Cargo</th><th>FB (VI,PPD,VF,GN)</th><th>PC (VI,PPD,VF,AAA)</th></tr></thead><tbody>`;
+    // Filtro: solo miembros con nombre y del área seleccionada
+    const filtrados = baseDatosCompleta.filter(i => i.columnaA === area && i.nombre && i.nombre.trim() !== "");
+    
+    let html = `<table>
+      <thead>
+        <tr><th rowspan="2">Nombre</th><th rowspan="2">Cargo</th><th colspan="4" class="header-group">Formación Básica</th><th colspan="4" class="header-group">Perfeccionamiento Continuo</th></tr>
+        <tr><th>VI</th><th>PPD</th><th>VF</th><th>GN</th><th>VI</th><th>PPD</th><th>VF</th><th>AAA</th></tr>
+      </thead>
+      <tbody>`;
     
     filtrados.forEach(p => {
-      html += `<tr><td>${p.nombre}</td><td>${p.cargo}</td>
-               <td>${check(p.columnaL)} ${check(p.columnaN)} ${check(p.columnaO)} ${check(p.columnaQ)}</td>
-               <td>${check(p.columnaS)} ${check(p.columnaU)} ${check(p.columnaV)} ${check(p.columnaX)}</td></tr>`;
+      html += `<tr>
+                <td class="col-nombre">${p.nombre}</td><td>${p.cargo}</td>
+                <td>${check(p.columnaL)}</td><td>${check(p.columnaN)}</td><td>${check(p.columnaO)}</td><td>${check(p.columnaQ)}</td>
+                <td>${check(p.columnaS)}</td><td>${check(p.columnaU)}</td><td>${check(p.columnaV)}</td><td>${check(p.columnaX)}</td>
+               </tr>`;
     });
     document.getElementById('tablaAreaContainer').innerHTML = html + "</tbody></table>";
   }
