@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <title>Dashboard - Dirección Nacional</title>
   <style>
-    :root { --primary: #6366f1; --purple-dark: #4c1d95; --border: #e2e8f0; --bg: #f8fafc; --success: #10b981; }
+    :root { --primary: #6366f1; --purple-dark: #4c1d95; --border: #e2e8f0; --bg: #f8fafc; --success: #10b981; --danger: #ef4444; }
     body { font-family: sans-serif; background: var(--bg); padding: 20px; }
     .container { max-width: 1000px; margin: auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
     .tab-btn { padding: 10px 20px; cursor: pointer; border: 1px solid var(--primary); background: white; color: var(--primary); border-radius: 5px; }
@@ -13,6 +13,8 @@
     th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
     th { background: #f1f5f9; }
     .hidden { display: none; }
+    .chulo { color: var(--success); font-weight: bold; }
+    .equis { color: var(--danger); font-weight: bold; }
   </style>
 </head>
 <body>
@@ -40,17 +42,12 @@
 
   fetch(API_URL).then(r => r.json()).then(d => {
     datos = d;
-    // Extraemos los nombres de las columnas que el servidor envía para saber el orden
     if(datos.length > 0) {
       const llaves = Object.keys(datos[0]);
-      // Asumimos el orden basado en tu petición: 
-      // 0:Area, 1:Cargo, 2:Nombre, 3-10: Columnas L, N, O, Q, S, U, V, X
-      
       const areas = [...new Set(datos.map(i => i[llaves[0]]))];
       const sel = document.getElementById('selArea');
       areas.forEach(a => sel.innerHTML += `<option value="${a}">${a}</option>`);
       
-      // Resumen general
       const conteo = (idx) => datos.filter(i => String(i[llaves[idx]]).toUpperCase() === "VERDADERO").length;
       document.getElementById('resumen').innerHTML = `FB: VI(${conteo(11)}) PPD(${conteo(13)}) VF(${conteo(14)}) GN(${conteo(16)})`;
     }
@@ -59,17 +56,17 @@
   function mostrar(id) {
     document.querySelectorAll('.contenido').forEach(c => c.classList.add('hidden'));
     document.getElementById(id).classList.remove('hidden');
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.innerText.includes(id === 'sec1' ? 'General' : 'Área')));
   }
 
   function dibujarTabla() {
     const area = document.getElementById('selArea').value;
     const llaves = Object.keys(datos[0]);
-    const filtrados = datos.filter(i => i[llaves[0]] === area && i[llaves[2]]); // Columna 0 es Area, 2 es Nombre
+    const filtrados = datos.filter(i => i[llaves[0]] === area && i[llaves[2]]); 
     
     let html = `<table><tr><th>Nombre</th><th>Cargo</th><th>FB: VI</th><th>FB: PPD</th><th>FB: VF</th><th>FB: GN</th><th>PC: VI</th><th>PC: PPD</th><th>PC: VF</th><th>PC: AAA</th></tr>`;
     
     filtrados.forEach(p => {
-      // Usamos los índices exactos de las columnas que pediste
       html += `<tr><td>${p[llaves[2]]}</td><td>${p[llaves[1]]}</td>
       <td>${check(p[llaves[11]])}</td><td>${check(p[llaves[13]])}</td><td>${check(p[llaves[14]])}</td><td>${check(p[llaves[16]])}</td>
       <td>${check(p[llaves[18]])}</td><td>${check(p[llaves[20]])}</td><td>${check(p[llaves[21]])}</td><td>${check(p[llaves[23]])}</td></tr>`;
@@ -77,7 +74,11 @@
     document.getElementById('tablaDiv').innerHTML = html + "</table>";
   }
 
-  function check(v) { return String(v).toUpperCase() === "VERDADERO" ? "✔️" : ""; }
+  // Lógica estricta: Verdadero = chulo, cualquier otra cosa = equis
+  function check(v) { 
+    const esVerdadero = String(v).toUpperCase() === "VERDADERO" || v === true;
+    return esVerdadero ? '<span class="chulo">✔️</span>' : '<span class="equis">❌</span>'; 
+  }
 </script>
 </body>
 </html>
