@@ -5,34 +5,41 @@
   <title>Dashboard - Dirección Nacional</title>
   <style>
     :root { --primary: #6366f1; --purple-dark: #4c1d95; --border: #e2e8f0; --bg: #f8fafc; --success: #10b981; --danger: #ef4444; }
-    body { font-family: sans-serif; background: var(--bg); padding: 20px; }
-    .container { max-width: 1000px; margin: auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-    .tab-btn { padding: 10px 20px; cursor: pointer; border: 1px solid var(--primary); background: white; color: var(--primary); border-radius: 5px; }
-    .tab-btn.active { background: var(--primary); color: white; }
-    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-    th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
-    th { background: #f1f5f9; }
-    .hidden { display: none; }
-    .chulo { color: var(--success); font-weight: bold; }
-    .equis { color: var(--danger); font-weight: bold; }
+    body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); padding: 2rem 1rem; color: #1e293b; }
+    .container { max-width: 1100px; margin: auto; background: white; padding: 2rem; border-radius: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+    .nav-tabs { display: flex; gap: 10px; margin-bottom: 2rem; }
+    .btn-tab { padding: 0.75rem 1.5rem; border: 1px solid var(--primary); background: transparent; color: var(--primary); border-radius: 8px; cursor: pointer; font-weight: bold; }
+    .btn-tab.active { background: var(--primary); color: white; }
+    .section-content { display: none; }
+    .section-content.active { display: block; }
+    .tabla-container { overflow-x: auto; margin-top: 1rem; }
+    table { width: 100%; border-collapse: collapse; border: 1px solid var(--border); }
+    th { background: #f1f5f9; padding: 10px; text-align: center; border: 1px solid var(--border); font-size: 0.85rem; }
+    td { padding: 10px; border: 1px solid var(--border); text-align: center; font-size: 0.9rem; }
+    .col-nombre { text-align: left !important; font-weight: 600; }
+    .header-group { border-bottom: 2px solid var(--purple-dark); }
+    .chulo { color: var(--success); }
+    .equis { color: var(--danger); }
   </style>
 </head>
 <body>
 
 <div class="container">
-  <div style="display:flex; gap:10px; margin-bottom:20px;">
-    <button class="tab-btn active" onclick="mostrar('sec1')">Info General</button>
-    <button class="tab-btn" onclick="mostrar('sec2')">Info por Área</button>
+  <div class="nav-tabs">
+    <button id="btnGeneral" class="btn-tab active" onclick="showSection('general', 'btnGeneral')">Información General</button>
+    <button id="btnArea" class="btn-tab" onclick="showSection('area', 'btnArea')">Información por Área</button>
   </div>
 
-  <div id="sec1" class="contenido">
+  <div id="general" class="section-content active">
     <h2>Resumen Nacional</h2>
-    <div id="resumen">Cargando...</div>
+    <div id="statsGeneral">Cargando datos...</div>
   </div>
 
-  <div id="sec2" class="contenido hidden">
-    <select id="selArea" onchange="dibujarTabla()"></select>
-    <div id="tablaDiv"></div>
+  <div id="area" class="section-content">
+    <select id="selectArea" onchange="renderTablaArea()">
+      <option value="">Seleccione un Área...</option>
+    </select>
+    <div id="tablaAreaContainer" class="tabla-container"></div>
   </div>
 </div>
 
@@ -40,44 +47,58 @@
   const API_URL = "https://script.google.com/macros/s/AKfycbxg6vaqC8w8IsCjHHy9UX9TTyf2nJKhlA1J37nvQEJb6ERK4nSQM5pAO7o8bqBYUj-0SQ/exec";
   let datos = [];
 
-  fetch(API_URL).then(r => r.json()).then(d => {
-    datos = d;
-    if(datos.length > 0) {
-      const llaves = Object.keys(datos[0]);
-      const areas = [...new Set(datos.map(i => i[llaves[0]]))];
-      const sel = document.getElementById('selArea');
-      areas.forEach(a => sel.innerHTML += `<option value="${a}">${a}</option>`);
-      
-      const conteo = (idx) => datos.filter(i => String(i[llaves[idx]]).toUpperCase() === "VERDADERO").length;
-      document.getElementById('resumen').innerHTML = `FB: VI(${conteo(11)}) PPD(${conteo(13)}) VF(${conteo(14)}) GN(${conteo(16)})`;
-    }
-  });
+  fetch(API_URL)
+    .then(r => r.json())
+    .then(d => {
+      datos = d;
+      console.log("Datos recibidos:", datos[0]); // <--- ESTO ES LA CLAVE
+      inicializar();
+    });
 
-  function mostrar(id) {
-    document.querySelectorAll('.contenido').forEach(c => c.classList.add('hidden'));
-    document.getElementById(id).classList.remove('hidden');
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.innerText.includes(id === 'sec1' ? 'General' : 'Área')));
+  function showSection(id, btnId) {
+    document.querySelectorAll('.section-content').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.btn-tab').forEach(b => b.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    document.getElementById(btnId).classList.add('active');
   }
 
-  function dibujarTabla() {
-    const area = document.getElementById('selArea').value;
-    const llaves = Object.keys(datos[0]);
-    const filtrados = datos.filter(i => i[llaves[0]] === area && i[llaves[2]]); 
+  function inicializar() {
+    const areas = [...new Set(datos.map(i => i.columnaA).filter(Boolean))].sort();
+    const sel = document.getElementById('selectArea');
+    areas.forEach(a => sel.innerHTML += `<option value="${a}">${a}</option>`);
     
-    let html = `<table><tr><th>Nombre</th><th>Cargo</th><th>FB: VI</th><th>FB: PPD</th><th>FB: VF</th><th>FB: GN</th><th>PC: VI</th><th>PC: PPD</th><th>PC: VF</th><th>PC: AAA</th></tr>`;
+    const count = (col) => datos.filter(i => String(i[col]).toUpperCase() === "VERDADERO" || i[col] === true).length;
+    document.getElementById('statsGeneral').innerHTML = `
+      <h3>Formación Básica</h3>
+      <p>VI: ${count('columnaL')} | PPD: ${count('columnaN')} | VF: ${count('columnaO')} | GN: ${count('columnaQ')}</p>
+      <h3>Perfeccionamiento Continuo</h3>
+      <p>VI: ${count('columnaS')} | PPD: ${count('columnaU')} | VF: ${count('columnaV')} | AAA: ${count('columnaX')}</p>
+    `;
+  }
+
+  function renderTablaArea() {
+    const area = document.getElementById('selectArea').value;
+    const filtrados = datos.filter(i => i.columnaA === area && i.nombre);
+    
+    let html = `<table>
+      <thead>
+        <tr><th rowspan="2">Nombre</th><th rowspan="2">Cargo</th><th colspan="4" class="header-group">Formación Básica</th><th colspan="4" class="header-group">Perfeccionamiento Continuo</th></tr>
+        <tr><th>VI</th><th>PPD</th><th>VF</th><th>GN</th><th>VI</th><th>PPD</th><th>VF</th><th>AAA</th></tr>
+      </thead>
+      <tbody>`;
     
     filtrados.forEach(p => {
-      html += `<tr><td>${p[llaves[2]]}</td><td>${p[llaves[1]]}</td>
-      <td>${check(p[llaves[11]])}</td><td>${check(p[llaves[13]])}</td><td>${check(p[llaves[14]])}</td><td>${check(p[llaves[16]])}</td>
-      <td>${check(p[llaves[18]])}</td><td>${check(p[llaves[20]])}</td><td>${check(p[llaves[21]])}</td><td>${check(p[llaves[23]])}</td></tr>`;
+      html += `<tr>
+                <td class="col-nombre">${p.nombre}</td><td>${p.cargo}</td>
+                <td>${check(p.columnaL)}</td><td>${check(p.columnaN)}</td><td>${check(p.columnaO)}</td><td>${check(p.columnaQ)}</td>
+                <td>${check(p.columnaS)}</td><td>${check(p.columnaU)}</td><td>${check(p.columnaV)}</td><td>${check(p.columnaX)}</td>
+               </tr>`;
     });
-    document.getElementById('tablaDiv').innerHTML = html + "</table>";
+    document.getElementById('tablaAreaContainer').innerHTML = html + "</tbody></table>";
   }
 
-  // Lógica estricta: Verdadero = chulo, cualquier otra cosa = equis
   function check(v) { 
-    const esVerdadero = String(v).toUpperCase() === "VERDADERO" || v === true;
-    return esVerdadero ? '<span class="chulo">✔️</span>' : '<span class="equis">❌</span>'; 
+    return (String(v).toUpperCase() === "VERDADERO" || v === true) ? '<span class="chulo">✔️</span>' : '<span class="equis">❌</span>'; 
   }
 </script>
 </body>
