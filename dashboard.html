@@ -7,7 +7,7 @@
   <style>
     :root { 
       --primary: #6366f1; --purple-dark: #4c1d95; --border: #e2e8f0; 
-      --bg: #f8fafc; --success: #10b981; --danger: #ef4444; 
+      --bg: #f8fafc; --success: #10b981; 
     }
     body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); padding: 2rem 1rem; color: #1e293b; }
     .container { max-width: 1100px; margin: auto; background: white; padding: 2rem; border-radius: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
@@ -74,7 +74,6 @@
     const sel = document.getElementById('selectArea');
     areas.forEach(a => sel.innerHTML += `<option value="${a}">${a}</option>`);
     
-    // Contamos solo si dice "VERDADERO" o true
     const count = (col) => baseDatosCompleta.filter(i => String(i[col]).toUpperCase() === "VERDADERO" || i[col] === true).length;
     
     document.getElementById('statsGeneral').innerHTML = `
@@ -87,7 +86,6 @@
 
   function renderTablaArea() {
     const area = document.getElementById('selectArea').value;
-    // Solo traemos personas con nombre (columna C) y cargo (columna B)
     const filtrados = baseDatosCompleta.filter(i => i.columnaA === area && i.nombre && i.nombre.trim() !== "");
     
     let html = `<table>
@@ -107,10 +105,10 @@
     document.getElementById('tablaAreaContainer').innerHTML = html + "</tbody></table>";
   }
 
-  // La lógica estricta solicitada:
+  // Lógica: Si es VERDADERO muestra check, de lo contrario deja la celda vacía
   function check(v) { 
     const valor = String(v).toUpperCase();
-    return (valor === "VERDADERO" || v === true) ? "✔️" : "❌"; 
+    return (valor === "VERDADERO" || v === true) ? "✔️" : ""; 
   }
 </script>
 </body>
