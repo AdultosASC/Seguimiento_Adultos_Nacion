@@ -3,27 +3,20 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dashboard - Dirección Nacional de Adultos</title>
+  <title>Dashboard - Dirección Nacional</title>
   <style>
-    :root { 
-      --primary: #6366f1; --purple-dark: #4c1d95; --border: #e2e8f0; 
-      --bg: #f8fafc; --success: #10b981; --danger: #ef4444; 
-    }
+    :root { --primary: #6366f1; --purple-dark: #4c1d95; --border: #e2e8f0; --bg: #f8fafc; --success: #10b981; --danger: #ef4444; }
     body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); padding: 2rem 1rem; color: #1e293b; }
     .container { max-width: 1100px; margin: auto; background: white; padding: 2rem; border-radius: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-    
     .nav-tabs { display: flex; gap: 10px; margin-bottom: 2rem; }
     .btn-tab { padding: 0.75rem 1.5rem; border: 1px solid var(--primary); background: transparent; color: var(--primary); border-radius: 8px; cursor: pointer; font-weight: bold; }
     .btn-tab.active { background: var(--primary); color: white; }
-    
     .section-content { display: none; }
     .section-content.active { display: block; }
-    
     .tabla-container { overflow-x: auto; margin-top: 1rem; }
     table { width: 100%; border-collapse: collapse; border: 1px solid var(--border); }
     th { background: #f1f5f9; padding: 10px; text-align: center; border: 1px solid var(--border); font-size: 0.85rem; }
     td { padding: 10px; border: 1px solid var(--border); text-align: center; font-size: 0.9rem; }
-    
     .col-nombre { text-align: left !important; font-weight: 600; }
     .header-group { border-bottom: 2px solid var(--purple-dark); }
   </style>
@@ -38,7 +31,7 @@
 
   <div id="general" class="section-content active">
     <h2>Resumen Nacional</h2>
-    <div id="statsGeneral">Cargando datos...</div>
+    <div id="statsGeneral">Cargando datos del servidor...</div>
   </div>
 
   <div id="area" class="section-content">
@@ -53,18 +46,20 @@
   const API_URL = "https://script.google.com/macros/s/AKfycbxg6vaqC8w8IsCjHHy9UX9TTyf2nJKhlA1J37nvQEJb6ERK4nSQM5pAO7o8bqBYUj-0SQ/exec";
   let baseDatosCompleta = [];
 
-  window.onload = () => {
-    fetch(API_URL)
-      .then(response => response.json())
-      .then(data => {
-        // Asignamos la respuesta de la API directamente
-        baseDatosCompleta = data;
-        inicializarDashboard();
-      })
-      .catch(err => {
-        document.getElementById('statsGeneral').innerHTML = "Error al cargar los datos: " + err;
-      });
-  };
+  // Función para obtener datos de forma segura
+  async function cargarDatos() {
+    try {
+      const response = await fetch(API_URL);
+      if (!response.ok) throw new Error('Error en la conexión');
+      baseDatosCompleta = await response.json();
+      inicializarDashboard();
+    } catch (err) {
+      document.getElementById('statsGeneral').innerHTML = "No se pudieron cargar los datos. Verifica que el script de Google esté publicado como Web App con acceso 'Cualquiera'.";
+      console.error(err);
+    }
+  }
+
+  window.onload = cargarDatos;
 
   function showSection(id) {
     document.querySelectorAll('.section-content').forEach(s => s.classList.remove('active'));
@@ -74,13 +69,15 @@
   }
 
   function inicializarDashboard() {
-    // Extraer áreas únicas de columnaA
+    if (!baseDatosCompleta || baseDatosCompleta.length === 0) return;
+    
+    // Poblar select
     const areas = [...new Set(baseDatosCompleta.map(i => i.columnaA).filter(Boolean))].sort();
     const sel = document.getElementById('selectArea');
     areas.forEach(a => sel.innerHTML += `<option value="${a}">${a}</option>`);
     
-    // Función para contar valores verdaderos
-    const count = (col) => baseDatosCompleta.filter(i => i[col] === true || i[col] === "VERDADERO" || i[col] === "true").length;
+    // Contar totales
+    const count = (col) => baseDatosCompleta.filter(i => String(i[col]).toUpperCase() === "TRUE" || String(i[col]).toUpperCase() === "VERDADERO").length;
     
     document.getElementById('statsGeneral').innerHTML = `
       <h3>Formación Básica</h3>
@@ -92,9 +89,6 @@
 
   function renderTablaArea() {
     const area = document.getElementById('selectArea').value;
-    if (!area) return;
-
-    // Filtro: solo miembros con nombre y del área seleccionada
     const filtrados = baseDatosCompleta.filter(i => i.columnaA === area && i.nombre && i.nombre.trim() !== "");
     
     let html = `<table>
@@ -106,8 +100,7 @@
     
     filtrados.forEach(p => {
       html += `<tr>
-                <td class="col-nombre">${p.nombre}</td>
-                <td>${p.cargo}</td>
+                <td class="col-nombre">${p.nombre}</td><td>${p.cargo}</td>
                 <td>${check(p.columnaL)}</td><td>${check(p.columnaN)}</td><td>${check(p.columnaO)}</td><td>${check(p.columnaQ)}</td>
                 <td>${check(p.columnaS)}</td><td>${check(p.columnaU)}</td><td>${check(p.columnaV)}</td><td>${check(p.columnaX)}</td>
                </tr>`;
@@ -116,7 +109,7 @@
   }
 
   function check(v) { 
-    return (v === true || v === "VERDADERO" || v === "true") ? "✔️" : "❌"; 
+    return (String(v).toUpperCase() === "TRUE" || String(v).toUpperCase() === "VERDADERO") ? "✔️" : "❌"; 
   }
 </script>
 </body>
