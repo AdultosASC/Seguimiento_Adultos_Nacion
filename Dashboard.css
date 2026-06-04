@@ -1,0 +1,11 @@
+:root {
+    --purple-dark: #4c1d95; --purple-light: #8b5cf6;
+    --bg: #f8fafc; --card-bg: #ffffff; --text: #1e293b;
+    --success: #10b981; --danger: #ef4444;
+}
+.kpi-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+.card-stats { background: white; padding: 1.5rem; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+.badge { font-size: 1.2rem; }
+.tabla-area { width: 100%; border-collapse: collapse; background: white; border-radius: 12px; overflow: hidden; }
+.tabla-area th { background: #f1f5f9; padding: 1rem; color: var(--purple-dark); }
+.tabla-area td { padding: 1rem; border-bottom: 1px solid #e2e8f0; }
