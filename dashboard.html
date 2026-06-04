@@ -32,7 +32,7 @@
 
   <div id="general" class="section-content active">
     <h2>Resumen Nacional</h2>
-    <div id="statsGeneral">Esperando datos...</div>
+    <div id="statsGeneral">Cargando...</div>
   </div>
 
   <div id="area" class="section-content">
@@ -47,18 +47,10 @@
   const API_URL = "https://script.google.com/macros/s/AKfycbxg6vaqC8w8IsCjHHy9UX9TTyf2nJKhlA1J37nvQEJb6ERK4nSQM5pAO7o8bqBYUj-0SQ/exec";
   let datos = [];
 
-  // Conexión con detector de errores
-  fetch(API_URL)
-    .then(response => response.json())
-    .then(d => {
-      datos = d;
-      console.log("¡ÉXITO! Los datos que llegaron son:", datos); // ESTO TE MOSTRARÁ LA ESTRUCTURA REAL
-      inicializar();
-    })
-    .catch(error => {
-      console.error("ERROR DE CONEXIÓN:", error);
-      document.getElementById('statsGeneral').innerHTML = "Error: No se pudieron leer los datos. Revisa la consola (F12).";
-    });
+  fetch(API_URL).then(r => r.json()).then(d => {
+    datos = d;
+    inicializar();
+  });
 
   function showSection(id, btnId) {
     document.querySelectorAll('.section-content').forEach(s => s.classList.remove('active'));
@@ -68,18 +60,23 @@
   }
 
   function inicializar() {
-    if (!datos || datos.length === 0) return;
-    // Usamos los nombres de las llaves reales del objeto que imprimiremos en la consola
-    const llaves = Object.keys(datos[0]);
+    const areas = [...new Set(datos.map(i => i.columnaA).filter(Boolean))].sort();
     const sel = document.getElementById('selectArea');
-    const areas = [...new Set(datos.map(i => i[llaves[0]]))];
     areas.forEach(a => sel.innerHTML += `<option value="${a}">${a}</option>`);
+    
+    const count = (col) => datos.filter(i => String(i[col]).toUpperCase() === "VERDADERO").length;
+    document.getElementById('statsGeneral').innerHTML = `
+      <h3>Formación Básica</h3>
+      <p>VI: ${count('columnaL')} | PPD: ${count('columnaN')} | VF: ${count('columnaO')} | GN: ${count('columnaQ')}</p>
+      <h3>Perfeccionamiento Continuo</h3>
+      <p>VI: ${count('columnaS')} | PPD: ${count('columnaU')} | VF: ${count('columnaV')} | AAA: ${count('columnaX')}</p>
+    `;
   }
 
   function renderTablaArea() {
     const area = document.getElementById('selectArea').value;
-    const llaves = Object.keys(datos[0]);
-    const filtrados = datos.filter(i => i[llaves[0]] === area);
+    // Solo mostramos filas donde "nombre" tenga contenido
+    const filtrados = datos.filter(i => i.columnaA === area && i.nombre && i.nombre.trim() !== "");
     
     let html = `<table><thead>
       <tr><th rowspan="2">Nombre</th><th rowspan="2">Cargo</th><th colspan="4" class="header-group">Formación Básica</th><th colspan="4" class="header-group">Perfeccionamiento Continuo</th></tr>
@@ -88,17 +85,17 @@
     
     filtrados.forEach(p => {
       html += `<tr>
-        <td class="col-nombre">${p[llaves[2]]}</td>
-        <td>${p[llaves[1]]}</td>
-        <td>${check(p[llaves[11]])}</td><td>${check(p[llaves[13]])}</td><td>${check(p[llaves[14]])}</td><td>${check(p[llaves[16]])}</td>
-        <td>${check(p[llaves[18]])}</td><td>${check(p[llaves[20]])}</td><td>${check(p[llaves[21]])}</td><td>${check(p[llaves[23]])}</td>
+        <td class="col-nombre">${p.nombre}</td>
+        <td>${p.cargo}</td>
+        <td>${check(p.columnaL)}</td><td>${check(p.columnaN)}</td><td>${check(p.columnaO)}</td><td>${check(p.columnaQ)}</td>
+        <td>${check(p.columnaS)}</td><td>${check(p.columnaU)}</td><td>${check(p.columnaV)}</td><td>${check(p.columnaX)}</td>
       </tr>`;
     });
     document.getElementById('tablaAreaContainer').innerHTML = html + "</tbody></table>";
   }
 
   function check(v) { 
-    return (String(v).toUpperCase() === "VERDADERO" || v === true) ? '<span class="chulo">✔️</span>' : '<span class="equis">❌</span>'; 
+    return (String(v).toUpperCase() === "VERDADERO") ? '<span class="chulo">✔️</span>' : '<span class="equis">❌</span>'; 
   }
 </script>
 </body>
