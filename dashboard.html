@@ -1,69 +1,61 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dashboard - Dirección Nacional</title>
-  <link rel="stylesheet" href="style.css"> 
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <style>
-    /* Ajustes específicos para el Dashboard */
-    .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
-    .kpi-card { background: var(--card-bg); padding: 1.5rem; border-radius: 12px; border: 1px solid var(--border); text-align: center; }
-    .kpi-valor { display: block; font-size: 2rem; font-weight: 700; color: var(--purple-dark); }
-    .kpi-label { font-size: 0.85rem; color: var(--text-light); text-transform: uppercase; }
-    .grafico-container { background: var(--card-bg); padding: 1.5rem; border-radius: 12px; border: 1px solid var(--border); }
-  </style>
-</head>
-<body>
-
-  <div class="container wide">
-    <div class="header-institucional">Dashboard: Escuela de Formación Carlos Quioga</div>
+<div class="container wide">
+    <h1 class="titulo-principal-a">Resumen Dirección Nacional de Adultos</h1>
     
-    <div class="dashboard-grid">
-      <div class="kpi-card"><span id="totalMiembros" class="kpi-valor">0</span><span class="kpi-label">Miembros Totales</span></div>
-      <div class="kpi-card"><span id="progresoMedio" class="kpi-valor">0%</span><span class="kpi-label">Progreso Promedio</span></div>
-      <div class="kpi-card"><span id="pendientes" class="kpi-valor">0</span><span class="kpi-label">PPD Pendientes</span></div>
+    <div class="form-group">
+        <select id="filtroArea" onchange="renderDashboard()">
+            <option value="GENERAL">--- Ver Resumen General ---</option>
+            </select>
     </div>
 
-    <div class="grafico-container">
-      <canvas id="graficoAreas"></canvas>
-    </div>
+    <div id="displayArea"></div>
+</div>
 
-    <button class="btn-back" onclick="window.location.href='index.html'">Volver a Consulta</button>
-  </div>
-
-  <script>
-    const API_URL = "https://script.google.com/macros/s/AKfycbxg6vaqC8w8IsCjHHy9UX9TTyf2nJKhlA1J37nvQEJb6ERK4nSQM5pAO7o8bqBYUj-0SQ/exec";
-
-    fetch(API_URL)
-      .then(r => r.json())
-      .then(data => {
-        procesarDashboard(data);
-      });
-
-    function procesarDashboard(data) {
-      // 1. Calcular KPIs
-      document.getElementById('totalMiembros').textContent = data.length;
-      
-      const promedio = data.reduce((acc, cur) => acc + (cur.progreso || 0), 0) / data.length;
-      document.getElementById('progresoMedio').textContent = Math.round(promedio) + "%";
-
-      // 2. Gráfico de Áreas (Ejemplo)
-      const ctx = document.getElementById('graficoAreas').getContext('2d');
-      new Chart(ctx, {
-        type: 'bar',
-        data: {
-          labels: [...new Set(data.map(i => i.columnaA))],
-          datasets: [{
-            label: 'Miembros por Área',
-            data: [12, 19, 3, 5], // Aquí deberías mapear los datos de tu array
-            backgroundColor: '#6366f1'
-          }]
-        },
-        options: { responsive: true }
-      });
+<script>
+    // Función para renderizar según la selección
+    function renderDashboard() {
+        const area = document.getElementById('filtroArea').value;
+        const display = document.getElementById('displayArea');
+        
+        if (area === "GENERAL") {
+            renderGeneral(baseDatosCompleta);
+        } else {
+            renderPorArea(baseDatosCompleta.filter(i => i.columnaA === area));
+        }
     }
-  </script>
-</body>
-</html>
+
+    function renderPorArea(data) {
+        let html = `<h2>Miembros en el Área: ${data.length}</h2>`;
+        html += `<table class="tabla-area"><thead><tr><th>Nombre</th><th>Cargo</th><th>FB: VI | PPD | VF | GN</th><th>PC: VI | PPD | VF | AAA</th></tr></thead><tbody>`;
+        
+        data.forEach(p => {
+            html += `<tr>
+                <td>${p.nombre}</td>
+                <td>${p.cargo}</td>
+                <td>${check(p.columnaL)} ${check(p.columnaN)} ${check(p.columnaO)} ${check(p.columnaQ)}</td>
+                <td>${check(p.columnaS)} ${check(p.columnaU)} ${check(p.columnaV)} ${check(p.columnaX)}</td>
+            </tr>`;
+        });
+        html += `</tbody></table>`;
+        document.getElementById('displayArea').innerHTML = html;
+    }
+
+    // Utilidad para los iconos
+    function check(val) {
+        const isTrue = (val === true || val === "VERDADERO" || val === "true");
+        return `<span class="badge" style="color:${isTrue ? 'var(--success)' : 'var(--danger)'}">${isTrue ? '✔️' : '❌'}</span>`;
+    }
+
+    function renderGeneral(data) {
+        // Lógica para contar totales
+        const total = data.length;
+        const count = (col) => data.filter(i => i[col] === true || i[col] === "VERDADERO").length;
+        
+        document.getElementById('displayArea').innerHTML = `
+            <div class="kpi-container">
+                <div class="card-stats"><h3>Formación Básica</h3>
+                VI: ${count('columnaL')} | PPD: ${count('columnaN')} | VF: ${count('columnaO')} | GN: ${count('columnaQ')}</div>
+                <div class="card-stats"><h3>Perfeccionamiento Continuo</h3>
+                VI: ${count('columnaS')} | PPD: ${count('columnaU')} | VF: ${count('columnaV')} | AAA: ${count('columnaX')}</div>
+            </div>`;
+    }
+</script>
