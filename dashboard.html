@@ -6,93 +6,88 @@
   <title>Dirección Nacional de Adultos</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <style>
-    :root { --primary: #6366f1; --purple-dark: #4c1d95; --bg: #f8fafc; --text: #1e293b; --border: #e2e8f0; }
-    body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); padding: 2rem; }
-    .container { max-width: 900px; margin: auto; background: white; padding: 2rem; border-radius: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-    .hidden { display: none !important; }
-    /* Estilos para el Informe Impreso/PDF */
-    #reporteImpresion { width: 100%; font-size: 0.8rem; }
-    #reporteImpresion table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
-    #reporteImpresion th, #reporteImpresion td { border: 1px solid #000; padding: 5px; text-align: center; }
-    #reporteImpresion th { background: #eee; }
+    :root { --primary: #6366f1; --purple-dark: #4c1d95; --bg: #f8fafc; --success: #10b981; --danger: #ef4444; }
+    body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); padding: 2rem 1rem; }
+    .container { max-width: 1000px; margin: auto; background: white; padding: 2rem; border-radius: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+    .nav-tabs { display: flex; gap: 10px; margin-bottom: 2rem; }
+    .btn-tab { padding: 0.75rem 1.5rem; border: 1px solid var(--primary); background: white; color: var(--primary); border-radius: 8px; cursor: pointer; font-weight: bold; }
+    .btn-tab.active { background: var(--primary); color: white; }
+    .section-content { display: none; }
+    .section-content.active { display: block; }
+    table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+    th, td { padding: 8px; border: 1px solid #e2e8f0; text-align: center; font-size: 0.85rem; }
+    th { background: #f1f5f9; }
+    .btn-informe { background: var(--purple-dark); color: white; padding: 0.75rem 1.5rem; border-radius: 8px; border: none; cursor: pointer; }
   </style>
 </head>
 <body>
 
-<div id="paginaFiltros" class="container">
-  <h1>Dirección Nacional de Adultos</h1>
-  <select id="selectA" onchange="cambioArea()"><option value="">Cargando Áreas...</option></select>
-  <div id="grupoC" class="hidden"><select id="selectC" onchange="activarBoton()"><option value="">Seleccione Nombre...</option></select></div>
-  <div style="display: flex; gap: 10px;">
-    <button id="btnConsultar" disabled onclick="irAPaginaReporte()">Consultar</button>
-    <button style="background: var(--purple-dark);" onclick="prepararInforme()">Generar Informe</button>
+<div class="container">
+  <div class="nav-tabs">
+    <button id="btnG" class="btn-tab active" onclick="tab('general', 'btnG')">Información General</button>
+    <button id="btnA" class="btn-tab" onclick="tab('area', 'btnA')">Información por Área</button>
   </div>
-</div>
 
-<div id="reporteImpresion" class="hidden"></div>
+  <div id="general" class="section-content active">
+    <h2>Resumen Nacional</h2>
+    <div id="stats">Cargando...</div>
+  </div>
 
-<div id="paginaReporte" class="container hidden">
-    <button onclick="volver()">Volver</button>
+  <div id="area" class="section-content">
+    <select id="selArea" onchange="render()"><option value="">Seleccione Área...</option></select>
+    <button class="btn-informe" style="margin-top:10px;" onclick="generarInformePDF()">Descargar Informe PDF</button>
+    <div id="tablaDiv"></div>
+  </div>
 </div>
 
 <script>
   const API_URL = "https://script.google.com/macros/s/AKfycbxg6vaqC8w8IsCjHHy9UX9TTyf2nJKhlA1J37nvQEJb6ERK4nSQM5pAO7o8bqBYUj-0SQ/exec";
   let db = [];
 
-  window.onload = () => { fetch(API_URL).then(r => r.json()).then(d => { db = d; inicializarA(); }); };
+  function mapearIcono(valor) {
+    var v = String(valor).trim().toUpperCase();
+    return (v === "VERDADERO" || v === "TRUE" || v === "1" || v === "V") ? "✔️" : "❌";
+  }
 
-  function inicializarA() {
-    let sel = document.getElementById('selectA');
-    let areas = [...new Set(db.map(i => i.columnaA))].sort();
-    sel.innerHTML = '<option value="">-- Seleccione Área --</option>';
+  fetch(API_URL).then(r => r.json()).then(data => {
+    db = data;
+    const areas = [...new Set(db.map(i => i.columnaA).filter(Boolean))].sort();
+    const sel = document.getElementById('selArea');
     areas.forEach(a => sel.innerHTML += `<option value="${a}">${a}</option>`);
+  });
+
+  function tab(id, btn) {
+    document.querySelectorAll('.section-content').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.btn-tab').forEach(b => b.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    document.getElementById(btn).classList.add('active');
   }
 
-  function cambioArea() {
-    let selC = document.getElementById('selectC');
-    let area = document.getElementById('selectA').value;
-    selC.innerHTML = '<option value="">-- Seleccione Nombre --</option>';
-    db.filter(i => i.columnaA === area).forEach(i => selC.innerHTML += `<option value="${i.nombre}">${i.nombre}</option>`);
-    document.getElementById('grupoC').classList.remove('hidden');
+  function render() {
+    const area = document.getElementById('selArea').value;
+    const filtrados = db.filter(i => i.columnaA === area);
+    let html = `<table><tr><th>Nombre</th><th>Cargo</th><th>FB:VI</th><th>FB:PPD</th><th>FB:VF</th><th>FB:GN</th><th>PC:VI</th><th>PC:PPD</th><th>PC:VF</th><th>PC:AAA</th></tr>`;
+    filtrados.forEach(p => {
+      html += `<tr><td>${p.nombre}</td><td>${p.cargo}</td>
+      <td>${mapearIcono(p.valoracionInicial)}</td><td>${mapearIcono(p.desarrolloPPD)}</td><td>${mapearIcono(p.valoracionFinal)}</td><td>${mapearIcono(p.gestorNacionalFecha)}</td>
+      <td>${mapearIcono(p.s4ValoracionInicial)}</td><td>${mapearIcono(p.s4DesarrolloPPD)}</td><td>${mapearIcono(p.s4ValoracionFinal)}</td><td>${mapearIcono(p.aaaFecha)}</td></tr>`;
+    });
+    document.getElementById('tablaDiv').innerHTML = html + "</table>";
   }
 
-  function activarBoton() { document.getElementById('btnConsultar').disabled = false; }
-
-  function prepararInforme() {
-    const area = document.getElementById('selectA').value;
+  function generarInformePDF() {
+    const area = document.getElementById('selArea').value;
     if (!area) return alert("Seleccione un área primero");
     
-    const filtrados = db.filter(i => i.columnaA === area);
-    let html = `<h1>Informe de Área: ${area}</h1>
-    <table border="1">
-      <thead>
-        <tr>
-          <th>Nombre</th><th>Cargo</th><th>FB:VI</th><th>FB:PPD</th><th>FB:VF</th><th>FB:GN</th>
-          <th>PC:VI</th><th>PC:PPD</th><th>PC:VF</th><th>PC:AAA</th>
-        </tr>
-      </thead>
-      <tbody>`;
+    // Crear un contenedor oculto para imprimir
+    let div = document.createElement('div');
+    div.id = "printDiv";
+    div.style.padding = "20px";
+    div.innerHTML = `<h1>Informe Área: ${area}</h1>` + document.getElementById('tablaDiv').innerHTML;
+    document.body.appendChild(div);
     
-    filtrados.forEach(u => {
-      html += `<tr>
-        <td>${u.nombre}</td><td>${u.cargo}</td>
-        <td>${u.valoracionInicial?'✅':'❌'}</td><td>${u.desarrolloPPD?'✅':'❌'}</td><td>${u.valoracionFinal?'✅':'❌'}</td><td>${u.gestorNacionalFecha?'✅':'❌'}</td>
-        <td>${u.s4ValoracionInicial?'✅':'❌'}</td><td>${u.s4DesarrolloPPD?'✅':'❌'}</td><td>${u.s4ValoracionFinal?'✅':'❌'}</td><td>${u.aaaFecha?'✅':'❌'}</td>
-      </tr>`;
-    });
-    html += `</tbody></table>`;
-    
-    const contenedor = document.getElementById('reporteImpresion');
-    contenedor.innerHTML = html;
-    contenedor.classList.remove('hidden');
-    
-    // Descargar PDF automáticamente
-    html2pdf().from(contenedor).save('Informe_'+area+'.pdf');
-    contenedor.classList.add('hidden');
+    html2pdf().from(div).set({filename: 'Informe_'+area+'.pdf'}).save().then(() => document.body.removeChild(div));
   }
-
-  function volver() { document.getElementById('paginaReporte').classList.add('hidden'); document.getElementById('paginaFiltros').classList.remove('hidden'); }
-  function irAPaginaReporte() { /* Tu lógica original de consulta individual */ }
 </script>
 </body>
 </html>
