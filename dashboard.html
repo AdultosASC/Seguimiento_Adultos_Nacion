@@ -65,7 +65,9 @@
 
   function render() {
     const area = document.getElementById('selArea').value;
-    const filtrados = db.filter(i => i.columnaA === area);
+    // AQUÍ ESTÁ EL CAMBIO: .filter agrega condición para que p.nombre no sea nulo ni vacío tras quitar espacios
+    const filtrados = db.filter(i => i.columnaA === area && i.nombre && i.nombre.trim() !== "");
+    
     let html = `<table><tr><th>Nombre</th><th>Cargo</th><th>FB:VI</th><th>FB:PPD</th><th>FB:VF</th><th>FB:GN</th><th>PC:VI</th><th>PC:PPD</th><th>PC:VF</th><th>PC:AAA</th></tr>`;
     filtrados.forEach(p => {
       html += `<tr><td>${p.nombre}</td><td>${p.cargo}</td>
@@ -79,7 +81,6 @@
     const area = document.getElementById('selArea').value;
     if (!area) return alert("Seleccione un área primero");
     
-    // Crear un contenedor oculto para imprimir
     let div = document.createElement('div');
     div.id = "printDiv";
     div.style.padding = "20px";
