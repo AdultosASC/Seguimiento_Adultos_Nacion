@@ -41,10 +41,16 @@
     const filtrados = db.filter(i => i.columnaA === area && i.nombre);
     let win = window.open('', '_blank');
     let html = `<html><head><style>
-      body{font-family:sans-serif; padding:20px;} 
-      .tarjeta{border:1px solid #ccc; padding:15px; margin-bottom:20px; page-break-inside:avoid;}
-      h3{margin-top:0;}
-    </style></head><body><h1>Informe de Área: ${area}</h1>`;
+      body{font-family: 'Segoe UI', sans-serif; padding: 40px; background: #f8fafc;}
+      h1{text-align: center; color: #1e293b; border-bottom: 3px solid #6366f1; padding-bottom: 10px;}
+      .grid-reporte{display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;}
+      .tarjeta{background: white; border-radius: 12px; padding: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); border-left: 5px solid #6366f1;}
+      .tarjeta h3{margin: 0 0 10px 0; color: #4c1d95; border-bottom: 1px solid #eee; padding-bottom: 5px;}
+      .info-row{display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 5px;}
+      .badge{font-weight: bold;}
+    </style></head><body>
+    <h1>Informe de Área: ${area}</h1>
+    <div class="grid-reporte">`;
     
     filtrados.forEach(u => {
       let fin = new Date(u.fechaFinalizacion);
@@ -53,13 +59,23 @@
       
       html += `<div class="tarjeta">
         <h3>${u.nombre}</h3>
-        <p><strong>Meses restantes en el cargo:</strong> ${diff > 0 ? diff : 0}</p>
-        <p><strong>Formación Básica:</strong> Inicial(${u.valoracionInicial?'✅':'❌'}) PPD(${u.desarrolloPPD?'✅':'❌'}) Final(${u.valoracionFinal?'✅':'❌'}) Gestor(${u.gestorNacionalFecha?'✅':'❌'})</p>
-        <p><strong>Perfeccionamiento:</strong> Inicial(${u.s4ValoracionInicial?'✅':'❌'}) PPD(${u.s4DesarrolloPPD?'✅':'❌'}) Final(${u.s4ValoracionFinal?'✅':'❌'}) AAA(${u.aaaFecha?'✅':'❌'})</p>
+        <div class="info-row"><span>Meses restantes:</span> <b>${diff > 0 ? diff : 0}</b></div>
+        <hr>
+        <div class="info-row"><span><b>Formación Básica</b></span></div>
+        <div class="info-row"><span>Inicial:</span> <span class="badge">${u.valoracionInicial?'✅':'❌'}</span></div>
+        <div class="info-row"><span>PPD:</span> <span class="badge">${u.desarrolloPPD?'✅':'❌'}</span></div>
+        <div class="info-row"><span>Final:</span> <span class="badge">${u.valoracionFinal?'✅':'❌'}</span></div>
+        <div class="info-row"><span>Gestor:</span> <span class="badge">${u.gestorNacionalFecha?'✅':'❌'}</span></div>
+        <hr>
+        <div class="info-row"><span><b>Perfeccionamiento</b></span></div>
+        <div class="info-row"><span>Inicial:</span> <span class="badge">${u.s4ValoracionInicial?'✅':'❌'}</span></div>
+        <div class="info-row"><span>PPD:</span> <span class="badge">${u.s4DesarrolloPPD?'✅':'❌'}</span></div>
+        <div class="info-row"><span>Final:</span> <span class="badge">${u.s4ValFinal?'✅':'❌'}</span></div>
+        <div class="info-row"><span>AAA:</span> <span class="badge">${u.aaaFecha?'✅':'❌'}</span></div>
       </div>`;
     });
     
-    html += "</body></html>";
+    html += "</div></body></html>";
     win.document.write(html);
     win.print();
   }
