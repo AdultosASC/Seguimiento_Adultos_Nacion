@@ -2,81 +2,97 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Generador de Informes Profesional</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dirección Nacional de Adultos</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <style>
-    :root { --primary: #6366f1; --purple-dark: #4c1d95; --bg: #f8fafc; }
+    :root { --primary: #6366f1; --purple-dark: #4c1d95; --bg: #f8fafc; --text: #1e293b; --border: #e2e8f0; }
     body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); padding: 2rem; }
-    .controls { max-width: 400px; margin: 0 auto 2rem; text-align: center; background: white; padding: 1.5rem; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-    select, button { width: 100%; padding: 0.75rem; margin-top: 0.5rem; border-radius: 8px; border: 1px solid #ddd; }
-    button { background: var(--purple-dark); color: white; font-weight: bold; cursor: pointer; }
-    
-    #reporteContenedor { max-width: 1000px; margin: auto; background: white; padding: 2rem; }
-    .grid-informe { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 15px; }
-    .tarjeta { border: 1px solid #e2e8f0; padding: 1rem; border-radius: 10px; background: #fafafa; }
-    .tarjeta h3 { margin: 0 0 0.5rem 0; color: var(--purple-dark); }
-    .badge { font-size: 0.8rem; padding: 2px 6px; border-radius: 4px; background: #e2e8f0; }
+    .container { max-width: 900px; margin: auto; background: white; padding: 2rem; border-radius: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+    .hidden { display: none !important; }
+    /* Estilos para el Informe Impreso/PDF */
+    #reporteImpresion { width: 100%; font-size: 0.8rem; }
+    #reporteImpresion table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+    #reporteImpresion th, #reporteImpresion td { border: 1px solid #000; padding: 5px; text-align: center; }
+    #reporteImpresion th { background: #eee; }
   </style>
 </head>
 <body>
 
-<div class="controls">
-  <select id="selArea"><option value="">Cargando áreas...</option></select>
-  <button onclick="generarVistaPrevia()">Generar Vista Previa</button>
-  <button id="btnPdf" style="display:none; background: #ef4444; margin-top:10px;" onclick="descargarPDF()">Descargar PDF</button>
+<div id="paginaFiltros" class="container">
+  <h1>Dirección Nacional de Adultos</h1>
+  <select id="selectA" onchange="cambioArea()"><option value="">Cargando Áreas...</option></select>
+  <div id="grupoC" class="hidden"><select id="selectC" onchange="activarBoton()"><option value="">Seleccione Nombre...</option></select></div>
+  <div style="display: flex; gap: 10px;">
+    <button id="btnConsultar" disabled onclick="irAPaginaReporte()">Consultar</button>
+    <button style="background: var(--purple-dark);" onclick="prepararInforme()">Generar Informe</button>
+  </div>
 </div>
 
-<div id="reporteContenedor"></div>
+<div id="reporteImpresion" class="hidden"></div>
+
+<div id="paginaReporte" class="container hidden">
+    <button onclick="volver()">Volver</button>
+</div>
 
 <script>
   const API_URL = "https://script.google.com/macros/s/AKfycbxg6vaqC8w8IsCjHHy9UX9TTyf2nJKhlA1J37nvQEJb6ERK4nSQM5pAO7o8bqBYUj-0SQ/exec";
   let db = [];
 
-  window.onload = () => {
-    fetch(API_URL).then(r => r.json()).then(data => {
-      db = data;
-      const areas = [...new Set(db.map(i => i.columnaA).filter(Boolean))].sort();
-      const sel = document.getElementById('selArea');
-      areas.forEach(a => sel.innerHTML += `<option value="${a}">${a}</option>`);
-    });
-  };
+  window.onload = () => { fetch(API_URL).then(r => r.json()).then(d => { db = d; inicializarA(); }); };
 
-  function generarVistaPrevia() {
-    const area = document.getElementById('selArea').value;
-    if (!area) return;
+  function inicializarA() {
+    let sel = document.getElementById('selectA');
+    let areas = [...new Set(db.map(i => i.columnaA))].sort();
+    sel.innerHTML = '<option value="">-- Seleccione Área --</option>';
+    areas.forEach(a => sel.innerHTML += `<option value="${a}">${a}</option>`);
+  }
+
+  function cambioArea() {
+    let selC = document.getElementById('selectC');
+    let area = document.getElementById('selectA').value;
+    selC.innerHTML = '<option value="">-- Seleccione Nombre --</option>';
+    db.filter(i => i.columnaA === area).forEach(i => selC.innerHTML += `<option value="${i.nombre}">${i.nombre}</option>`);
+    document.getElementById('grupoC').classList.remove('hidden');
+  }
+
+  function activarBoton() { document.getElementById('btnConsultar').disabled = false; }
+
+  function prepararInforme() {
+    const area = document.getElementById('selectA').value;
+    if (!area) return alert("Seleccione un área primero");
     
-    const filtrados = db.filter(i => i.columnaA === area && i.nombre);
-    let html = `<h1>Informe de Área: ${area}</h1><div class="grid-informe">`;
+    const filtrados = db.filter(i => i.columnaA === area);
+    let html = `<h1>Informe de Área: ${area}</h1>
+    <table border="1">
+      <thead>
+        <tr>
+          <th>Nombre</th><th>Cargo</th><th>FB:VI</th><th>FB:PPD</th><th>FB:VF</th><th>FB:GN</th>
+          <th>PC:VI</th><th>PC:PPD</th><th>PC:VF</th><th>PC:AAA</th>
+        </tr>
+      </thead>
+      <tbody>`;
     
     filtrados.forEach(u => {
-      let fin = new Date(u.fechaFinalizacion);
-      let diff = Math.max(0, Math.floor((fin - new Date()) / (1000 * 60 * 60 * 24 * 30)));
-      
-      html += `<div class="tarjeta">
-        <h3>${u.nombre}</h3>
-        <p>⏳ ${diff} meses restantes</p>
-        <p><small>Formación Básica</small><br>
-        VI:${u.valoracionInicial?'✅':'❌'} | PPD:${u.desarrolloPPD?'✅':'❌'} | VF:${u.valoracionFinal?'✅':'❌'} | GN:${u.gestorNacionalFecha?'✅':'❌'}</p>
-        <p><small>Perfeccionamiento</small><br>
-        VI:${u.s4ValoracionInicial?'✅':'❌'} | PPD:${u.s4DesarrolloPPD?'✅':'❌'} | VF:${u.s4ValoracionFinal?'✅':'❌'} | AAA:${u.aaaFecha?'✅':'❌'}</p>
-      </div>`;
+      html += `<tr>
+        <td>${u.nombre}</td><td>${u.cargo}</td>
+        <td>${u.valoracionInicial?'✅':'❌'}</td><td>${u.desarrolloPPD?'✅':'❌'}</td><td>${u.valoracionFinal?'✅':'❌'}</td><td>${u.gestorNacionalFecha?'✅':'❌'}</td>
+        <td>${u.s4ValoracionInicial?'✅':'❌'}</td><td>${u.s4DesarrolloPPD?'✅':'❌'}</td><td>${u.s4ValoracionFinal?'✅':'❌'}</td><td>${u.aaaFecha?'✅':'❌'}</td>
+      </tr>`;
     });
+    html += `</tbody></table>`;
     
-    html += "</div>";
-    document.getElementById('reporteContenedor').innerHTML = html;
-    document.getElementById('btnPdf').style.display = 'block';
+    const contenedor = document.getElementById('reporteImpresion');
+    contenedor.innerHTML = html;
+    contenedor.classList.remove('hidden');
+    
+    // Descargar PDF automáticamente
+    html2pdf().from(contenedor).save('Informe_'+area+'.pdf');
+    contenedor.classList.add('hidden');
   }
 
-  function descargarPDF() {
-    const element = document.getElementById('reporteContenedor');
-    html2pdf().from(element).set({
-      margin: 10,
-      filename: 'Informe_Area.pdf',
-      image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2 },
-      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-    }).save();
-  }
+  function volver() { document.getElementById('paginaReporte').classList.add('hidden'); document.getElementById('paginaFiltros').classList.remove('hidden'); }
+  function irAPaginaReporte() { /* Tu lógica original de consulta individual */ }
 </script>
 </body>
 </html>
