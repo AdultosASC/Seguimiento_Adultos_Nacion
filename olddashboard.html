@@ -14,7 +14,7 @@
     .section-content { display: none; }
     .section-content.active { display: block; }
     table { width: 100%; border-collapse: collapse; margin-top: 1rem; font-size: 0.75rem; }
-    th, td { padding: 6px; border: 1px solid #e2e8f0; text-align: center; }
+    th, td { padding: 5px; border: 1px solid #e2e8f0; text-align: center; }
     th { background: #f1f5f9; }
     .btn-informe { background: var(--purple-dark); color: white; padding: 0.75rem 1.5rem; border-radius: 8px; border: none; cursor: pointer; }
     .chulo { color: var(--success); font-weight: bold; }
@@ -71,10 +71,11 @@
 
     const filtrados = db.filter(i => i.columnaA === area && i.nombre && i.nombre.trim() !== "");
     
-    // Tabla actualizada con las columnas GN, PF:PPD y AAA
+    // Encabezados con las columnas solicitadas:
     let html = `<table><tr>
-      <th>Nombre</th><th>Cargo</th><th>FB: VI</th><th>FB: PPD</th><th>FB: VF</th>
-      <th>GN</th><th>PC: VI</th><th>PC: PPD</th><th>PC: VF</th><th>PF: PPD</th><th>AAA</th>
+      <th>Nombre</th><th>Cargo</th>
+      <th>FB: VI</th><th>FB: PPD</th><th>FB: VF</th>
+      <th>GN</th><th>PC: VI</th><th>PC: PPD</th><th>PC: VF</th><th>AAA</th>
     </tr>`;
     
     filtrados.forEach(p => {
@@ -86,9 +87,8 @@
         <td>${procesarDato(p.valoracionFinal)}</td>
         <td>${procesarDato(p.columnaQ)}</td>
         <td>${procesarDato(p.s4ValoracionInicial)}</td>
-        <td>${procesarDato(p.s4DesarrolloPPD)}</td>
-        <td>${procesarDato(p.s4ValoracionFinal)}</td>
         <td>${procesarDato(p.columnaU)}</td>
+        <td>${procesarDato(p.s4ValoracionFinal)}</td>
         <td>${procesarDato(p.columnaX)}</td>
       </tr>`;
     });
