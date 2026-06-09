@@ -2,7 +2,6 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dirección Nacional de Adultos</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <style>
@@ -29,12 +28,10 @@
     <button id="btnG" class="btn-tab active" onclick="tab('general', 'btnG')">Información General</button>
     <button id="btnA" class="btn-tab" onclick="tab('area', 'btnA')">Información por Área</button>
   </div>
-
   <div id="general" class="section-content active">
     <h2>Resumen Nacional</h2>
     <div id="stats">Cargando datos...</div>
   </div>
-
   <div id="area" class="section-content">
     <select id="selArea" onchange="render()"><option value="">Seleccione Área...</option></select>
     <button class="btn-informe" style="margin-top:10px;" onclick="generarInformePDF()">Descargar Informe PDF</button>
@@ -46,22 +43,16 @@
   const API_URL = "https://script.google.com/macros/s/AKfycbxg6vaqC8w8IsCjHHy9UX9TTyf2nJKhlA1J37nvQEJb6ERK4nSQM5pAO7o8bqBYUj-0SQ/exec";
   let db = [];
 
-  // Función inteligente: Si es fecha la muestra, si es booleano pone chulo/equis
-  function procesarDato(valor) {
-    if (valor === null || valor === undefined || valor === "" || valor === "N/A") return "❌";
-    
-    // Si es booleano o string que parece booleano
+  // Función lógica pura: índices de matriz
+  function procesar(valor, esFecha) {
+    if (esFecha) return (valor && valor !== "N/A" && valor !== "") ? valor : "❌";
     var v = String(valor).trim().toUpperCase();
-    if (v === "TRUE" || v === "VERDADERO" || v === "1" || v === "V" || v === "SI") return '<span class="chulo">✔️</span>';
-    
-    // Si es una fecha (formato YYYY-MM-DD según tu script)
-    if (v.includes("-")) return valor; 
-    
-    return valor; // Retorna cualquier otro dato tal cual
+    return (v === "TRUE" || v === "VERDADERO" || v === "1" || v === "V" || v === "SI") ? '<span class="chulo">✔️</span>' : '<span class="equis">❌</span>';
   }
 
   fetch(API_URL).then(r => r.json()).then(data => {
     db = data;
+    // La columnaA en tu script es el índice 0 del objeto registrado
     const areas = [...new Set(db.map(i => i.columnaA))].filter(Boolean).sort();
     const sel = document.getElementById('selArea');
     areas.forEach(a => sel.innerHTML += `<option value="${a}">${a}</option>`);
@@ -81,17 +72,19 @@
     let html = `<table><tr><th>Nombre</th><th>Cargo</th><th>FB:VI</th><th>FB:PPD</th><th>FB:VF</th><th>FB:GN</th><th>PC:VI</th><th>PC:PPD</th><th>PC:VF</th><th>PC:AAA</th></tr>`;
     
     filtrados.forEach(p => {
+      // Usamos el objeto "p" y extraemos los valores. 
+      // Como tu script ya mapeó los índices, aquí simplemente llamamos a la propiedad.
       html += `<tr>
         <td>${p.nombre}</td>
         <td>${p.cargo}</td>
-        <td>${procesarDato(p.valoracionInicial)}</td>
-        <td>${procesarDato(p.desarrolloPPD)}</td>
-        <td>${procesarDato(p.valoracionFinal)}</td>
-        <td>${procesarDato(p.gestorNacionalFecha)}</td>
-        <td>${procesarDato(p.s4ValoracionInicial)}</td>
-        <td>${procesarDato(p.s4DesarrolloPPD)}</td>
-        <td>${procesarDato(p.s4ValoracionFinal)}</td>
-        <td>${procesarDato(p.aaaFecha)}</td>
+        <td>${procesar(p.valoracionInicial, false)}</td>
+        <td>${procesar(p.desarrolloPPD, false)}</td>
+        <td>${procesar(p.valoracionFinal, false)}</td>
+        <td>${procesar(p.gestorNacionalFecha, true)}</td>
+        <td>${procesar(p.s4ValoracionInicial, false)}</td>
+        <td>${procesar(p.s4DesarrolloPPD, false)}</td>
+        <td>${procesar(p.s4ValoracionFinal, false)}</td>
+        <td>${procesar(p.aaaFecha, true)}</td>
       </tr>`;
     });
     document.getElementById('tablaDiv').innerHTML = html + "</table>";
