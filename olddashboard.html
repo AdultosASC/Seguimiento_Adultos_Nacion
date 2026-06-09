@@ -2,121 +2,111 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dirección Nacional de Adultos</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <style>
-    :root {
-      --primary: #6366f1; --primary-hover: #4f46e5; --purple-dark: #4c1d95; --purple-light: #8b5cf6;
-      --bg: #f8fafc; --card-bg: #ffffff; --text: #1e293b; --text-light: #64748b; --border: #e2e8f0;
-      --success: #10b981; --danger: #ef4444;
-    }
-    body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 2rem 1rem; display: flex; justify-content: center; align-items: center; min-height: 100vh; box-sizing: border-box; }
-    .container { background-color: var(--card-bg); padding: 2.5rem; border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05); width: 100%; max-width: 450px; box-sizing: border-box; }
-    .container.wide { max-width: 850px; }
-    .header-institucional { color: var(--purple-dark); font-size: 1.25rem; font-weight: 700; text-align: center; margin-bottom: 1.5rem; border-bottom: 2px dashed var(--border); padding-bottom: 1rem; }
-    h1 { font-size: 1.4rem; font-weight: 700; margin: 0 0 1.5rem 0; text-align: center; }
-    .form-group { margin-bottom: 1.5rem; }
-    .label-filtro { display: block; font-size: 0.9rem; font-weight: 700; color: var(--purple-dark); margin-bottom: 0.6rem; }
-    select { width: 100%; padding: 0.75rem 1rem; font-size: 1rem; background-color: var(--bg); border: 1px solid var(--border); border-radius: 8px; color: var(--text); outline: none; box-sizing: border-box; }
-    button { width: 100%; padding: 0.75rem 1rem; font-size: 1rem; font-weight: 600; color: white; background-color: var(--primary); border: none; border-radius: 8px; cursor: pointer; margin-top: 1rem; }
-    .hidden { display: none !important; }
-    .titulo-principal-a { color: var(--purple-dark); font-weight: bold; font-size: 1.8rem; margin-bottom: 1.5rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; }
-    .seccion-reporte { background-color: var(--bg); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; }
-    .seccion-reporte h2 { font-size: 1.2rem; color: var(--primary); margin-top: 0; margin-bottom: 1rem; font-weight: 700; }
-    .grid-dos-columnas { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.25rem; }
-    .dato-bloque { display: flex; flex-direction: column; }
-    .dato-label { font-size: 0.8rem; font-weight: 600; color: var(--text-light); text-transform: uppercase; margin-bottom: 0.2rem; }
-    .dato-valor { font-size: 1rem; font-weight: 500; color: var(--text); }
+    :root { --primary: #6366f1; --purple-dark: #4c1d95; --bg: #f8fafc; --success: #10b981; --danger: #ef4444; }
+    body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); padding: 2rem 1rem; }
+    .container { max-width: 1100px; margin: auto; background: white; padding: 2rem; border-radius: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+    .nav-tabs { display: flex; gap: 10px; margin-bottom: 2rem; }
+    .btn-tab { padding: 0.75rem 1.5rem; border: 1px solid var(--primary); background: white; color: var(--primary); border-radius: 8px; cursor: pointer; font-weight: bold; }
+    .btn-tab.active { background: var(--primary); color: white; }
+    .section-content { display: none; }
+    .section-content.active { display: block; }
+    table { width: 100%; border-collapse: collapse; margin-top: 1rem; font-size: 0.75rem; }
+    th, td { padding: 6px; border: 1px solid #e2e8f0; text-align: center; }
+    th { background: #f1f5f9; }
+    .btn-informe { background: var(--purple-dark); color: white; padding: 0.75rem 1.5rem; border-radius: 8px; border: none; cursor: pointer; }
     .chulo { color: var(--success); font-weight: bold; }
     .equis { color: var(--danger); font-weight: bold; }
-    .btn-back { background-color: transparent; color: var(--text-light); border: 1px solid var(--border); margin-top: 1rem; width: auto; padding: 0.5rem 1rem; }
   </style>
 </head>
 <body>
 
-  <div id="paginaFiltros" class="container">
-    <div class="header-institucional">Dirección Nacional de <br>Adultos en el Movimiento</div>
-    <h1>Consulta/Registro de Información</h1>
-    <div class="form-group">
-      <label for="selectA" class="label-filtro">Seleccione Área Estratégica</label>
-      <select id="selectA" onchange="cambioArea()"><option value="">Conectando con la base de datos...</option></select>
-    </div>
-    <div id="grupoC" class="form-group hidden">
-      <label for="selectC" class="label-filtro">Seleccione Nombre</label>
-      <select id="selectC" onchange="activarBotonConsultar()"><option value="">-- Seleccione un nombre --</option></select>
-    </div>
-    <button id="btnConsultar" disabled onclick="irAPaginaReporte()">Consultar</button>
+<div class="container">
+  <div class="nav-tabs">
+    <button id="btnG" class="btn-tab active" onclick="tab('general', 'btnG')">Información General</button>
+    <button id="btnA" class="btn-tab" onclick="tab('area', 'btnA')">Información por Área</button>
   </div>
 
-  <div id="paginaReporte" class="container wide hidden">
-    <div id="tituloColumnaA" class="titulo-principal-a"></div>
-    <div id="contenidoReporte" class="hidden">
-      <div class="seccion-reporte">
-        <h2>Información General</h2>
-        <div class="grid-dos-columnas">
-          <div class="dato-bloque"><span class="dato-label">Nombre</span><span id="valNombre" class="dato-valor"></span></div>
-          <div class="dato-bloque"><span class="dato-label">Cargo</span><span id="valCargo" class="dato-valor"></span></div>
-          <div id="boxGestor" class="dato-bloque" style="grid-column: 1 / -1;"><span class="dato-label">Gestor Nacional (GN)</span><span id="valGestor" class="dato-valor"></span></div>
-        </div>
-      </div>
-      <div class="seccion-reporte">
-        <h2>Desarrollo Personal</h2>
-        <div class="grid-dos-columnas">
-          <div class="dato-bloque"><span class="dato-label">PF: PPD</span><span id="valPPD" class="dato-valor"></span></div>
-          <div class="dato-bloque"><span class="dato-label">AAA</span><span id="valAAA" class="dato-valor"></span></div>
-        </div>
-      </div>
-    </div>
-    <button class="btn-back" onclick="volverYRefrescarConsulta()">Volver a consultar</button>
+  <div id="general" class="section-content active">
+    <h2>Resumen Nacional</h2>
+    <div id="stats">Cargando datos...</div>
   </div>
 
-  <script>
-    const API_URL = "https://script.google.com/macros/s/AKfycbxg6vaqC8w8IsCjHHy9UX9TTyf2nJKhlA1J37nvQEJb6ERK4nSQM5pAO7o8bqBYUj-0SQ/exec"; 
-    let baseDatosCompleta = [];
+  <div id="area" class="section-content">
+    <select id="selArea" onchange="render()"><option value="">Seleccione Área...</option></select>
+    <button class="btn-informe" style="margin-top:10px;" onclick="generarInformePDF()">Descargar Informe PDF</button>
+    <div id="tablaDiv"></div>
+  </div>
+</div>
 
-    window.onload = function() { fetch(API_URL).then(r => r.json()).then(data => { baseDatosCompleta = data; inicializarDesplegableA(); }); };
+<script>
+  const API_URL = "https://script.google.com/macros/s/AKfycbxg6vaqC8w8IsCjHHy9UX9TTyf2nJKhlA1J37nvQEJb6ERK4nSQM5pAO7o8bqBYUj-0SQ/exec";
+  let db = [];
 
-    function procesarDato(valor) {
-      if (valor === null || valor === undefined || valor === "" || valor === "N/A") return '<span class="equis">❌</span>';
-      var v = String(valor).trim().toUpperCase();
-      return (v === "TRUE" || v === "VERDADERO" || v === "1" || v === "V" || v === "SI") ? '<span class="chulo">✔️</span>' : '<span class="equis">❌</span>';
-    }
+  function procesarDato(valor) {
+    if (valor === null || valor === undefined || valor === "" || valor === "N/A") return '<span class="equis">❌</span>';
+    var v = String(valor).trim().toUpperCase();
+    return (v === "TRUE" || v === "VERDADERO" || v === "1" || v === "V" || v === "SI") ? '<span class="chulo">✔️</span>' : '<span class="equis">❌</span>';
+  }
 
-    function inicializarDesplegableA() {
-      var select = document.getElementById('selectA');
-      let areas = [...new Set(baseDatosCompleta.map(item => item.columnaA))].filter(Boolean).sort();
-      select.innerHTML = '<option value="">-- Seleccione un Área --</option>';
-      areas.forEach(area => { let el = document.createElement('option'); el.value = area; el.textContent = area; select.appendChild(el); });
-    }
+  fetch(API_URL).then(r => r.json()).then(data => {
+    db = data;
+    const areas = [...new Set(db.map(i => i.columnaA))].filter(Boolean).sort();
+    const sel = document.getElementById('selArea');
+    areas.forEach(a => { if(a) sel.innerHTML += `<option value="${a}">${a}</option>`; });
+  }).catch(e => console.error("Error al cargar datos:", e));
 
-    function cambioArea() {
-      var valorA = document.getElementById('selectA').value;
-      var grupoC = document.getElementById('grupoC');
-      var selectC = document.getElementById('selectC');
-      if (!valorA) { grupoC.classList.add('hidden'); return; }
-      let nombres = baseDatosCompleta.filter(item => item.columnaA === valorA).map(item => item.nombre);
-      selectC.innerHTML = '<option value="">-- Seleccione un nombre --</option>';
-      nombres.forEach(nom => { let el = document.createElement('option'); el.value = nom; el.textContent = nom; selectC.appendChild(el); });
-      grupoC.classList.remove('hidden');
-    }
+  function tab(id, btn) {
+    document.querySelectorAll('.section-content').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.btn-tab').forEach(b => b.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    document.getElementById(btn).classList.add('active');
+  }
 
-    function activarBotonConsultar() { document.getElementById('btnConsultar').disabled = (document.getElementById('selectC').value === ""); }
+  function render() {
+    const area = document.getElementById('selArea').value;
+    if (!area) return;
 
-    function irAPaginaReporte() {
-      let u = baseDatosCompleta.find(item => item.columnaA === document.getElementById('selectA').value && item.nombre === document.getElementById('selectC').value);
-      document.getElementById('paginaFiltros').classList.add('hidden');
-      document.getElementById('paginaReporte').classList.remove('hidden');
-      
-      document.getElementById('valNombre').textContent = u.nombre;
-      document.getElementById('valCargo').textContent = u.cargo;
-      document.getElementById('valGestor').innerHTML = procesarDato(u.columnaQ);
-      document.getElementById('valPPD').innerHTML = procesarDato(u.columnaU);
-      document.getElementById('valAAA').innerHTML = procesarDato(u.columnaX);
-      
-      document.getElementById('contenidoReporte').classList.remove('hidden');
-    }
+    const filtrados = db.filter(i => i.columnaA === area && i.nombre && i.nombre.trim() !== "");
+    
+    // Tabla actualizada con las nuevas columnas: GN, PF:PPD, AAA
+    let html = `<table><tr>
+        <th>Nombre</th><th>Cargo</th><th>FB: VI</th><th>FB: PPD</th><th>FB: VF</th>
+        <th>GN</th><th>PC: VI</th><th>PC: PPD</th><th>PC: VF</th><th>AAA</th>
+        <th>GN (N)</th><th>PF:PPD (U)</th><th>AAA (X)</th>
+      </tr>`;
+    
+    filtrados.forEach(p => {
+      html += `<tr>
+        <td>${p.nombre || "Sin nombre"}</td>
+        <td>${p.cargo || "Sin cargo"}</td>
+        <td>${procesarDato(p.valoracionInicial)}</td>
+        <td>${procesarDato(p.desarrolloPPD)}</td>
+        <td>${procesarDato(p.valoracionFinal)}</td>
+        <td>${procesarDato(p.gestorNacionalFecha)}</td>
+        <td>${procesarDato(p.s4ValoracionInicial)}</td>
+        <td>${procesarDato(p.s4DesarrolloPPD)}</td>
+        <td>${procesarDato(p.s4ValoracionFinal)}</td>
+        <td>${procesarDato(p.aaaFecha)}</td>
+        <td>${procesarDato(p.columnaQ)}</td>
+        <td>${procesarDato(p.columnaU)}</td>
+        <td>${procesarDato(p.columnaX)}</td>
+      </tr>`;
+    });
+    document.getElementById('tablaDiv').innerHTML = html + "</table>";
+  }
 
-    function volverYRefrescarConsulta() { location.reload(); }
-  </script>
+  function generarInformePDF() {
+    const area = document.getElementById('selArea').value;
+    if (!area) return alert("Seleccione un área primero");
+    let div = document.createElement('div');
+    div.style.padding = "20px";
+    div.innerHTML = `<h1>Informe Área: ${area}</h1>` + document.getElementById('tablaDiv').innerHTML;
+    document.body.appendChild(div);
+    html2pdf().from(div).set({filename: 'Informe_'+area+'.pdf', margin: 5, image: {type: 'jpeg', quality: 0.98}, html2canvas: {scale: 2}}).save().then(() => document.body.removeChild(div));
+  }
+</script>
 </body>
 </html>
