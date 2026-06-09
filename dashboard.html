@@ -2,7 +2,6 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dirección Nacional de Adultos</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <style>
@@ -57,7 +56,7 @@
     const areas = [...new Set(db.map(i => i.columnaA))].filter(Boolean).sort();
     const sel = document.getElementById('selArea');
     areas.forEach(a => sel.innerHTML += `<option value="${a}">${a}</option>`);
-  });
+  }).catch(e => console.error("Error al cargar datos:", e));
 
   function tab(id, btn) {
     document.querySelectorAll('.section-content').forEach(s => s.classList.remove('active'));
@@ -68,10 +67,14 @@
 
   function render() {
     const area = document.getElementById('selArea').value;
+    if (!area) return;
+
+    // Filtramos asegurando que mantenemos la integridad del objeto "p"
     const filtrados = db.filter(i => i.columnaA === area && i.nombre && i.nombre.trim() !== "");
     
     let html = `<table><tr><th>Nombre</th><th>Cargo</th><th>FB: VI</th><th>FB: PPD</th><th>FB: VF</th><th>GN</th><th>PC: VI</th><th>PC: PPD</th><th>PC: VF</th><th>AAA</th></tr>`;
     
+    // Al usar "p" aquí, garantizamos que toda la fila viene del mismo objeto de la base de datos
     filtrados.forEach(p => {
       html += `<tr>
         <td>${p.nombre}</td>
