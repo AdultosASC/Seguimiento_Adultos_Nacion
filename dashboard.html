@@ -55,7 +55,7 @@
     db = data;
     const areas = [...new Set(db.map(i => i.columnaA))].filter(Boolean).sort();
     const sel = document.getElementById('selArea');
-    areas.forEach(a => sel.innerHTML += `<option value="${a}">${a}</option>`);
+    areas.forEach(a => { if(a) sel.innerHTML += `<option value="${a}">${a}</option>`; });
   }).catch(e => console.error("Error al cargar datos:", e));
 
   function tab(id, btn) {
@@ -69,16 +69,16 @@
     const area = document.getElementById('selArea').value;
     if (!area) return;
 
-    // Filtramos asegurando que mantenemos la integridad del objeto "p"
+    // Filtro estricto para evitar registros huérfanos
     const filtrados = db.filter(i => i.columnaA === area && i.nombre && i.nombre.trim() !== "");
     
     let html = `<table><tr><th>Nombre</th><th>Cargo</th><th>FB: VI</th><th>FB: PPD</th><th>FB: VF</th><th>GN</th><th>PC: VI</th><th>PC: PPD</th><th>PC: VF</th><th>AAA</th></tr>`;
     
-    // Al usar "p" aquí, garantizamos que toda la fila viene del mismo objeto de la base de datos
     filtrados.forEach(p => {
+      // Validamos que el objeto 'p' tenga los campos esperados para esta fila
       html += `<tr>
-        <td>${p.nombre}</td>
-        <td>${p.cargo}</td>
+        <td>${p.nombre || "Sin nombre"}</td>
+        <td>${p.cargo || "Sin cargo"}</td>
         <td>${procesarDato(p.valoracionInicial)}</td>
         <td>${procesarDato(p.desarrolloPPD)}</td>
         <td>${procesarDato(p.valoracionFinal)}</td>
