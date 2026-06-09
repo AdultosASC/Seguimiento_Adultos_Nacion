@@ -5,105 +5,88 @@
   <title>Dirección Nacional de Adultos</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <style>
-    :root { --primary: #6366f1; --purple-dark: #4c1d95; --bg: #f8fafc; --success: #10b981; --danger: #ef4444; }
-    body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); padding: 2rem 1rem; }
-    .container { max-width: 1100px; margin: auto; background: white; padding: 2rem; border-radius: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-    .nav-tabs { display: flex; gap: 10px; margin-bottom: 2rem; }
-    .btn-tab { padding: 0.75rem 1.5rem; border: 1px solid var(--primary); background: white; color: var(--primary); border-radius: 8px; cursor: pointer; font-weight: bold; }
-    .btn-tab.active { background: var(--primary); color: white; }
-    .section-content { display: none; }
-    .section-content.active { display: block; }
-    table { width: 100%; border-collapse: collapse; margin-top: 1rem; font-size: 0.75rem; }
-    th, td { padding: 5px; border: 1px solid #e2e8f0; text-align: center; }
-    th { background: #f1f5f9; }
-    .btn-informe { background: var(--purple-dark); color: white; padding: 0.75rem 1.5rem; border-radius: 8px; border: none; cursor: pointer; }
-    .chulo { color: var(--success); font-weight: bold; }
-    .equis { color: var(--danger); font-weight: bold; }
+    :root { --primary: #6366f1; --primary-hover: #4f46e5; --purple-dark: #4c1d95; --purple-light: #8b5cf6; --bg: #f8fafc; --card-bg: #ffffff; --text: #1e293b; --text-light: #64748b; --border: #e2e8f0; --success: #10b981; --danger: #ef4444; }
+    body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 2rem 1rem; display: flex; justify-content: center; min-height: 100vh; box-sizing: border-box; }
+    .container { background-color: var(--card-bg); padding: 2.5rem; border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05); width: 100%; max-width: 850px; box-sizing: border-box; }
+    .header-institucional { color: var(--purple-dark); font-size: 1.25rem; font-weight: 700; text-align: center; margin-bottom: 1.5rem; border-bottom: 2px dashed var(--border); padding-bottom: 1rem; }
+    .titulo-principal-a { color: var(--purple-dark); font-weight: bold; font-size: 1.8rem; margin-bottom: 1.5rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; }
+    .seccion-reporte { background-color: var(--bg); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; }
+    .seccion-reporte h2 { font-size: 1.2rem; color: var(--primary); margin-top: 0; margin-bottom: 1rem; font-weight: 700; }
+    .grid-dos-columnas { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.25rem; }
+    .dato-bloque { display: flex; flex-direction: column; }
+    .dato-mixto-linea { grid-column: 1 / -1; display: flex; align-items: center; justify-content: space-between; background: var(--card-bg); padding: 0.75rem 1rem; border-radius: 8px; border: 1px solid var(--border); gap: 1.5rem; }
+    .mixto-izq { display: flex; align-items: center; gap: 0.85rem; }
+    .dato-label { font-size: 0.8rem; font-weight: 600; color: var(--text-light); text-transform: uppercase; margin-bottom: 0.2rem; }
+    .dato-valor { font-size: 1rem; font-weight: 500; color: var(--text); }
+    .status-badge { font-size: 1.2rem; font-weight: bold; }
+    .tabla-archivos { width: 100%; border-collapse: collapse; margin-top: 0.5rem; background: white; border-radius: 8px; border: 1px solid var(--border); }
+    .tabla-archivos th, .tabla-archivos td { padding: 0.75rem 1rem; text-align: left; font-size: 0.9rem; border-bottom: 1px solid var(--border); }
+    .hidden { display: none !important; }
   </style>
 </head>
 <body>
 
-<div class="container">
-  <div class="nav-tabs">
-    <button id="btnG" class="btn-tab active" onclick="tab('general', 'btnG')">Información General</button>
-    <button id="btnA" class="btn-tab" onclick="tab('area', 'btnA')">Información por Área</button>
+  <div class="container">
+    <div id="tituloColumnaA" class="titulo-principal-a"></div>
+    <div id="contenidoReporte">
+      <div class="seccion-reporte">
+        <h2>Información General</h2>
+        <div class="grid-dos-columnas">
+          <div class="dato-bloque"><span class="dato-label">Nombre</span><span id="valNombre" class="dato-valor"></span></div>
+          <div class="dato-bloque"><span class="dato-label">Líder</span><span id="valLider" class="dato-valor"></span></div>
+          <div class="dato-bloque"><span class="dato-label">Comisión</span><span id="valComision" class="dato-valor"></span></div>
+          <div class="dato-bloque"><span class="dato-label">Resolución</span><span id="valResolucion" class="dato-valor"></span></div>
+        </div>
+      </div>
+
+      <div class="seccion-reporte">
+        <h2>Desarrollo y Seguimiento</h2>
+        <div class="grid-dos-columnas">
+          <div class="dato-mixto-linea">
+            <div class="mixto-izq"><span id="statusGN" class="status-badge"></span><span class="verificacion-titulo">GN</span></div>
+            <div id="boxFechaGN" class="dato-bloque" style="text-align: right;"><span class="dato-label">Fecha</span><span id="valFechaGN" class="dato-valor"></span></div>
+          </div>
+          <div class="dato-mixto-linea">
+            <div class="mixto-izq"><span id="statusPCPPD" class="status-badge"></span><span class="verificacion-titulo">PC: PPD</span></div>
+            <div class="dato-bloque" style="text-align: right;"><span class="dato-label">Fecha Val. Inicial PC</span><span id="valFechaValInicialPC" class="dato-valor"></span></div>
+          </div>
+          <div id="boxAAA" class="dato-bloque" style="grid-column: 1 / -1; background: #f0fdf4; padding: 0.75rem; border-radius: 8px; border: 1px solid #bbf7d0;">
+            <span class="dato-label" style="color: #166534;">AAA</span><span id="valAAA" class="dato-valor" style="font-weight: 600;"></span>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
-  <div id="general" class="section-content active">
-    <h2>Resumen Nacional</h2>
-    <div id="stats">Cargando datos...</div>
-  </div>
+  <script>
+    // Asumimos que 'usuarioSeleccionado' ya contiene los datos del JSON
+    function cargarReporte(usuarioSeleccionado) {
+      document.getElementById('tituloColumnaA').textContent = usuarioSeleccionado.columnaA;
+      document.getElementById('valNombre').textContent = usuarioSeleccionado.nombre;
+      document.getElementById('valLider').textContent = usuarioSeleccionado.lider;
+      document.getElementById('valComision').textContent = usuarioSeleccionado.comision;
+      document.getElementById('valResolucion').textContent = usuarioSeleccionado.resolucion;
 
-  <div id="area" class="section-content">
-    <select id="selArea" onchange="render()"><option value="">Seleccione Área...</option></select>
-    <button class="btn-informe" style="margin-top:10px;" onclick="generarInformePDF()">Descargar Informe PDF</button>
-    <div id="tablaDiv"></div>
-  </div>
-</div>
+      // Procesar GN
+      mapearIconoEstado('statusGN', usuarioSeleccionado.GN);
+      document.getElementById('valFechaGN').textContent = usuarioSeleccionado.fechaGN || "N/A";
 
-<script>
-  const API_URL = "https://script.google.com/macros/s/AKfycbxg6vaqC8w8IsCjHHy9UX9TTyf2nJKhlA1J37nvQEJb6ERK4nSQM5pAO7o8bqBYUj-0SQ/exec";
-  let db = [];
+      // Procesar PCPPD
+      mapearIconoEstado('statusPCPPD', usuarioSeleccionado.PCPPD);
+      document.getElementById('valFechaValInicialPC').textContent = usuarioSeleccionado.fechaValoracionInicialPC || "N/A";
 
-  function procesarDato(valor) {
-    if (valor === null || valor === undefined || valor === "" || valor === "N/A") return '<span class="equis">❌</span>';
-    var v = String(valor).trim().toUpperCase();
-    return (v === "TRUE" || v === "VERDADERO" || v === "1" || v === "V" || v === "SI") ? '<span class="chulo">✔️</span>' : '<span class="equis">❌</span>';
-  }
+      // Procesar AAA
+      document.getElementById('valAAA').textContent = usuarioSeleccionado.AAA || "N/A";
+    }
 
-  fetch(API_URL).then(r => r.json()).then(data => {
-    db = data;
-    const areas = [...new Set(db.map(i => i.columnaA))].filter(Boolean).sort();
-    const sel = document.getElementById('selArea');
-    areas.forEach(a => { if(a) sel.innerHTML += `<option value="${a}">${a}</option>`; });
-  }).catch(e => console.error("Error al cargar datos:", e));
-
-  function tab(id, btn) {
-    document.querySelectorAll('.section-content').forEach(s => s.classList.remove('active'));
-    document.querySelectorAll('.btn-tab').forEach(b => b.classList.remove('active'));
-    document.getElementById(id).classList.add('active');
-    document.getElementById(btn).classList.add('active');
-  }
-
-  function render() {
-    const area = document.getElementById('selArea').value;
-    if (!area) return;
-
-    const filtrados = db.filter(i => i.columnaA === area && i.nombre && i.nombre.trim() !== "");
-    
-    // Encabezados con las columnas solicitadas:
-    let html = `<table><tr>
-      <th>Nombre</th><th>Cargo</th>
-      <th>FB: VI</th><th>FB: PPD</th><th>FB: VF</th>
-      <th>GN</th><th>PC: VI</th><th>PC: PPD</th><th>PC: VF</th><th>AAA</th>
-    </tr>`;
-    
-    filtrados.forEach(p => {
-      html += `<tr>
-        <td>${p.nombre || "Sin nombre"}</td>
-        <td>${p.cargo || "Sin cargo"}</td>
-        <td>${procesarDato(p.valoracionInicial)}</td>
-        <td>${procesarDato(p.desarrolloPPD)}</td>
-        <td>${procesarDato(p.valoracionFinal)}</td>
-        <td>${procesarDato(p.columnaQ)}</td>
-        <td>${procesarDato(p.s4ValoracionInicial)}</td>
-        <td>${procesarDato(p.columnaU)}</td>
-        <td>${procesarDato(p.s4ValoracionFinal)}</td>
-        <td>${procesarDato(p.columnaX)}</td>
-      </tr>`;
-    });
-    document.getElementById('tablaDiv').innerHTML = html + "</table>";
-  }
-
-  function generarInformePDF() {
-    const area = document.getElementById('selArea').value;
-    if (!area) return alert("Seleccione un área primero");
-    let div = document.createElement('div');
-    div.style.padding = "20px";
-    div.innerHTML = `<h1>Informe Área: ${area}</h1>` + document.getElementById('tablaDiv').innerHTML;
-    document.body.appendChild(div);
-    html2pdf().from(div).set({filename: 'Informe_'+area+'.pdf'}).save().then(() => document.body.removeChild(div));
-  }
-</script>
+    function mapearIconoEstado(idElemento, valor) {
+      var el = document.getElementById(idElemento);
+      var esVerdadero = (valor === true || valor === "true" || valor === "VERDADERO" || valor === "1" || valor === "SI");
+      if (el) {
+        el.textContent = esVerdadero ? "✔️" : "❌";
+        el.style.color = esVerdadero ? "var(--success)" : "var(--danger)";
+      }
+    }
+  </script>
 </body>
 </html>
