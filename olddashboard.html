@@ -71,12 +71,11 @@
 
     const filtrados = db.filter(i => i.columnaA === area && i.nombre && i.nombre.trim() !== "");
     
-    // Tabla actualizada con las nuevas columnas: GN, PF:PPD, AAA
+    // Tabla actualizada con las columnas GN, PF:PPD y AAA
     let html = `<table><tr>
-        <th>Nombre</th><th>Cargo</th><th>FB: VI</th><th>FB: PPD</th><th>FB: VF</th>
-        <th>GN</th><th>PC: VI</th><th>PC: PPD</th><th>PC: VF</th><th>AAA</th>
-        <th>GN (N)</th><th>PF:PPD (U)</th><th>AAA (X)</th>
-      </tr>`;
+      <th>Nombre</th><th>Cargo</th><th>FB: VI</th><th>FB: PPD</th><th>FB: VF</th>
+      <th>GN</th><th>PC: VI</th><th>PC: PPD</th><th>PC: VF</th><th>PF: PPD</th><th>AAA</th>
+    </tr>`;
     
     filtrados.forEach(p => {
       html += `<tr>
@@ -85,12 +84,10 @@
         <td>${procesarDato(p.valoracionInicial)}</td>
         <td>${procesarDato(p.desarrolloPPD)}</td>
         <td>${procesarDato(p.valoracionFinal)}</td>
-        <td>${procesarDato(p.gestorNacionalFecha)}</td>
+        <td>${procesarDato(p.columnaQ)}</td>
         <td>${procesarDato(p.s4ValoracionInicial)}</td>
         <td>${procesarDato(p.s4DesarrolloPPD)}</td>
         <td>${procesarDato(p.s4ValoracionFinal)}</td>
-        <td>${procesarDato(p.aaaFecha)}</td>
-        <td>${procesarDato(p.columnaQ)}</td>
         <td>${procesarDato(p.columnaU)}</td>
         <td>${procesarDato(p.columnaX)}</td>
       </tr>`;
@@ -105,7 +102,7 @@
     div.style.padding = "20px";
     div.innerHTML = `<h1>Informe Área: ${area}</h1>` + document.getElementById('tablaDiv').innerHTML;
     document.body.appendChild(div);
-    html2pdf().from(div).set({filename: 'Informe_'+area+'.pdf', margin: 5, image: {type: 'jpeg', quality: 0.98}, html2canvas: {scale: 2}}).save().then(() => document.body.removeChild(div));
+    html2pdf().from(div).set({filename: 'Informe_'+area+'.pdf'}).save().then(() => document.body.removeChild(div));
   }
 </script>
 </body>
