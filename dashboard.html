@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <title>Dirección Nacional de Adultos</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     :root { --primary: #6366f1; --purple-dark: #4c1d95; --bg: #f8fafc; --success: #10b981; --danger: #ef4444; }
     body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); padding: 2rem 1rem; }
@@ -14,10 +13,12 @@
     .btn-tab.active { background: var(--primary); color: white; }
     .section-content { display: none; }
     .section-content.active { display: block; }
-    .graficos-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-top: 1rem; }
     table { width: 100%; border-collapse: collapse; margin-top: 1rem; font-size: 0.75rem; }
     th, td { padding: 6px; border: 1px solid #e2e8f0; text-align: center; }
     th { background: #f1f5f9; }
+    .btn-informe { background: var(--purple-dark); color: white; padding: 0.75rem 1.5rem; border-radius: 8px; border: none; cursor: pointer; }
+    .chulo { color: var(--success); font-weight: bold; }
+    .equis { color: var(--danger); font-weight: bold; }
   </style>
 </head>
 <body>
@@ -29,16 +30,13 @@
   </div>
 
   <div id="general" class="section-content active">
-    <h2>Resumen Nacional (Estadísticas)</h2>
-    <div class="graficos-grid">
-      <canvas id="chartFB"></canvas>
-      <canvas id="chartPC"></canvas>
-    </div>
+    <h2>Resumen Nacional</h2>
+    <div id="stats">Cargando datos...</div>
   </div>
 
   <div id="area" class="section-content">
     <select id="selArea" onchange="render()"><option value="">Seleccione Área...</option></select>
-    <button class="btn-informe" onclick="generarInformePDF()">Descargar PDF</button>
+    <button class="btn-informe" style="margin-top:10px;" onclick="generarInformePDF()">Descargar Informe PDF</button>
     <div id="tablaDiv"></div>
   </div>
 </div>
@@ -47,42 +45,19 @@
   const API_URL = "https://script.google.com/macros/s/AKfycbxg6vaqC8w8IsCjHHy9UX9TTyf2nJKhlA1J37nvQEJb6ERK4nSQM5pAO7o8bqBYUj-0SQ/exec";
   let db = [];
 
+  // Función maestra para procesar cualquier columna de tipo booleano/estado
   function procesarDato(valor) {
+    if (valor === null || valor === undefined || valor === "" || valor === "N/A" || valor === "FALSE") return '<span class="equis">❌</span>';
     var v = String(valor).trim().toUpperCase();
-    return (v === "TRUE" || v === "VERDADERO" || v === "1" || v === "V" || v === "SI");
+    return (v === "TRUE" || v === "VERDADERO" || v === "1" || v === "V" || v === "SI") ? '<span class="chulo">✔️</span>' : '<span class="equis">❌</span>';
   }
 
   fetch(API_URL).then(r => r.json()).then(data => {
     db = data;
-    renderCharts();
     const areas = [...new Set(db.map(i => i.columnaA))].filter(Boolean).sort();
     const sel = document.getElementById('selArea');
     areas.forEach(a => { if(a) sel.innerHTML += `<option value="${a}">${a}</option>`; });
-  });
-
-  function renderCharts() {
-    // Calcular totales
-    let total = db.length;
-    let fbVI = db.filter(p => procesarDato(p.valoracionInicial)).length;
-    let fbVF = db.filter(p => procesarDato(p.valoracionFinal)).length;
-    let aaa = db.filter(p => procesarDato(p.AAA)).length;
-
-    new Chart(document.getElementById('chartFB'), {
-      type: 'bar',
-      data: {
-        labels: ['Valoración Inicial', 'Valoración Final'],
-        datasets: [{ label: 'Cumplimiento FB', data: [fbVI, fbVF], backgroundColor: '#6366f1' }]
-      }
-    });
-
-    new Chart(document.getElementById('chartPC'), {
-      type: 'pie',
-      data: {
-        labels: ['Con AAA', 'Sin AAA'],
-        datasets: [{ data: [aaa, total - aaa], backgroundColor: ['#10b981', '#ef4444'] }]
-      }
-    });
-  }
+  }).catch(e => console.error("Error al cargar datos:", e));
 
   function tab(id, btn) {
     document.querySelectorAll('.section-content').forEach(s => s.classList.remove('active'));
@@ -91,8 +66,45 @@
     document.getElementById(btn).classList.add('active');
   }
 
-  function render() { /* Tu código original de renderizado aquí */ }
-  function generarInformePDF() { /* Tu código original de PDF aquí */ }
+  function render() {
+    const area = document.getElementById('selArea').value;
+    if (!area) return;
+
+    const filtrados = db.filter(i => i.columnaA === area && i.nombre && i.nombre.trim() !== "");
+    
+    // Encabezados organizados
+    let html = `<table><tr>
+      <th>Nombre</th><th>Cargo</th><th>FB: VI</th><th>FB: PPD</th><th>FB: VF</th>
+      <th>GN</th><th>PC: VI</th><th>PC: PPD</th><th>PC: VF</th><th>AAA</th>
+    </tr>`;
+    
+    filtrados.forEach(p => {
+      // Usamos p.GN, p.PCPPD y p.AAA procesándolos con la misma función
+      html += `<tr>
+        <td>${p.nombre || "Sin nombre"}</td>
+        <td>${p.cargo || "Sin cargo"}</td>
+        <td>${procesarDato(p.valoracionInicial)}</td>
+        <td>${procesarDato(p.desarrolloPPD)}</td>
+        <td>${procesarDato(p.valoracionFinal)}</td>
+        <td>${procesarDato(p.GN)}</td>
+        <td>${procesarDato(p.s4ValoracionInicial)}</td>
+        <td>${procesarDato(p.PCPPD)}</td>
+        <td>${procesarDato(p.s4ValoracionFinal)}</td>
+        <td>${procesarDato(p.AAA)}</td>
+      </tr>`;
+    });
+    document.getElementById('tablaDiv').innerHTML = html + "</table>";
+  }
+
+  function generarInformePDF() {
+    const area = document.getElementById('selArea').value;
+    if (!area) return alert("Seleccione un área primero");
+    let div = document.createElement('div');
+    div.style.padding = "20px";
+    div.innerHTML = `<h1>Informe Área: ${area}</h1>` + document.getElementById('tablaDiv').innerHTML;
+    document.body.appendChild(div);
+    html2pdf().from(div).set({filename: 'Informe_'+area+'.pdf'}).save().then(() => document.body.removeChild(div));
+  }
 </script>
 </body>
 </html>
