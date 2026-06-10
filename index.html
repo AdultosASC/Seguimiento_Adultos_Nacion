@@ -85,7 +85,7 @@
           <div class="dato-bloque"><span class="dato-label">Nombre</span><span id="valNombre" class="dato-valor"></span></div>
           <div class="dato-bloque"><span class="dato-label">Cargo</span><span id="valCargo" class="dato-valor"></span></div>
           <div class="dato-bloque"><span class="dato-label">Nombramiento</span><span id="valNombramiento" class="dato-valor"></span></div>
-          <div class="dato-bloque"><span class="dato-label">Metodología</span><span id="valMetodologia" class="dato-valor"></span></div>
+          <div class="dato-bloque"><span class="dato-label">Metodología</span><span id="valMetodología" class="dato-valor"></span></div>
           <div class="dato-bloque"><span class="dato-label">Fecha de Nombramiento</span><span id="valFechaNom" class="dato-valor"></span></div>
           <div class="dato-bloque"><span class="dato-label">Duración</span><span id="valDuracion" class="dato-valor"></span></div>
           <div class="dato-bloque" style="grid-column: 1 / -1;"><span class="dato-label">Fecha Finalización</span><span id="valFechaFin" class="dato-valor"></span></div>
@@ -246,7 +246,7 @@
 
     function mapearIconoEstado(idElemento, valorBooleano) {
       var el = document.getElementById(idElemento);
-      var esVerdadero = (valorBooleano === true || valorBooleano === "true" || valorBooleano === "VERDADERO");
+      var esVerdadero = (valorBooleano === true || valorBooleano === "true" || valorBooleano === "VERDADERO" || valorBooleano === 1 || valorBooleano === "1");
       if (el) {
         if (esVerdadero) { el.textContent = "✔️"; el.style.color = "var(--success)"; } 
         else { el.textContent = "❌"; el.style.color = "var(--danger)"; }
@@ -257,6 +257,8 @@
     function irAPaginaReporte() {
       var valorA = document.getElementById('selectA').value;
       var valorC = document.getElementById('selectC').value;
+      
+      // Buscamos el objeto. Para acceder al índice 20, usaremos Object.values()
       usuarioSeleccionado = baseDatosCompleta.find(item => item.columnaA === valorA && item.nombre === valorC);
       if(!usuarioSeleccionado) return;
 
@@ -267,7 +269,7 @@
       document.getElementById('valNombre').textContent = usuarioSeleccionado.nombre;
       document.getElementById('valCargo').textContent = usuarioSeleccionado.cargo;
       document.getElementById('valNombramiento').textContent = usuarioSeleccionado.nombramiento;
-      document.getElementById('valMetodologia').textContent = usuarioSeleccionado.metodologia;
+      document.getElementById('valMetodología').textContent = usuarioSeleccionado.metodologia;
       
       document.getElementById('valFechaNom').textContent = formatearFechaVisual(usuarioSeleccionado.fechaNombramiento);
       document.getElementById('valFechaFin').textContent = formatearFechaVisual(usuarioSeleccionado.fechaFinalizacion);
@@ -308,7 +310,13 @@
       if (fGestorFormateada && fGestorFormateada !== "N/A") { document.getElementById('valGestorFecha').textContent = "Fecha de registro: " + fGestorFormateada; document.getElementById('boxGestor').classList.remove('hidden'); } else { document.getElementById('boxGestor').classList.add('hidden'); }
 
       // Carga Perfeccionamiento Continuo
-      mapearIconoEstado('statusS4PPD', usuarioSeleccionado.s4DesarrolloPPD);
+      mapearIconoEstado('statusS4ValInicial', usuarioSeleccionado.s4ValoracionInicial);
+      
+      // MODIFICACIÓN: Obtenemos el valor del índice 20 (array 0-index) del objeto de datos
+      let valoresObjeto = Object.values(usuarioSeleccionado);
+      let valorIndice20 = valoresObjeto[20];
+      mapearIconoEstado('statusS4PPD', valorIndice20);
+
       var esS4ValInicialTrue = mapearIconoEstado('statusS4ValInicial', usuarioSeleccionado.s4ValoracionInicial);
       var fS4Nom1 = formatearFechaVisual(usuarioSeleccionado.s4FechaValoracionInicial);
       if (esS4ValInicialTrue && fS4Nom1 !== "N/A") { document.getElementById('valFechaS4ValInicial').textContent = fS4Nom1; document.getElementById('boxFechaS4ValInicial').classList.remove('hidden'); } else { document.getElementById('boxFechaS4ValInicial').classList.add('hidden'); }
@@ -337,7 +345,7 @@
       fetch(API_URL + "?accion=listarFiles&urlCarpeta=" + encodeURIComponent(usuarioSeleccionado.carpetaDrive))
         .then(res => res.json())
         .then(res => {
-          loader.classList.add('hidden');
+          loader.classList.remove('hidden');
           if (res && res.resultado === "OK") {
             if (!res.archivos || res.archivos.length === 0) {
               cuerpo.innerHTML = '<tr><td colspan="2" style="text-align:center; color:var(--text-light); font-style:italic; padding: 2rem 0;">La carpeta está vacía. Sube un archivo abajo.</td></tr>';
@@ -378,7 +386,7 @@
       if (!fileInput.files || fileInput.files.length === 0) { alert("Por favor, selecciona un archivo."); return; }
       const archivo = fileInput.files[0];
       const reader = new FileReader();
-      statusDiv.style.color = "var(--primary)"; statusDiv.textContent = "⏳ Subiendo documento masivo...";
+      statusDiv.style.color = "var(--primary)"; statusDiv.textContent = "⏳ Subiendo documento...";
       btn.disabled = true;
 
       reader.onload = function(e) {
