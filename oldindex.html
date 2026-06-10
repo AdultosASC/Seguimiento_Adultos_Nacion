@@ -115,10 +115,7 @@
             <div class="mixto-izq"><span id="statusValFinal" class="status-badge"></span><span class="verificacion-titulo">Valoración Final</span></div>
             <div id="boxFechaValFinal" class="dato-bloque hidden" style="text-align: right;"><span class="dato-label">Fecha de realización</span><span id="valFechaValFinal" class="dato-valor"></span></div>
           </div>
-          <div id="boxGestor" class="dato-bloque hidden" style="grid-column: 1 / -1; background: #f8fafc; padding: 0.75rem; border-radius: 8px; border: 1px dashed var(--border); margin-top: 0.5rem;">
-            <span class="dato-label" style="color: #4c1d95;">Gestor Nacional</span>
-            <span id="valGestorFecha" class="dato-valor" style="font-weight: 600; color: #4c1d95;"></span>
-          </div>
+          <div id="boxGestor" class="dato-bloque hidden" style="grid-column: 1 / -1; background: #f8fafc; padding: 0.75rem; border-radius: 8px; border: 1px dashed var(--border); margin-top: 0.5rem;"><span class="dato-label">Gestor Nacional</span><span id="valGestorFecha" class="dato-valor" style="font-weight: 600;"></span></div>
         </div>
       </div>
 
@@ -260,7 +257,6 @@
     function irAPaginaReporte() {
       var valorA = document.getElementById('selectA').value;
       var valorC = document.getElementById('selectC').value;
-      
       usuarioSeleccionado = baseDatosCompleta.find(item => item.columnaA === valorA && item.nombre === valorC);
       if(!usuarioSeleccionado) return;
 
@@ -309,9 +305,9 @@
       var f2Formateada = formatearFechaVisual(usuarioSeleccionado.fechaValoracionFinal);
       if (esValFinalTrue && f2Formateada !== "N/A") { document.getElementById('valFechaValFinal').textContent = f2Formateada; document.getElementById('boxFechaValFinal').classList.remove('hidden'); } else { document.getElementById('boxFechaValFinal').classList.add('hidden'); }
       
-      // Lógica para mostrar Gestor Nacional (Igual que AAA)
+      // Corrección bloque Gestor Nacional
       var fGestorFormateada = formatearFechaVisual(usuarioSeleccionado.gestorNacionalFecha);
-      if (fGestorFormateada && fGestorFormateada !== "N/A") { 
+      if (fGestorFormateada && fGestorFormateada !== "N/A" && fGestorFormateada !== "undefined") { 
           document.getElementById('valGestorFecha').textContent = "Fecha de registro: " + fGestorFormateada; 
           document.getElementById('boxGestor').classList.remove('hidden'); 
       } else { 
@@ -329,7 +325,7 @@
       var fS4Nom2 = formatearFechaVisual(usuarioSeleccionado.s4FechaValoracionFinal);
       if (esS4ValFinalTrue && fS4Nom2 !== "N/A") { document.getElementById('valFechaS4ValFinal').textContent = fS4Nom2; document.getElementById('boxFechaS4ValFinal').classList.remove('hidden'); } else { document.getElementById('boxFechaS4ValFinal').classList.add('hidden'); }
       var fAAAFormateada = formatearFechaVisual(usuarioSeleccionado.aaaFecha);
-      if (fAAAFormateada && fAAAFormateada !== "N/A") { document.getElementById('valAAAFecha').textContent = "Fecha de acreditación: " + fAAAFormateada; document.getElementById('boxAAA').classList.remove('hidden'); } else { document.getElementById('boxAAA').classList.add('hidden'); }
+      if (fAAAFormateada && fAAAFormateada !== "N/A" && fAAAFormateada !== "undefined") { document.getElementById('valAAAFecha').textContent = "Fecha de acreditación: " + fAAAFormateada; document.getElementById('boxAAA').classList.remove('hidden'); } else { document.getElementById('boxAAA').classList.add('hidden'); }
 
       document.getElementById('loaderReporte').classList.add('hidden');
       document.getElementById('contenidoReporte').classList.remove('hidden');
