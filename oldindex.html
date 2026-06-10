@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dirección Nacional de Adultos</title>
   <style>
-    :root { 
+    :root {
       --primary: #6366f1; --primary-hover: #4f46e5; --purple-dark: #4c1d95; --purple-light: #8b5cf6;
       --bg: #f8fafc; --card-bg: #ffffff; --text: #1e293b; --text-light: #64748b; --border: #e2e8f0;
       --success: #10b981; --danger: #ef4444;
@@ -38,41 +38,67 @@
     .tabla-archivos th, .tabla-archivos td { padding: 0.75rem 1rem; text-align: left; font-size: 0.9rem; border-bottom: 1px solid var(--border); }
     .tabla-archivos th { background-color: #f1f5f9; font-weight: 700; color: var(--purple-dark); }
     .acciones-btn-group { display: flex; gap: 0.5rem; justify-content: center; }
-    .btn-mini { padding: 0.4rem 0.8rem; font-size: 0.8rem; font-weight: bold; border-radius: 4px; width: auto; margin: 0; display: inline-block; cursor: pointer; color: white; border: none; }
+    .btn-mini { padding: 0.4rem 0.8rem; font-size: 0.8rem; font-weight: bold; border-radius: 4px; width: auto; margin: 0; display: inline-block; }
     .btn-ver { background-color: var(--primary); }
     .btn-del { background-color: var(--danger); }
     .box-carga { background: #f8fafc; border: 1px solid var(--border); padding: 1.25rem; border-radius: 12px; margin-bottom: 1.5rem; }
-    .btn-back { background-color: transparent; color: var(--text-light); border: 1px solid var(--border); margin-top: 1rem; width: auto; padding: 0.5rem 1rem; cursor: pointer; }
+    .btn-back { background-color: transparent; color: var(--text-light); border: 1px solid var(--border); margin-top: 1rem; width: auto; padding: 0.5rem 1rem; }
     .contenedor-progreso { display: flex; align-items: center; gap: 1rem; background: #e2e8f0; border-radius: 9999px; height: 1.25rem; overflow: hidden; position: relative; margin-top: 0.4rem; }
     .barra-interna { background: linear-gradient(90deg, var(--purple-light), var(--primary)); height: 100%; width: 0%; transition: width 0.5s ease-in-out; }
   </style>
 </head>
 <body>
-  <div id="paginaFiltros" class="container">...</div>
-  <div id="paginaReporte" class="container wide hidden">...</div>
+  <div id="paginaFiltros" class="container">
+    <div class="header-institucional">Dirección Nacional de <br>Adultos en el Movimiento</div>
+    <h1>Consulta/Registro de Información</h1>
+    <div class="form-group">
+      <label for="selectA" class="label-filtro">Seleccione Área Estratégica</label>
+      <select id="selectA" onchange="cambioArea()"><option value="">Conectando con la base de datos...</option></select>
+    </div>
+    <div id="grupoC" class="form-group hidden">
+      <label for="selectC" class="label-filtro">Seleccione Nombre</label>
+      <select id="selectC" onchange="activarBotonConsultar()"><option value="">-- Seleccione un nombre --</option></select>
+    </div>
+    <button id="btnConsultar" disabled onclick="irAPaginaReporte()">Consultar</button>
+  </div>
+  
+  <div id="paginaReporte" class="container wide hidden">
+    <div id="tituloColumnaA" class="titulo-principal-a"></div>
+    <div id="loaderReporte" class="loader">Procesando información...</div>
+    <div id="contenidoReporte" class="hidden">
+      <div id="valNombre" class="dato-valor"></div> <div class="seccion-reporte">
+        <h2>Desarrollo Personal Formación Básica</h2>
+        <div id="boxGestor" class="dato-bloque hidden" style="grid-column: 1 / -1; background: #f8fafc; padding: 0.75rem; border-radius: 8px; border: 1px solid var(--danger); margin-top: 0.5rem;">
+           <span class="dato-label" style="color: var(--danger);">Gestor Nacional</span>
+           <span id="valGestorFecha" class="dato-valor" style="font-weight: 600; color: var(--danger);"></span>
+        </div>
+      </div>
+      <div class="seccion-reporte">
+        <h2>Desarrollo Personal Perfeccionamiento Continuo</h2>
+        <div class="dato-mixto-linea">
+            <div class="mixto-izq"><span id="statusS4PPD" class="status-badge"></span><span class="verificacion-titulo">En desarrollo de su PPD</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <script>
-    // ... [Variables y funciones originales cargadas aquí] ...
-
+    // ... (funciones originales)
     function irAPaginaReporte() {
-      // 1. CARGA ORIGINAL DE DATOS
-      // ... (todo tu código original de asignación de elementos)
-
-      // MODIFICACIÓN 1: GN en Formación Básica (con estilo rojo)
+      // ... (asignaciones)
+      
+      // MODIFICACIÓN 1: GN en Formación Básica (Color Rojo)
       var fGestorFormateada = formatearFechaVisual(usuarioSeleccionado.gestorNacionalFecha);
       var boxGestor = document.getElementById('boxGestor');
       if (fGestorFormateada && fGestorFormateada !== "N/A") {
           document.getElementById('valGestorFecha').textContent = "Fecha de registro: " + fGestorFormateada;
-          document.getElementById('valGestorFecha').style.color = "var(--danger)"; // Rojo
-          boxGestor.style.borderColor = "var(--danger)";
           boxGestor.classList.remove('hidden');
       } else { boxGestor.classList.add('hidden'); }
 
-      // MODIFICACIÓN 2: Secuencia lógica PC:PPD
-      // Se asegura que PPD tome el valor correcto de s4DesarrolloPPD
+      // MODIFICACIÓN 2: PC:PPD Correcto
       mapearIconoEstado('statusS4PPD', usuarioSeleccionado.s4DesarrolloPPD);
       
-      // ... [El resto de tu lógica original intacta] ...
+      // ... (resto intacto)
     }
   </script>
 </body>
