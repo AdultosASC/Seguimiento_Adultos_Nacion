@@ -5,247 +5,89 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dirección Nacional de Adultos</title>
   <style>
-    :root {
-      --primary: #6366f1; --primary-hover: #4f46e5; --purple-dark: #4c1d95; --purple-light: #8b5cf6;
-      --bg: #f8fafc; --card-bg: #ffffff; --text: #1e293b; --text-light: #64748b; --border: #e2e8f0;
-      --success: #10b981; --danger: #ef4444;
-    }
-    body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 2rem 1rem; display: flex; justify-content: center; align-items: center; min-height: 100vh; box-sizing: border-box; }
-    .container { background-color: var(--card-bg); padding: 2.5rem; border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05); width: 100%; max-width: 450px; box-sizing: border-box; }
-    .container.wide { max-width: 850px; }
-    .header-institucional { color: var(--purple-dark); font-size: 1.25rem; font-weight: 700; text-align: center; margin-bottom: 1.5rem; border-bottom: 2px dashed var(--border); padding-bottom: 1rem; }
-    h1 { font-size: 1.4rem; font-weight: 700; margin: 0 0 1.5rem 0; text-align: center; }
-    .form-group { margin-bottom: 1.5rem; }
-    .label-filtro { display: block; font-size: 0.9rem; font-weight: 700; color: var(--purple-dark); margin-bottom: 0.6rem; }
-    select, input[type="file"] { width: 100%; padding: 0.75rem 1rem; font-size: 1rem; background-color: var(--bg); border: 1px solid var(--border); border-radius: 8px; color: var(--text); outline: none; box-sizing: border-box; }
-    button { width: 100%; padding: 0.75rem 1rem; font-size: 1rem; font-weight: 600; color: white; background-color: var(--primary); border: none; border-radius: 8px; cursor: pointer; margin-top: 1rem; }
-    button:hover { background-color: var(--primary-hover); }
-    button:disabled { background-color: var(--border); cursor: not-allowed; }
+    :root { --primary: #6366f1; --purple-dark: #4c1d95; --bg: #f8fafc; --text: #1e293b; --success: #10b981; --danger: #ef4444; }
+    body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); padding: 2rem 1rem; }
+    .container { background: #fff; padding: 2rem; border-radius: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); max-width: 850px; margin: auto; }
     .hidden { display: none !important; }
-    .titulo-principal-a { color: var(--purple-dark); font-weight: bold; font-size: 1.8rem; margin-bottom: 1.5rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; }
-    .seccion-reporte { background-color: var(--bg); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; }
-    .seccion-reporte h2 { font-size: 1.2rem; color: var(--primary); margin-top: 0; margin-bottom: 1rem; font-weight: 700; }
-    .grid-dos-columnas { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.25rem; }
-    .dato-bloque { display: flex; flex-direction: column; }
-    .dato-mixto-linea { grid-column: 1 / -1; display: flex; align-items: center; justify-content: space-between; background: var(--card-bg); padding: 0.75rem 1rem; border-radius: 8px; border: 1px solid var(--border); gap: 1.5rem; }
-    .mixto-izq { display: flex; align-items: center; gap: 0.85rem; }
-    .dato-inline-bloque { grid-column: 1 / -1; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; }
-    .verificacion-titulo { font-size: 0.95rem; font-weight: 600; color: var(--text); }
+    .seccion-reporte { background: #f8fafc; padding: 1.5rem; margin-bottom: 1rem; border-radius: 12px; border: 1px solid #e2e8f0; }
     .status-badge { font-size: 1.2rem; font-weight: bold; }
-    .dato-label { font-size: 0.8rem; font-weight: 600; color: var(--text-light); text-transform: uppercase; margin-bottom: 0.2rem; }
-    .dato-valor { font-size: 1rem; font-weight: 500; color: var(--text); }
-    .tabla-archivos { width: 100%; border-collapse: collapse; margin-top: 0.5rem; background: white; border-radius: 8px; overflow: hidden; border: 1px solid var(--border); }
-    .tabla-archivos th, .tabla-archivos td { padding: 0.75rem 1rem; text-align: left; font-size: 0.9rem; border-bottom: 1px solid var(--border); }
-    .tabla-archivos th { background-color: #f1f5f9; font-weight: 700; color: var(--purple-dark); }
-    .acciones-btn-group { display: flex; gap: 0.5rem; justify-content: center; }
-    .btn-mini { padding: 0.4rem 0.8rem; font-size: 0.8rem; font-weight: bold; border-radius: 4px; width: auto; margin: 0; display: inline-block; }
-    .btn-ver { background-color: var(--primary); }
-    .btn-del { background-color: var(--danger); }
-    .box-carga { background: #f8fafc; border: 1px solid var(--border); padding: 1.25rem; border-radius: 12px; margin-bottom: 1.5rem; }
-    .btn-back { background-color: transparent; color: var(--text-light); border: 1px solid var(--border); margin-top: 1rem; width: auto; padding: 0.5rem 1rem; }
-    .contenedor-progreso { display: flex; align-items: center; gap: 1rem; background: #e2e8f0; border-radius: 9999px; height: 1.25rem; overflow: hidden; position: relative; margin-top: 0.4rem; }
-    .barra-interna { background: linear-gradient(90deg, var(--purple-light), var(--primary)); height: 100%; width: 0%; transition: width 0.5s ease-in-out; }
+    .btn-back { background: #64748b; color: white; padding: 0.5rem 1rem; border-radius: 8px; border: none; cursor: pointer; }
   </style>
 </head>
 <body>
-  <div id="paginaFiltros" class="container">
-    <div class="header-institucional">Dirección Nacional de <br>Adultos en el Movimiento</div>
-    <h1>Consulta/Registro de Información</h1>
-    <div class="form-group">
-      <label for="selectA" class="label-filtro">Seleccione Área Estratégica</label>
-      <select id="selectA" onchange="cambioArea()"><option value="">Conectando con la base de datos...</option></select>
-    </div>
-    <div id="grupoC" class="form-group hidden">
-      <label for="selectC" class="label-filtro">Seleccione Nombre</label>
-      <select id="selectC" onchange="activarBotonConsultar()"><option value="">-- Seleccione un nombre --</option></select>
-    </div>
+
+  <div id="paginaFiltros" class="container" style="max-width: 450px;">
+    <h1>Consulta de Información</h1>
+    <select id="selectA" onchange="cambioArea()"><option value="">Cargando base de datos...</option></select>
+    <select id="selectC" class="hidden" onchange="activarBotonConsultar()"><option value="">-- Seleccione un nombre --</option></select>
     <button id="btnConsultar" disabled onclick="irAPaginaReporte()">Consultar</button>
   </div>
 
-  <div id="paginaReporte" class="container wide hidden">
-    <div id="tituloColumnaA" class="titulo-principal-a"></div>
-    <div id="loaderReporte" class="loader">Procesando información...</div>
-    <div id="contenidoReporte" class="hidden">
+  <div id="paginaReporte" class="container hidden">
+    <button class="btn-back" onclick="location.reload()">← Volver</button>
+    <div id="contenidoReporte">
+      <h2 id="tituloNombre"></h2>
+      
       <div class="seccion-reporte">
-        <h2>Información General</h2>
-        <div class="grid-dos-columnas">
-          <div class="dato-bloque"><span class="dato-label">Nombre</span><span id="valNombre" class="dato-valor"></span></div>
-          <div class="dato-bloque"><span class="dato-label">Cargo</span><span id="valCargo" class="dato-valor"></span></div>
-          <div class="dato-bloque"><span class="dato-label">Nombramiento</span><span id="valNombramiento" class="dato-valor"></span></div>
-          <div class="dato-bloque"><span class="dato-label">Metodología</span><span id="valMetodologia" class="dato-valor"></span></div>
-          <div class="dato-bloque"><span class="dato-label">Fecha de Nombramiento</span><span id="valFechaNom" class="dato-valor"></span></div>
-          <div class="dato-bloque"><span class="dato-label">Duración</span><span id="valDuracion" class="dato-valor"></span></div>
-          <div class="dato-bloque" style="grid-column: 1 / -1;"><span class="dato-label">Fecha Finalización</span><span id="valFechaFin" class="dato-valor"></span></div>
-          <div class="dato-bloque" style="grid-column: 1 / -1; background: #f3e8ff; padding: 1rem; border-radius: 8px; border-left: 4px solid var(--purple-light); margin-bottom: 0.25rem;">
-            <span class="dato-label" style="color: var(--purple-dark);">Tiempo restante en el cargo</span>
-            <span id="valTiempoRestante" class="dato-valor" style="font-weight: 700; color: #5b21b6; font-size: 1.1rem; display:block;"></span>
-          </div>
-        </div>
+        <h3>Formación Básica</h3>
+        <p>GN (Gestor Nacional): <span id="statusGN" class="status-badge"></span> <span id="fechaGN"></span></p>
       </div>
+
       <div class="seccion-reporte">
-        <h2>Desarrollo Personal Formación Básica</h2>
-        <div class="grid-dos-columnas">
-          <div class="dato-inline-bloque"><span class="dato-label" style="color: var(--purple-dark); margin-bottom: 0;">Asesor Personal:</span><span id="valAsesorPersonal" class="dato-valor" style="font-size: 1.1rem; font-weight: 600;"></span></div>
-          <div class="dato-mixto-linea">
-            <div class="mixto-izq"><span id="statusValInicial" class="status-badge"></span><span class="verificacion-titulo">Valoración Inicial</span></div>
-            <div id="boxFechaValInicial" class="dato-bloque hidden" style="text-align: right;"><span class="dato-label">Fecha de realización</span><span id="valFechaValInicial" class="dato-valor"></span></div>
-          </div>
-          <div class="dato-mixto-linea"><div class="mixto-izq"><span id="statusPPD" class="status-badge"></span><span class="verificacion-titulo">En desarrollo de su PPD</span></div></div>
-          <div class="dato-mixto-linea">
-            <div class="mixto-izq"><span id="statusValFinal" class="status-badge"></span><span class="verificacion-titulo">Valoración Final</span></div>
-            <div id="boxFechaValFinal" class="dato-bloque hidden" style="text-align: right;"><span class="dato-label">Fecha de realización</span><span id="valFechaValFinal" class="dato-valor"></span></div>
-          </div>
-          <div id="boxGestor" class="dato-bloque hidden" style="grid-column: 1 / -1; background: #f8fafc; padding: 0.75rem; border-radius: 8px; border: 1px dashed var(--border); margin-top: 0.5rem;"><span class="dato-label">Gestor Nacional</span><span id="valGestorFecha" class="dato-valor" style="font-weight: 600;"></span></div>
-        </div>
-      </div>
-      <div class="seccion-reporte">
-        <h2>Desarrollo Personal Perfeccionamiento Continuo</h2>
-        <div class="grid-dos-columnas">
-          <div class="dato-mixto-linea">
-            <div class="mixto-izq"><span id="statusS4ValInicial" class="status-badge"></span><span class="verificacion-titulo">Valoración Inicial</span></div>
-            <div id="boxFechaS4ValInicial" class="dato-bloque hidden" style="text-align: right;"><span class="dato-label">Fecha de realización</span><span id="valFechaS4ValInicial" class="dato-valor"></span></div>
-          </div>
-          <div class="dato-mixto-linea"><div class="mixto-izq"><span id="statusS4PPD" class="status-badge"></span><span class="verificacion-titulo">En desarrollo de su PPD</span></div></div>
-          <div class="dato-mixto-linea">
-            <div class="mixto-izq"><span id="statusS4ValFinal" class="status-badge"></span><span class="verificacion-titulo">Valoración Final</span></div>
-            <div id="boxFechaS4ValFinal" class="dato-bloque hidden" style="text-align: right;"><span class="dato-label">Fecha de realización</span><span id="valFechaS4ValFinal" class="dato-valor"></span></div>
-          </div>
-          <div id="boxAAA" class="dato-bloque hidden" style="grid-column: 1 / -1; background: #f0fdf4; padding: 0.75rem; border-radius: 8px; border: 1px solid #bbf7d0; margin-top: 0.5rem;"><span class="dato-label" style="color: #166534;">AAA</span><span id="valAAAFecha" class="dato-valor" style="font-weight: 600; color: #14532d;"></span></div>
-        </div>
-      </div>
-      <div class="seccion-reporte" style="background: #fafafa; padding: 1rem; margin-bottom: 1.5rem; border: 1px solid var(--border);">
-        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem; font-weight: bold; color: var(--purple-dark);"><span>Progreso de archivos</span><span id="textoMetrica">0 de 6 archivos (0%)</span></div>
-        <div class="contenedor-progreso"><div class="barra-interna" id="barraMetrica"></div></div>
-      </div>
-      <div class="seccion-reporte">
-        <h2>📁 Expediente Documental</h2>
-        <div id="loaderArchivos" class="loader hidden">Consultando carpeta...</div>
-        <table class="tabla-archivos" id="tablaFiles">
-          <thead><tr><th>Nombre del Archivo en Drive</th><th style="width: 180px; text-align: center;">Acciones</th></tr></thead>
-          <tbody id="cuerpoTablaArchivos"></tbody>
-        </table>
-      </div>
-      <div class="seccion-reporte box-carga">
-        <h2>📤 Cargar Nuevo Archivo Documental</h2>
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; align-items: end;">
-          <div><label class="label-filtro">Tipo Documento:</label><select id="tipoDocCarga"><option value="Resolucion nombramiento">Resolución nombramiento</option><option value="Acuerdo Mutuo">Acuerdo Mutuo</option><option value="Curso SfH1">Curso SfH1</option><option value="Curso SfH2">Curso SfH2</option><option value="Modulo induccion">Módulo inducción</option><option value="Aval AP">Aval AP</option></select></div>
-          <div><label class="label-filtro">Seleccionar archivo:</label><input type="file" id="inputArchivo"></div>
-          <div><button style="margin:0;" id="btnSubirArchivo" onclick="procesarSubidaArchivo()">Subir Documento</button></div>
-        </div>
-        <div id="statusEnvio" style="margin-top: 0.75rem; font-size: 0.9rem; font-weight: bold;"></div>
+        <h3>Perfeccionamiento Continuo</h3>
+        <p>PC: PPD: <span id="statusPCPPD" class="status-badge"></span></p>
+        <p>AAA: <span id="statusAAA" class="status-badge"></span> <span id="fechaAAA"></span></p>
       </div>
     </div>
-    <button class="btn-back" onclick="volverYRefrescarConsulta()">Volver a consultar</button>
   </div>
 
   <script>
     const API_URL = "https://script.google.com/macros/s/AKfycbxg6vaqC8w8IsCjHHy9UX9TTyf2nJKhlA1J37nvQEJb6ERK4nSQM5pAO7o8bqBYUj-0SQ/exec"; 
     let baseDatosCompleta = [];
-    let usuarioSeleccionado = null;
-    window.onload = function() { cargarDatosDesdeAPI(); };
-    function cargarDatosDesdeAPI() {
-      var select = document.getElementById('selectA');
-      select.innerHTML = '<option value="">Conectando con la base de datos...</option>';
-      fetch(API_URL).then(r => r.json()).then(data => { baseDatosCompleta = data; inicializarDesplegableA(); }).catch(err => { select.innerHTML = '<option value="">Error de conexión.</option>'; });
-    }
-    function inicializarDesplegableA() {
-      var select = document.getElementById('selectA');
-      let areas = [...new Set(baseDatosCompleta.map(item => item.columnaA))].filter(Boolean).sort();
-      select.innerHTML = '<option value="">-- Seleccione un Área --</option>';
-      areas.forEach(area => { var el = document.createElement('option'); el.value = area; el.textContent = area; select.appendChild(el); });
-    }
+
+    // Carga inicial
+    fetch(API_URL).then(r => r.json()).then(data => {
+      baseDatosCompleta = data;
+      let areas = [...new Set(data.map(i => i.columnaA))].filter(Boolean).sort();
+      let selA = document.getElementById('selectA');
+      selA.innerHTML = '<option value="">-- Seleccione Área --</option>';
+      areas.forEach(a => selA.innerHTML += `<option value="${a}">${a}</option>`);
+    });
+
     function cambioArea() {
-      var valorA = document.getElementById('selectA').value;
-      var grupoC = document.getElementById('grupoC');
-      var selectC = document.getElementById('selectC');
-      if (!valorA) { grupoC.classList.add('hidden'); document.getElementById('btnConsultar').disabled = true; return; }
-      let nombresFiltrados = baseDatosCompleta.filter(item => item.columnaA === valorA).map(item => item.nombre).filter(Boolean).sort();
-      selectC.innerHTML = '<option value="">-- Seleccione un nombre --</option>';
-      nombresFiltrados.forEach(nom => { var el = document.createElement('option'); el.value = nom; el.textContent = nom; selectC.appendChild(el); });
-      grupoC.classList.remove('hidden');
+      let area = document.getElementById('selectA').value;
+      let selC = document.getElementById('selectC');
+      let nombres = baseDatosCompleta.filter(i => i.columnaA === area).map(i => i.nombre);
+      selC.innerHTML = '<option value="">-- Seleccione Nombre --</option>';
+      nombres.forEach(n => selC.innerHTML += `<option value="${n}">${n}</option>`);
+      selC.classList.remove('hidden');
     }
-    function activarBotonConsultar() { document.getElementById('btnConsultar').disabled = (document.getElementById('selectC').value === ""); }
-    function extraerEstructuraFecha(strFecha) {
-      if(!strFecha || strFecha === "N/A" || strFecha.toString().trim() === "") return null;
-      let texto = strFecha.toString().trim();
-      if (texto.includes('T') && texto.includes('/')) {
-        let partesSlash = texto.split('/');
-        if (partesSlash.length === 3) { return new Date(parseInt(partesSlash[2], 10), parseInt(partesSlash[1], 10) - 1, parseInt(partesSlash[0].split('T')[0], 10)); }
-      }
-      if (texto.includes('-')) {
-        let partesDash = texto.split('-');
-        if (partesDash.length === 3) { return new Date(parseInt(partesDash[0], 10), parseInt(partesDash[1], 10) - 1, parseInt(partesDash[2], 10)); }
-      }
-      let intentoDirecto = new Date(texto);
-      return !isNaN(intentoDirecto.getTime()) ? intentoDirecto : null;
+
+    function activarBotonConsultar() { document.getElementById('btnConsultar').disabled = false; }
+
+    function mapearIcono(id, val) {
+      let el = document.getElementById(id);
+      let esVerdadero = (String(val).toUpperCase() === "TRUE" || String(val) === "1" || String(val).toUpperCase() === "SI" || String(val).toUpperCase() === "VERDADERO");
+      el.textContent = esVerdadero ? "✔️" : "❌";
+      el.style.color = esVerdadero ? "var(--success)" : "var(--danger)";
     }
-    function formatearFechaVisual(strFecha) {
-      let objetoFecha = extraerEstructuraFecha(strFecha);
-      if (!objetoFecha) return strFecha || "N/A";
-      return String(objetoFecha.getDate()).padStart(2, '0') + "/" + String(objetoFecha.getMonth() + 1).padStart(2, '0') + "/" + objetoFecha.getFullYear();
-    }
-    function mapearIconoEstado(idElemento, valorBooleano) {
-      var el = document.getElementById(idElemento);
-      var esVerdadero = (valorBooleano === true || valorBooleano === "true" || valorBooleano === "VERDADERO" || valorBooleano === "1" || valorBooleano === "SI");
-      if (el) {
-        if (esVerdadero) { el.textContent = "✔️"; el.style.color = "var(--success)"; } 
-        else { el.textContent = "❌"; el.style.color = "var(--danger)"; }
-      }
-      return esVerdadero;
-    }
+
     function irAPaginaReporte() {
-      var valorA = document.getElementById('selectA').value;
-      var valorC = document.getElementById('selectC').value;
-      usuarioSeleccionado = baseDatosCompleta.find(item => item.columnaA === valorA && item.nombre === valorC);
-      if(!usuarioSeleccionado) return;
+      let nombre = document.getElementById('selectC').value;
+      let user = baseDatosCompleta.find(i => i.nombre === nombre);
+      if(!user) return;
+
       document.getElementById('paginaFiltros').classList.add('hidden');
       document.getElementById('paginaReporte').classList.remove('hidden');
-      document.getElementById('tituloColumnaA').textContent = usuarioSeleccionado.columnaA;
-      document.getElementById('valNombre').textContent = usuarioSeleccionado.nombre;
-      document.getElementById('valCargo').textContent = usuarioSeleccionado.cargo;
-      document.getElementById('valNombramiento').textContent = usuarioSeleccionado.nombramiento;
-      document.getElementById('valMetodologia').textContent = usuarioSeleccionado.metodologia;
-      document.getElementById('valFechaNom').textContent = formatearFechaVisual(usuarioSeleccionado.fechaNombramiento);
-      document.getElementById('valFechaFin').textContent = formatearFechaVisual(usuarioSeleccionado.fechaFinalizacion);
-      // Cálculo de tiempo
-      let fechaFinObj = extraerEstructuraFecha(usuarioSeleccionado.fechaFinalizacion);
-      if (fechaFinObj) {
-        var fechaHoy = new Date(); fechaHoy.setHours(0,0,0,0);
-        if (fechaFinObj >= fechaHoy) {
-          var diffMs = fechaFinObj - fechaHoy;
-          var diffDias = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
-          document.getElementById('valTiempoRestante').textContent = diffDias + " días";
-        } else { document.getElementById('valTiempoRestante').textContent = "Período vencido"; }
-      } else { document.getElementById('valTiempoRestante').textContent = "Sin fecha"; }
-      // Carga Formación Básica
-      document.getElementById('valAsesorPersonal').textContent = usuarioSeleccionado.asesorPersonal;
-      mapearIconoEstado('statusPPD', usuarioSeleccionado.desarrolloPPD);
-      var esValInicialTrue = mapearIconoEstado('statusValInicial', usuarioSeleccionado.valoracionInicial);
-      if (esValInicialTrue && formatearFechaVisual(usuarioSeleccionado.fechaValoracionInicial) !== "N/A") { document.getElementById('valFechaValInicial').textContent = formatearFechaVisual(usuarioSeleccionado.fechaValoracionInicial); document.getElementById('boxFechaValInicial').classList.remove('hidden'); } else { document.getElementById('boxFechaValInicial').classList.add('hidden'); }
-      var esValFinalTrue = mapearIconoEstado('statusValFinal', usuarioSeleccionado.valoracionFinal);
-      if (esValFinalTrue && formatearFechaVisual(usuarioSeleccionado.fechaValoracionFinal) !== "N/A") { document.getElementById('valFechaValFinal').textContent = formatearFechaVisual(usuarioSeleccionado.fechaValoracionFinal); document.getElementById('boxFechaValFinal').classList.remove('hidden'); } else { document.getElementById('boxFechaValFinal').classList.add('hidden'); }
-      // Lógica GN
-      var fGestorFormateada = formatearFechaVisual(usuarioSeleccionado.fechaGN);
-      if (fGestorFormateada && fGestorFormateada !== "N/A") { document.getElementById('valGestorFecha').textContent = "Fecha de registro: " + fGestorFormateada; document.getElementById('boxGestor').classList.remove('hidden'); } else { document.getElementById('boxGestor').classList.add('hidden'); }
-      // Carga Perfeccionamiento Continuo (PC)
-      mapearIconoEstado('statusS4PPD', usuarioSeleccionado.PCPPD); 
-      var esS4ValInicialTrue = mapearIconoEstado('statusS4ValInicial', usuarioSeleccionado.s4ValoracionInicial);
-      if (esS4ValInicialTrue && formatearFechaVisual(usuarioSeleccionado.fechaValoracionInicialPC) !== "N/A") { document.getElementById('valFechaS4ValInicial').textContent = formatearFechaVisual(usuarioSeleccionado.fechaValoracionInicialPC); document.getElementById('boxFechaS4ValInicial').classList.remove('hidden'); } else { document.getElementById('boxFechaS4ValInicial').classList.add('hidden'); }
-      var esS4ValFinalTrue = mapearIconoEstado('statusS4ValFinal', usuarioSeleccionado.s4ValoracionFinal);
-      if (esS4ValFinalTrue && formatearFechaVisual(usuarioSeleccionado.s4FechaValoracionFinal) !== "N/A") { document.getElementById('valFechaS4ValFinal').textContent = formatearFechaVisual(usuarioSeleccionado.s4FechaValoracionFinal); document.getElementById('boxFechaS4ValFinal').classList.remove('hidden'); } else { document.getElementById('boxFechaS4ValFinal').classList.add('hidden'); }
-      // Lógica AAA
-      var fAAAFormateada = formatearFechaVisual(usuarioSeleccionado.aaaFecha);
-      if (fAAAFormateada && fAAAFormateada !== "N/A") { document.getElementById('valAAAFecha').textContent = "Fecha de acreditación: " + fAAAFormateada; document.getElementById('boxAAA').classList.remove('hidden'); } else { document.getElementById('boxAAA').classList.add('hidden'); }
-      document.getElementById('loaderReporte').classList.add('hidden');
-      document.getElementById('contenidoReporte').classList.remove('hidden');
-      solicitarListaArchivosDrive();
+
+      // Mapeo preciso con los nombres definidos en Codigo.gs
+      document.getElementById('tituloNombre').textContent = user.nombre;
+      mapearIcono('statusGN', user.GN);
+      document.getElementById('fechaGN').textContent = user.fechaGN || "";
+      mapearIcono('statusPCPPD', user.PCPPD);
+      mapearIcono('statusAAA', user.AAA);
+      document.getElementById('fechaAAA').textContent = user.aaaFecha || "";
     }
-    // ... (Mantener las funciones solicitarListaArchivosDrive, procesarSubidaArchivo, etc. sin cambios)
-    function solicitarListaArchivosDrive() { /* ... */ }
-    function actualizarBarraMetrica(cantidad) { /* ... */ }
-    function procesarSubidaArchivo() { /* ... */ }
-    function eliminarArchivoDrive(id) { /* ... */ }
-    function volverYRefrescarConsulta() { location.reload(); }
   </script>
 </body>
 </html>
