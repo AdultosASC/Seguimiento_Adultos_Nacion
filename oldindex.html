@@ -48,27 +48,38 @@
   </style>
 </head>
 <body>
+
   <div id="paginaFiltros" class="container">...</div>
   <div id="paginaReporte" class="container wide hidden">...</div>
 
   <script>
-    // ... [MANTENGO TODAS LAS FUNCIONES IGUALES] ...
-    
+    // ... (Todo tu JS original hasta la función irAPaginaReporte) ...
+
     function irAPaginaReporte() {
-      // ... (código anterior de asignación de datos)
+      // (Asignación de datos original...)
+      // ...
       
-      // --- MODIFICACIÓN: Bloque Gestor Nacional (GN) ---
+      // 1. GN en Formación Básica (Color Rojo, similar al bloque AAA)
       var fGestorFormateada = formatearFechaVisual(usuarioSeleccionado.gestorNacionalFecha);
       var boxGestor = document.getElementById('boxGestor');
       if (fGestorFormateada && fGestorFormateada !== "N/A") {
           document.getElementById('valGestorFecha').textContent = "Fecha de registro: " + fGestorFormateada;
+          document.getElementById('valGestorFecha').style.color = "var(--danger)"; // Rojo
+          boxGestor.style.borderColor = "var(--danger)";
           boxGestor.classList.remove('hidden');
       } else {
           boxGestor.classList.add('hidden');
       }
+
+      // 2. Corrección lógica PC:PPD (Apuntando a la columna s4DesarrolloPPD)
+      mapearIconoEstado('statusS4PPD', usuarioSeleccionado.s4DesarrolloPPD);
       
-      // ... (continúa el resto de tu código exactamente igual)
+      // ... (El resto de tu lógica original sigue exactamente igual)
+      document.getElementById('loaderReporte').classList.add('hidden');
+      document.getElementById('contenidoReporte').classList.remove('hidden');
+      solicitarListaArchivosDrive();
     }
+    // ... (El resto de funciones originales)
   </script>
 </body>
 </html>
