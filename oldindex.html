@@ -14,7 +14,8 @@
     .btn-back { background: #64748b; color: white; padding: 0.5rem 1rem; border-radius: 8px; border: none; cursor: pointer; }
     .tabla-archivos { width: 100%; border-collapse: collapse; margin-top: 0.5rem; }
     .tabla-archivos th, .tabla-archivos td { padding: 0.75rem; border-bottom: 1px solid #e2e8f0; text-align: left; }
-    .btn-mini { padding: 0.3rem 0.6rem; font-size: 0.8rem; cursor: pointer; }
+    .btn-mini { padding: 0.3rem 0.6rem; font-size: 0.8rem; border-radius: 4px; cursor: pointer; }
+    .btn-del { background: var(--danger); color: white; border: none; }
   </style>
 </head>
 <body>
@@ -30,29 +31,26 @@
     <button class="btn-back" onclick="location.reload()">← Volver</button>
     <div id="contenidoReporte">
       <h2 id="tituloNombre"></h2>
+      <p>Tiempo restante en el cargo: <strong id="valTiempoRestante"></strong></p>
       
       <div class="seccion-reporte">
-        <h3>Información General</h3>
-        <p>Tiempo restante en el cargo: <span id="valTiempoRestante" style="font-weight:bold;"></span></p>
-      </div>
-
-      <div class="seccion-reporte">
         <h3>Formación Básica</h3>
-        <p>GN (Gestor Nacional): <span id="statusGN" class="status-badge"></span> <span id="fechaGN"></span></p>
+        <div id="boxGN" style="background: #fee2e2; padding: 0.75rem; border-radius: 8px; border: 1px solid #fecaca; margin-bottom: 0.5rem;">
+            GN (Gestor Nacional): <span id="statusGN" class="status-badge"></span> <span id="fechaGN"></span>
+        </div>
       </div>
 
       <div class="seccion-reporte">
         <h3>Perfeccionamiento Continuo</h3>
         <p>PC: PPD: <span id="statusPCPPD" class="status-badge"></span></p>
-        <p>AAA: <span id="statusAAA" class="status-badge"></span> <span id="fechaAAA"></span></p>
+        <div id="boxAAA" style="background: #f0fdf4; padding: 0.75rem; border-radius: 8px; border: 1px solid #bbf7d0;">
+            AAA: <span id="statusAAA" class="status-badge"></span> <span id="fechaAAA"></span>
+        </div>
       </div>
 
       <div class="seccion-reporte">
-        <h2>📁 Expediente Documental</h2>
-        <table class="tabla-archivos" id="tablaFiles">
-          <thead><tr><th>Archivo</th><th>Acciones</th></tr></thead>
-          <tbody id="cuerpoTablaArchivos"></tbody>
-        </table>
+        <h3>📁 Expediente Documental</h3>
+        <table class="tabla-archivos"><tbody id="cuerpoTablaArchivos"></tbody></table>
       </div>
     </div>
   </div>
@@ -88,10 +86,9 @@
       el.style.color = esVerdadero ? "var(--success)" : "var(--danger)";
     }
 
-    function extraerEstructuraFecha(str) {
-      if(!str || str === "N/A") return null;
-      let d = new Date(str);
-      return isNaN(d.getTime()) ? null : d;
+    function extraerEstructuraFecha(strFecha) {
+      if(!strFecha || strFecha === "N/A") return null;
+      return new Date(strFecha);
     }
 
     function irAPaginaReporte() {
@@ -101,41 +98,42 @@
 
       document.getElementById('paginaFiltros').classList.add('hidden');
       document.getElementById('paginaReporte').classList.remove('hidden');
+      document.getElementById('tituloNombre').textContent = usuarioSeleccionado.nombre;
 
-      // Cálculo años y meses
-      let fin = extraerEstructuraFecha(usuarioSeleccionado.fechaFinalizacion);
-      if (fin) {
+      // Cálculo tiempo restante (Años y Meses)
+      let fechaFin = extraerEstructuraFecha(usuarioSeleccionado.fechaFinalizacion);
+      if (fechaFin) {
         let hoy = new Date();
-        let diffY = fin.getFullYear() - hoy.getFullYear();
-        let diffM = fin.getMonth() - hoy.getMonth();
-        if (diffM < 0) { diffY--; diffM += 12; }
-        document.getElementById('valTiempoRestante').textContent = `${diffY} años y ${diffM} meses`;
+        let diff = (fechaFin - hoy) / (1000 * 60 * 60 * 24 * 30.44);
+        let anios = Math.floor(diff / 12);
+        let meses = Math.floor(diff % 12);
+        document.getElementById('valTiempoRestante').textContent = anios + " años y " + meses + " meses";
       }
 
-      document.getElementById('tituloNombre').textContent = usuarioSeleccionado.nombre;
-      
-      // GN con estilo rojo
       mapearIcono('statusGN', usuarioSeleccionado.GN);
-      let boxGN = document.getElementById('statusGN').parentElement;
-      boxGN.style.backgroundColor = "#fee2e2"; boxGN.style.padding = "5px"; boxGN.style.borderRadius = "8px";
-      
       document.getElementById('fechaGN').textContent = usuarioSeleccionado.fechaGN || "";
       mapearIcono('statusPCPPD', usuarioSeleccionado.PCPPD);
       mapearIcono('statusAAA', usuarioSeleccionado.AAA);
       document.getElementById('fechaAAA').textContent = usuarioSeleccionado.aaaFecha || "";
-      
+
       solicitarListaArchivosDrive();
     }
 
     function solicitarListaArchivosDrive() {
+      if(!usuarioSeleccionado.carpetaDrive) return;
       fetch(API_URL + "?accion=listarFiles&urlCarpeta=" + encodeURIComponent(usuarioSeleccionado.carpetaDrive))
-        .then(res => res.json()).then(res => {
+        .then(r => r.json()).then(res => {
           let cuerpo = document.getElementById('cuerpoTablaArchivos');
           cuerpo.innerHTML = "";
           res.archivos.forEach(f => {
-            cuerpo.innerHTML += `<tr><td>${f.nombre}</td><td><button class="btn-mini" onclick="window.open('${f.url}')">Ver</button></td></tr>`;
+            cuerpo.innerHTML += `<tr><td>${f.nombre}</td><td><button class="btn-mini btn-del" onclick="eliminarArchivo('${f.id}')">Borrar</button></td></tr>`;
           });
         });
+    }
+
+    function eliminarArchivo(id) {
+      fetch(API_URL, {method: "POST", body: JSON.stringify({accion: "eliminar", fileId: id})})
+      .then(() => solicitarListaArchivosDrive());
     }
   </script>
 </body>
