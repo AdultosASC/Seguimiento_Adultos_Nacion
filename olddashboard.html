@@ -14,10 +14,13 @@
     .btn-tab.active { background: var(--primary); color: white; }
     .section-content { display: none; }
     .section-content.active { display: block; }
-    .graficos-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-top: 1rem; }
+    .grafico-container { margin-bottom: 2rem; padding: 1rem; background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; }
     table { width: 100%; border-collapse: collapse; margin-top: 1rem; font-size: 0.75rem; }
     th, td { padding: 6px; border: 1px solid #e2e8f0; text-align: center; }
     th { background: #f1f5f9; }
+    .btn-informe { background: var(--purple-dark); color: white; padding: 0.75rem 1.5rem; border-radius: 8px; border: none; cursor: pointer; }
+    .chulo { color: var(--success); font-weight: bold; }
+    .equis { color: var(--danger); font-weight: bold; }
   </style>
 </head>
 <body>
@@ -29,16 +32,18 @@
   </div>
 
   <div id="general" class="section-content active">
-    <h2>Resumen Nacional (Estadísticas)</h2>
-    <div class="graficos-grid">
-      <canvas id="chartFB"></canvas>
-      <canvas id="chartPC"></canvas>
+    <h2>Resumen Nacional (Gráficos)</h2>
+    <div class="grafico-container">
+        <canvas id="chartFB" height="80"></canvas>
+    </div>
+    <div class="grafico-container">
+        <canvas id="chartPC" height="80"></canvas>
     </div>
   </div>
 
   <div id="area" class="section-content">
     <select id="selArea" onchange="render()"><option value="">Seleccione Área...</option></select>
-    <button class="btn-informe" onclick="generarInformePDF()">Descargar PDF</button>
+    <button class="btn-informe" style="margin-top:10px;" onclick="generarInformePDF()">Descargar Informe PDF</button>
     <div id="tablaDiv"></div>
   </div>
 </div>
@@ -48,39 +53,41 @@
   let db = [];
 
   function procesarDato(valor) {
+    if (valor === null || valor === undefined || valor === "" || valor === "N/A" || valor === "FALSE") return false;
     var v = String(valor).trim().toUpperCase();
     return (v === "TRUE" || v === "VERDADERO" || v === "1" || v === "V" || v === "SI");
   }
 
   fetch(API_URL).then(r => r.json()).then(data => {
     db = data;
-    renderCharts();
     const areas = [...new Set(db.map(i => i.columnaA))].filter(Boolean).sort();
     const sel = document.getElementById('selArea');
     areas.forEach(a => { if(a) sel.innerHTML += `<option value="${a}">${a}</option>`; });
+    actualizarGraficos();
   });
 
-  function renderCharts() {
-    // Calcular totales
-    let total = db.length;
-    let fbVI = db.filter(p => procesarDato(p.valoracionInicial)).length;
-    let fbVF = db.filter(p => procesarDato(p.valoracionFinal)).length;
-    let aaa = db.filter(p => procesarDato(p.AAA)).length;
+  function actualizarGraficos() {
+    const total = db.length;
+    const statsFB = [
+      db.filter(p => procesarDato(p.valoracionInicial)).length,
+      db.filter(p => procesarDato(p.desarrolloPPD)).length,
+      db.filter(p => procesarDato(p.valoracionFinal)).length,
+      db.filter(p => procesarDato(p.GN)).length
+    ];
+
+    const statsPC = [
+      db.filter(p => procesarDato(p.s4ValoracionInicial)).length,
+      db.filter(p => procesarDato(p.PCPPD)).length,
+      db.filter(p => procesarDato(p.s4ValoracionFinal)).length,
+      db.filter(p => procesarDato(p.AAA)).length
+    ];
 
     new Chart(document.getElementById('chartFB'), {
-      type: 'bar',
-      data: {
-        labels: ['Valoración Inicial', 'Valoración Final'],
-        datasets: [{ label: 'Cumplimiento FB', data: [fbVI, fbVF], backgroundColor: '#6366f1' }]
-      }
+      type: 'bar', data: { labels: ['FB: VI', 'FB: PPD', 'FB: VF', 'GN'], datasets: [{ label: 'Cumplimiento Formación Básica', data: statsFB, backgroundColor: '#6366f1' }] }
     });
 
     new Chart(document.getElementById('chartPC'), {
-      type: 'pie',
-      data: {
-        labels: ['Con AAA', 'Sin AAA'],
-        datasets: [{ data: [aaa, total - aaa], backgroundColor: ['#10b981', '#ef4444'] }]
-      }
+      type: 'bar', data: { labels: ['PC: VI', 'PC: PPD', 'PC: VF', 'AAA'], datasets: [{ label: 'Cumplimiento Perfeccionamiento Continuo', data: statsPC, backgroundColor: '#8b5cf6' }] }
     });
   }
 
@@ -91,8 +98,37 @@
     document.getElementById(btn).classList.add('active');
   }
 
-  function render() { /* Tu código original de renderizado aquí */ }
-  function generarInformePDF() { /* Tu código original de PDF aquí */ }
+  function render() {
+    // --- ESTA SECCIÓN NO SE TOCÓ ---
+    const area = document.getElementById('selArea').value;
+    if (!area) return;
+    const filtrados = db.filter(i => i.columnaA === area && i.nombre && i.nombre.trim() !== "");
+    let html = `<table><tr><th>Nombre</th><th>Cargo</th><th>FB: VI</th><th>FB: PPD</th><th>FB: VF</th><th>GN</th><th>PC: VI</th><th>PC: PPD</th><th>PC: VF</th><th>AAA</th></tr>`;
+    filtrados.forEach(p => {
+      html += `<tr>
+        <td>${p.nombre || "Sin nombre"}</td><td>${p.cargo || "Sin cargo"}</td>
+        <td>${procesarDato(p.valoracionInicial) ? '<span class="chulo">✔️</span>' : '<span class="equis">❌</span>'}</td>
+        <td>${procesarDato(p.desarrolloPPD) ? '<span class="chulo">✔️</span>' : '<span class="equis">❌</span>'}</td>
+        <td>${procesarDato(p.valoracionFinal) ? '<span class="chulo">✔️</span>' : '<span class="equis">❌</span>'}</td>
+        <td>${procesarDato(p.GN) ? '<span class="chulo">✔️</span>' : '<span class="equis">❌</span>'}</td>
+        <td>${procesarDato(p.s4ValoracionInicial) ? '<span class="chulo">✔️</span>' : '<span class="equis">❌</span>'}</td>
+        <td>${procesarDato(p.PCPPD) ? '<span class="chulo">✔️</span>' : '<span class="equis">❌</span>'}</td>
+        <td>${procesarDato(p.s4ValoracionFinal) ? '<span class="chulo">✔️</span>' : '<span class="equis">❌</span>'}</td>
+        <td>${procesarDato(p.AAA) ? '<span class="chulo">✔️</span>' : '<span class="equis">❌</span>'}</td>
+      </tr>`;
+    });
+    document.getElementById('tablaDiv').innerHTML = html + "</table>";
+  }
+
+  function generarInformePDF() {
+    const area = document.getElementById('selArea').value;
+    if (!area) return alert("Seleccione un área primero");
+    let div = document.createElement('div');
+    div.style.padding = "20px";
+    div.innerHTML = `<h1>Informe Área: ${area}</h1>` + document.getElementById('tablaDiv').innerHTML;
+    document.body.appendChild(div);
+    html2pdf().from(div).set({filename: 'Informe_'+area+'.pdf'}).save().then(() => document.body.removeChild(div));
+  }
 </script>
 </body>
 </html>
