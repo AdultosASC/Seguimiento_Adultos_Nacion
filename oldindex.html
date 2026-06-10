@@ -48,7 +48,6 @@
   </style>
 </head>
 <body>
-
   <div id="paginaFiltros" class="container">
     <div class="header-institucional">Dirección Nacional de <br>Adultos en el Movimiento</div>
     <h1>Consulta/Registro de Información</h1>
@@ -82,10 +81,11 @@
       <div class="seccion-reporte">
         <h2>Desarrollo Personal Formación Básica</h2>
         <div class="grid-dos-columnas">
+          <div class="dato-inline-bloque"><span class="dato-label" style="color: var(--purple-dark); margin-bottom: 0;">Asesor Personal:</span><span id="valAsesorPersonal" class="dato-valor" style="font-size: 1.1rem; font-weight: 600;"></span></div>
           <div class="dato-mixto-linea"><div class="mixto-izq"><span id="statusValInicial" class="status-badge"></span><span class="verificacion-titulo">Valoración Inicial</span></div><div id="boxFechaValInicial" class="dato-bloque hidden"><span class="dato-label">Fecha</span><span id="valFechaValInicial" class="dato-valor"></span></div></div>
           <div class="dato-mixto-linea"><div class="mixto-izq"><span id="statusPPD" class="status-badge"></span><span class="verificacion-titulo">En desarrollo de su PPD</span></div></div>
           <div class="dato-mixto-linea"><div class="mixto-izq"><span id="statusValFinal" class="status-badge"></span><span class="verificacion-titulo">Valoración Final</span></div><div id="boxFechaValFinal" class="dato-bloque hidden"><span class="dato-label">Fecha</span><span id="valFechaValFinal" class="dato-valor"></span></div></div>
-          <div id="boxGestor" class="dato-bloque hidden" style="grid-column: 1 / -1; background: #f8fafc; padding: 0.75rem; border-radius: 8px; border: 1px dashed var(--border);"><span class="dato-label">Gestor Nacional</span><span id="valGestorFecha" class="dato-valor"></span></div>
+          <div id="boxGestor" class="dato-bloque hidden" style="grid-column: 1 / -1; background: #f8fafc; padding: 0.75rem; border-radius: 8px; border: 1px dashed var(--border);"><span class="dato-label">Gestor Nacional</span><span id="valGestorFecha" class="dato-valor" style="font-weight: 600;"></span></div>
         </div>
       </div>
       <div class="seccion-reporte">
@@ -121,8 +121,6 @@
       document.getElementById('grupoC').classList.remove('hidden');
     }
 
-    function activarBotonConsultar() { document.getElementById('btnConsultar').disabled = !document.getElementById('selectC').value; }
-
     function mapearIcono(id, val) {
       let el = document.getElementById(id);
       let isTrue = (val === true || val === "true" || val === "VERDADERO" || val === 1 || val === "1");
@@ -132,6 +130,7 @@
 
     function irAPaginaReporte() {
       let user = baseDatosCompleta.find(i => i.columnaA === document.getElementById('selectA').value && i.nombre === document.getElementById('selectC').value);
+      if(!user) return;
       document.getElementById('paginaFiltros').classList.add('hidden');
       document.getElementById('paginaReporte').classList.remove('hidden');
       
@@ -142,19 +141,25 @@
       mapearIcono('statusPPD', user.desarrolloPPD);
       if(mapearIcono('statusValInicial', user.valoracionInicial)) { document.getElementById('valFechaValInicial').textContent = user.fechaValoracionInicial; document.getElementById('boxFechaValInicial').classList.remove('hidden'); }
       
-      // GN (Corregido: Lógica espejo a AAA)
+      // GN - Ahora usando la propiedad exacta de tu nueva columna
       let boxG = document.getElementById('boxGestor');
-      if (user.gestorNacionalFecha && user.gestorNacionalFecha !== "N/A") { document.getElementById('valGestorFecha').textContent = user.gestorNacionalFecha; boxG.classList.remove('hidden'); } else { boxG.classList.add('hidden'); }
+      if (user.gestorNacionalFecha && user.gestorNacionalFecha !== "N/A" && user.gestorNacionalFecha !== "") {
+          document.getElementById('valGestorFecha').textContent = user.gestorNacionalFecha;
+          boxG.classList.remove('hidden');
+      } else {
+          boxG.classList.add('hidden');
+      }
 
-      // Perfeccionamiento (Índice 20)
+      // Perfeccionamiento
       mapearIcono('statusS4PPD', Object.values(user)[20]);
       
       // AAA
       let boxAAA = document.getElementById('boxAAA');
-      if (user.aaaFecha && user.aaaFecha !== "N/A") { document.getElementById('valAAAFecha').textContent = user.aaaFecha; boxAAA.classList.remove('hidden'); } else { boxAAA.classList.add('hidden'); }
+      if (user.aaaFecha && user.aaaFecha !== "N/A" && user.aaaFecha !== "") { document.getElementById('valAAAFecha').textContent = user.aaaFecha; boxAAA.classList.remove('hidden'); } else { boxAAA.classList.add('hidden'); }
 
       document.getElementById('contenidoReporte').classList.remove('hidden');
     }
+    function activarBotonConsultar() { document.getElementById('btnConsultar').disabled = !document.getElementById('selectC').value; }
   </script>
 </body>
 </html>
