@@ -85,7 +85,7 @@
           <div class="dato-bloque"><span class="dato-label">Nombre</span><span id="valNombre" class="dato-valor"></span></div>
           <div class="dato-bloque"><span class="dato-label">Cargo</span><span id="valCargo" class="dato-valor"></span></div>
           <div class="dato-bloque"><span class="dato-label">Nombramiento</span><span id="valNombramiento" class="dato-valor"></span></div>
-          <div class="dato-bloque"><span class="dato-label">Metodología</span><span id="valMetodología" class="dato-valor"></span></div>
+          <div class="dato-bloque"><span class="dato-label">Metodología</span><span id="valMetodologia" class="dato-valor"></span></div>
           <div class="dato-bloque"><span class="dato-label">Fecha de Nombramiento</span><span id="valFechaNom" class="dato-valor"></span></div>
           <div class="dato-bloque"><span class="dato-label">Duración</span><span id="valDuracion" class="dato-valor"></span></div>
           <div class="dato-bloque" style="grid-column: 1 / -1;"><span class="dato-label">Fecha Finalización</span><span id="valFechaFin" class="dato-valor"></span></div>
@@ -115,7 +115,10 @@
             <div class="mixto-izq"><span id="statusValFinal" class="status-badge"></span><span class="verificacion-titulo">Valoración Final</span></div>
             <div id="boxFechaValFinal" class="dato-bloque hidden" style="text-align: right;"><span class="dato-label">Fecha de realización</span><span id="valFechaValFinal" class="dato-valor"></span></div>
           </div>
-          <div id="boxGestor" class="dato-bloque hidden" style="grid-column: 1 / -1; background: #f8fafc; padding: 0.75rem; border-radius: 8px; border: 1px dashed var(--border); margin-top: 0.5rem;"><span class="dato-label">Gestor Nacional</span><span id="valGestorFecha" class="dato-valor" style="font-weight: 600;"></span></div>
+          <div id="boxGestor" class="dato-bloque hidden" style="grid-column: 1 / -1; background: #f8fafc; padding: 0.75rem; border-radius: 8px; border: 1px dashed var(--border); margin-top: 0.5rem;">
+            <span class="dato-label" style="color: #4c1d95;">Gestor Nacional</span>
+            <span id="valGestorFecha" class="dato-valor" style="font-weight: 600; color: #4c1d95;"></span>
+          </div>
         </div>
       </div>
 
@@ -258,7 +261,6 @@
       var valorA = document.getElementById('selectA').value;
       var valorC = document.getElementById('selectC').value;
       
-      // Buscamos el objeto. Para acceder al índice 20, usaremos Object.values()
       usuarioSeleccionado = baseDatosCompleta.find(item => item.columnaA === valorA && item.nombre === valorC);
       if(!usuarioSeleccionado) return;
 
@@ -269,7 +271,7 @@
       document.getElementById('valNombre').textContent = usuarioSeleccionado.nombre;
       document.getElementById('valCargo').textContent = usuarioSeleccionado.cargo;
       document.getElementById('valNombramiento').textContent = usuarioSeleccionado.nombramiento;
-      document.getElementById('valMetodología').textContent = usuarioSeleccionado.metodologia;
+      document.getElementById('valMetodologia').textContent = usuarioSeleccionado.metodologia;
       
       document.getElementById('valFechaNom').textContent = formatearFechaVisual(usuarioSeleccionado.fechaNombramiento);
       document.getElementById('valFechaFin').textContent = formatearFechaVisual(usuarioSeleccionado.fechaFinalizacion);
@@ -306,16 +308,19 @@
       var esValFinalTrue = mapearIconoEstado('statusValFinal', usuarioSeleccionado.valoracionFinal);
       var f2Formateada = formatearFechaVisual(usuarioSeleccionado.fechaValoracionFinal);
       if (esValFinalTrue && f2Formateada !== "N/A") { document.getElementById('valFechaValFinal').textContent = f2Formateada; document.getElementById('boxFechaValFinal').classList.remove('hidden'); } else { document.getElementById('boxFechaValFinal').classList.add('hidden'); }
+      
+      // Lógica para mostrar Gestor Nacional (Igual que AAA)
       var fGestorFormateada = formatearFechaVisual(usuarioSeleccionado.gestorNacionalFecha);
-      if (fGestorFormateada && fGestorFormateada !== "N/A") { document.getElementById('valGestorFecha').textContent = "Fecha de registro: " + fGestorFormateada; document.getElementById('boxGestor').classList.remove('hidden'); } else { document.getElementById('boxGestor').classList.add('hidden'); }
+      if (fGestorFormateada && fGestorFormateada !== "N/A") { 
+          document.getElementById('valGestorFecha').textContent = "Fecha de registro: " + fGestorFormateada; 
+          document.getElementById('boxGestor').classList.remove('hidden'); 
+      } else { 
+          document.getElementById('boxGestor').classList.add('hidden'); 
+      }
 
       // Carga Perfeccionamiento Continuo
-      mapearIconoEstado('statusS4ValInicial', usuarioSeleccionado.s4ValoracionInicial);
-      
-      // MODIFICACIÓN: Obtenemos el valor del índice 20 (array 0-index) del objeto de datos
       let valoresObjeto = Object.values(usuarioSeleccionado);
-      let valorIndice20 = valoresObjeto[20];
-      mapearIconoEstado('statusS4PPD', valorIndice20);
+      mapearIconoEstado('statusS4PPD', valoresObjeto[20]); // Índice 20
 
       var esS4ValInicialTrue = mapearIconoEstado('statusS4ValInicial', usuarioSeleccionado.s4ValoracionInicial);
       var fS4Nom1 = formatearFechaVisual(usuarioSeleccionado.s4FechaValoracionInicial);
@@ -345,7 +350,7 @@
       fetch(API_URL + "?accion=listarFiles&urlCarpeta=" + encodeURIComponent(usuarioSeleccionado.carpetaDrive))
         .then(res => res.json())
         .then(res => {
-          loader.classList.remove('hidden');
+          loader.classList.add('hidden');
           if (res && res.resultado === "OK") {
             if (!res.archivos || res.archivos.length === 0) {
               cuerpo.innerHTML = '<tr><td colspan="2" style="text-align:center; color:var(--text-light); font-style:italic; padding: 2rem 0;">La carpeta está vacía. Sube un archivo abajo.</td></tr>';
