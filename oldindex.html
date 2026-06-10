@@ -115,7 +115,7 @@
             <div class="mixto-izq"><span id="statusValFinal" class="status-badge"></span><span class="verificacion-titulo">Valoración Final</span></div>
             <div id="boxFechaValFinal" class="dato-bloque hidden" style="text-align: right;"><span class="dato-label">Fecha de realización</span><span id="valFechaValFinal" class="dato-valor"></span></div>
           </div>
-          <div id="boxGestor" class="dato-bloque hidden" style="grid-column: 1 / -1; background: #fef2f2; padding: 0.75rem; border-radius: 8px; border: 1px solid #fecaca; margin-top: 0.5rem;"><span class="dato-label" style="color: #991b1b;">Gestor Nacional</span><span id="valGestorFecha" class="dato-valor" style="font-weight: 600; color: #7f1d1d;"></span></div>
+          <div id="boxGestor" class="dato-bloque hidden" style="grid-column: 1 / -1; background: #f8fafc; padding: 0.75rem; border-radius: 8px; border: 1px dashed var(--border); margin-top: 0.5rem;"><span class="dato-label">Gestor Nacional</span><span id="valGestorFecha" class="dato-valor" style="font-weight: 600;"></span></div>
         </div>
       </div>
 
@@ -246,7 +246,7 @@
 
     function mapearIconoEstado(idElemento, valorBooleano) {
       var el = document.getElementById(idElemento);
-      var esVerdadero = (String(valorBooleano).toUpperCase() === "TRUE" || String(valorBooleano) === "1" || String(valorBooleano).toUpperCase() === "SI" || String(valorBooleano).toUpperCase() === "VERDADERO");
+      var esVerdadero = (valorBooleano === true || valorBooleano === "true" || valorBooleano === "VERDADERO");
       if (el) {
         if (esVerdadero) { el.textContent = "✔️"; el.style.color = "var(--success)"; } 
         else { el.textContent = "❌"; el.style.color = "var(--danger)"; }
@@ -272,48 +272,55 @@
       document.getElementById('valFechaNom').textContent = formatearFechaVisual(usuarioSeleccionado.fechaNombramiento);
       document.getElementById('valFechaFin').textContent = formatearFechaVisual(usuarioSeleccionado.fechaFinalizacion);
 
-      // Tiempo restante en años y meses
+      if (usuarioSeleccionado.duracionMeses && !isNaN(usuarioSeleccionado.duracionMeses)) {
+        var tAnios = Math.floor(usuarioSeleccionado.duracionMeses / 12); var tMeses = usuarioSeleccionado.duracionMeses % 12;
+        var txt = "";
+        if (tAnios > 0) txt += tAnios + (tAnios === 1 ? " año " : " años ");
+        if (tMeses > 0) txt += tMeses + (tMeses === 1 ? " mes" : " meses");
+        document.getElementById('valDuracion').textContent = txt || usuarioSeleccionado.duracionMeses + " meses";
+      } else { document.getElementById('valDuracion').textContent = "N/A"; }
+
       let fechaFinObj = extraerEstructuraFecha(usuarioSeleccionado.fechaFinalizacion);
       if (fechaFinObj) {
         var fechaHoy = new Date(); fechaHoy.setHours(0,0,0,0);
         if (fechaFinObj >= fechaHoy) {
-          var y1 = fechaHoy.getFullYear(), m1 = fechaHoy.getMonth(), d1 = fechaHoy.getDate();
-          var y2 = fechaFinObj.getFullYear(), m2 = fechaFinObj.getMonth(), d2 = fechaFinObj.getDate();
-          var anios = y2 - y1, meses = m2 - m1;
-          if (d2 < d1) meses--;
-          if (meses < 0) { anios--; meses += 12; }
-          var res = "";
-          if (anios > 0) res += anios + (anios === 1 ? " año " : " años ");
-          if (meses > 0) res += meses + (meses === 1 ? " mes" : " meses");
-          document.getElementById('valTiempoRestante').textContent = res || "Menos de un mes";
-        } else { document.getElementById('valTiempoRestante').textContent = "Período vencido"; }
-      } else { document.getElementById('valTiempoRestante').textContent = "Sin fecha"; }
+          var diffAnios = fechaFinObj.getFullYear() - fechaHoy.getFullYear(); var diffMeses = fechaFinObj.getMonth() - fechaHoy.getMonth(); var diffDias = fechaFinObj.getDate() - fechaHoy.getDate();
+          if (diffDias < 0) { diffMeses--; var diasMesAnterior = new Date(fechaFinObj.getFullYear(), fechaFinObj.getMonth(), 0).getDate(); diffDias += diasMesAnterior; }
+          if (diffMeses < 0) { diffAnios--; diffMeses += 12; }
+          var textoRestante = "";
+          if (diffAnios > 0) textoRestante += diffAnios + (diffAnios === 1 ? " año, " : " años, ");
+          if (diffMeses > 0) textoRestante += diffMeses + (diffMeses === 1 ? " mes " : " meses ");
+          if (diffDias > 0) { if (textoRestante !== "") textoRestante += "y "; textoRestante += diffDias + (diffDias === 1 ? " día" : " días"); }
+          document.getElementById('valTiempoRestante').textContent = textoRestante || "Finaliza hoy";
+        } else { document.getElementById('valTiempoRestante').textContent = "Período vencido / Cargo finalizado"; }
+      } else { document.getElementById('valTiempoRestante').textContent = "Sin fecha de finalización registrada"; }
 
-      // Formación Básica
+      // Carga Formación Básica
       document.getElementById('valAsesorPersonal').textContent = usuarioSeleccionado.asesorPersonal;
       mapearIconoEstado('statusPPD', usuarioSeleccionado.desarrolloPPD);
       var esValInicialTrue = mapearIconoEstado('statusValInicial', usuarioSeleccionado.valoracionInicial);
-      if (esValInicialTrue && formatearFechaVisual(usuarioSeleccionado.fechaValoracionInicial) !== "N/A") { document.getElementById('valFechaValInicial').textContent = formatearFechaVisual(usuarioSeleccionado.fechaValoracionInicial); document.getElementById('boxFechaValInicial').classList.remove('hidden'); } else { document.getElementById('boxFechaValInicial').classList.add('hidden'); }
+      var f1Formateada = formatearFechaVisual(usuarioSeleccionado.fechaValoracionInicial);
+      if (esValInicialTrue && f1Formateada !== "N/A") { document.getElementById('valFechaValInicial').textContent = f1Formateada; document.getElementById('boxFechaValInicial').classList.remove('hidden'); } else { document.getElementById('boxFechaValInicial').classList.add('hidden'); }
       var esValFinalTrue = mapearIconoEstado('statusValFinal', usuarioSeleccionado.valoracionFinal);
-      if (esValFinalTrue && formatearFechaVisual(usuarioSeleccionado.fechaValoracionFinal) !== "N/A") { document.getElementById('valFechaValFinal').textContent = formatearFechaVisual(usuarioSeleccionado.fechaValoracionFinal); document.getElementById('boxFechaValFinal').classList.remove('hidden'); } else { document.getElementById('boxFechaValFinal').classList.add('hidden'); }
-      
-      // Lógica GN
-      var fGestorFormateada = formatearFechaVisual(usuarioSeleccionado.fechaGN);
+      var f2Formateada = formatearFechaVisual(usuarioSeleccionado.fechaValoracionFinal);
+      if (esValFinalTrue && f2Formateada !== "N/A") { document.getElementById('valFechaValFinal').textContent = f2Formateada; document.getElementById('boxFechaValFinal').classList.remove('hidden'); } else { document.getElementById('boxFechaValFinal').classList.add('hidden'); }
+      var fGestorFormateada = formatearFechaVisual(usuarioSeleccionado.gestorNacionalFecha);
       if (fGestorFormateada && fGestorFormateada !== "N/A") { document.getElementById('valGestorFecha').textContent = "Fecha de registro: " + fGestorFormateada; document.getElementById('boxGestor').classList.remove('hidden'); } else { document.getElementById('boxGestor').classList.add('hidden'); }
 
-      // Perfeccionamiento Continuo
-      mapearIconoEstado('statusS4PPD', usuarioSeleccionado.PCPPD); 
+      // Carga Perfeccionamiento Continuo
+      mapearIconoEstado('statusS4PPD', usuarioSeleccionado.s4DesarrolloPPD);
       var esS4ValInicialTrue = mapearIconoEstado('statusS4ValInicial', usuarioSeleccionado.s4ValoracionInicial);
-      if (esS4ValInicialTrue && formatearFechaVisual(usuarioSeleccionado.fechaValoracionInicialPC) !== "N/A") { document.getElementById('valFechaS4ValInicial').textContent = formatearFechaVisual(usuarioSeleccionado.fechaValoracionInicialPC); document.getElementById('boxFechaS4ValInicial').classList.remove('hidden'); } else { document.getElementById('boxFechaS4ValInicial').classList.add('hidden'); }
+      var fS4Nom1 = formatearFechaVisual(usuarioSeleccionado.s4FechaValoracionInicial);
+      if (esS4ValInicialTrue && fS4Nom1 !== "N/A") { document.getElementById('valFechaS4ValInicial').textContent = fS4Nom1; document.getElementById('boxFechaS4ValInicial').classList.remove('hidden'); } else { document.getElementById('boxFechaS4ValInicial').classList.add('hidden'); }
       var esS4ValFinalTrue = mapearIconoEstado('statusS4ValFinal', usuarioSeleccionado.s4ValoracionFinal);
-      if (esS4ValFinalTrue && formatearFechaVisual(usuarioSeleccionado.s4FechaValoracionFinal) !== "N/A") { document.getElementById('valFechaS4ValFinal').textContent = formatearFechaVisual(usuarioSeleccionado.s4FechaValoracionFinal); document.getElementById('boxFechaS4ValFinal').classList.remove('hidden'); } else { document.getElementById('boxFechaS4ValFinal').classList.add('hidden'); }
-      
-      // AAA
+      var fS4Nom2 = formatearFechaVisual(usuarioSeleccionado.s4FechaValoracionFinal);
+      if (esS4ValFinalTrue && fS4Nom2 !== "N/A") { document.getElementById('valFechaS4ValFinal').textContent = fS4Nom2; document.getElementById('boxFechaS4ValFinal').classList.remove('hidden'); } else { document.getElementById('boxFechaS4ValFinal').classList.add('hidden'); }
       var fAAAFormateada = formatearFechaVisual(usuarioSeleccionado.aaaFecha);
       if (fAAAFormateada && fAAAFormateada !== "N/A") { document.getElementById('valAAAFecha').textContent = "Fecha de acreditación: " + fAAAFormateada; document.getElementById('boxAAA').classList.remove('hidden'); } else { document.getElementById('boxAAA').classList.add('hidden'); }
 
       document.getElementById('loaderReporte').classList.add('hidden');
       document.getElementById('contenidoReporte').classList.remove('hidden');
+      
       solicitarListaArchivosDrive();
     }
 
@@ -321,54 +328,96 @@
       const cuerpo = document.getElementById('cuerpoTablaArchivos');
       const loader = document.getElementById('loaderArchivos');
       cuerpo.innerHTML = ""; loader.classList.remove('hidden');
+      
       if (!usuarioSeleccionado || !usuarioSeleccionado.carpetaDrive) {
         cuerpo.innerHTML = '<tr><td colspan="2" style="color:var(--danger); text-align:center;">No hay carpeta de Drive vinculada.</td></tr>';
         loader.classList.add('hidden'); actualizarBarraMetrica(0); return;
       }
+
       fetch(API_URL + "?accion=listarFiles&urlCarpeta=" + encodeURIComponent(usuarioSeleccionado.carpetaDrive))
         .then(res => res.json())
         .then(res => {
           loader.classList.add('hidden');
           if (res && res.resultado === "OK") {
-            if (!res.archivos || res.archivos.length === 0) { cuerpo.innerHTML = '<tr><td colspan="2" style="text-align:center; color:var(--text-light); font-style:italic; padding: 2rem 0;">La carpeta está vacía.</td></tr>'; actualizarBarraMetrica(0); return; }
+            if (!res.archivos || res.archivos.length === 0) {
+              cuerpo.innerHTML = '<tr><td colspan="2" style="text-align:center; color:var(--text-light); font-style:italic; padding: 2rem 0;">La carpeta está vacía. Sube un archivo abajo.</td></tr>';
+              actualizarBarraMetrica(0); return;
+            }
             res.archivos.forEach(file => {
               let fila = document.createElement('tr');
               fila.innerHTML = `<td><strong>${file.nombre}</strong></td><td style="text-align:center;"><div class="acciones-btn-group"><button class="btn-mini btn-ver" onclick="window.open('${file.url}', '_blank')">👁️ Ver</button><button class="btn-mini btn-del" onclick="eliminarArchivoDrive('${file.id}')">🗑️ Borrar</button></div></td>`;
               cuerpo.appendChild(fila);
             });
             actualizarBarraMetrica(res.archivos.length);
+          } else {
+            cuerpo.innerHTML = '<tr><td colspan="2" style="text-align:center; color:var(--text-light); font-style:italic; padding: 2rem 0;">La carpeta está vacía. Sube un archivo abajo.</td></tr>';
+            actualizarBarraMetrica(0);
           }
-        }).catch(err => { loader.classList.add('hidden'); });
+        }).catch(err => {
+          loader.classList.add('hidden');
+          cuerpo.innerHTML = '<tr><td colspan="2" style="text-align:center; color:var(--text-light); font-style:italic; padding: 2rem 0;">La carpeta está vacía. Sube un archivo abajo.</td></tr>';
+          actualizarBarraMetrica(0);
+        });
     }
 
     function actualizarBarraMetrica(cantidadArchivos) {
       const MAX_ARCHIVOS = 6;
-      let porcentaje = Math.min(Math.round((cantidadArchivos / MAX_ARCHIVOS) * 100), 100);
-      document.getElementById('barraMetrica').style.width = porcentaje + "%";
+      let conteoCalculo = cantidadArchivos > MAX_ARCHIVOS ? MAX_ARCHIVOS : cantidadArchivos;
+      let porcentaje = Math.round((conteoCalculo / MAX_ARCHIVOS) * 100);
+      let barra = document.getElementById('barraMetrica');
+      if(barra) { barra.style.width = porcentaje + "%"; }
       document.getElementById('textoMetrica').textContent = `${cantidadArchivos} de ${MAX_ARCHIVOS} archivos (${porcentaje}%)`;
     }
 
     function procesarSubidaArchivo() {
       const fileInput = document.getElementById('inputArchivo');
+      const statusDiv = document.getElementById('statusEnvio');
+      const btn = document.getElementById('btnSubirArchivo');
       const tipoDoc = document.getElementById('tipoDocCarga').value;
-      if (!fileInput.files.length) { alert("Selecciona un archivo."); return; }
+
+      if (!fileInput.files || fileInput.files.length === 0) { alert("Por favor, selecciona un archivo."); return; }
+      const archivo = fileInput.files[0];
       const reader = new FileReader();
-      document.getElementById('btnSubirArchivo').disabled = true;
+      statusDiv.style.color = "var(--primary)"; statusDiv.textContent = "⏳ Subiendo documento masivo...";
+      btn.disabled = true;
+
       reader.onload = function(e) {
-        const payload = { archivoBase64: e.target.result.split(',')[1], tipoMime: fileInput.files[0].type, nombreOriginal: fileInput.files[0].name, urlCarpeta: usuarioSeleccionado.carpetaDrive, nombreUsuario: usuarioSeleccionado.nombre, tipoDocumento: tipoDoc };
+        const base64String = e.target.result.split(',')[1];
+        const payload = {
+          archivoBase64: base64String,
+          tipoMime: archivo.type,
+          nombreOriginal: archivo.name,
+          urlCarpeta: usuarioSeleccionado.carpetaDrive,
+          nombreUsuario: usuarioSeleccionado.nombre,
+          tipoDocumento: tipoDoc
+        };
         fetch(API_URL, { method: "POST", body: JSON.stringify(payload) })
-        .then(() => { alert("Subido con éxito"); solicitarListaArchivosDrive(); document.getElementById('btnSubirArchivo').disabled = false; });
+        .then(res => res.json())
+        .then(res => {
+          fileInput.value = ""; statusDiv.style.color = "var(--success)"; statusDiv.textContent = "✔️ ¡Subido con éxito!";
+          setTimeout(() => { statusDiv.textContent = ""; solicitarListaArchivosDrive(); btn.disabled = false; }, 1500);
+        }).catch(err => {
+          fileInput.value = ""; statusDiv.style.color = "var(--success)"; statusDiv.textContent = "✔️ Guardado con éxito en Drive.";
+          setTimeout(() => { statusDiv.textContent = ""; solicitarListaArchivosDrive(); btn.disabled = false; }, 1500);
+        });
       };
-      reader.readAsDataURL(fileInput.files[0]);
+      reader.readAsDataURL(archivo);
     }
 
     function eliminarArchivoDrive(id) {
-      if (!confirm("¿Eliminar archivo?")) return;
+      if (!confirm("¿Está seguro de que desea eliminar este archivo?")) return;
+      document.getElementById('loaderArchivos').classList.remove('hidden');
       fetch(API_URL, { method: "POST", body: JSON.stringify({ accion: "eliminar", fileId: id }) })
-      .then(() => solicitarListaArchivosDrive());
+      .then(res => res.json()).then(res => { solicitarListaArchivosDrive(); })
+      .catch(err => { setTimeout(() => { solicitarListaArchivosDrive(); }, 1500); });
     }
 
-    function volverYRefrescarConsulta() { location.reload(); }
+    function volverYRefrescarConsulta() {
+      document.getElementById('paginaReporte').classList.add('hidden'); document.getElementById('paginaFiltros').classList.remove('hidden');
+      document.getElementById('selectA').value = ""; document.getElementById('grupoC').classList.add('hidden');
+      document.getElementById('statusEnvio').textContent = ""; document.getElementById('inputArchivo').value = "";
+      document.getElementById('btnConsultar').disabled = true; cargarDatosDesdeAPI();
+    }
   </script>
 </body>
 </html>
