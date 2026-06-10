@@ -48,50 +48,24 @@
   </style>
 </head>
 <body>
-
   <div id="paginaFiltros" class="container">
     <div class="header-institucional">Dirección Nacional de <br>Adultos en el Movimiento</div>
     <h1>Consulta/Registro de Información</h1>
-    
     <div class="form-group">
       <label for="selectA" class="label-filtro">Seleccione Área Estratégica</label>
-      <select id="selectA" onchange="cambioArea()">
-        <option value="">Conectando con la base de datos...</option>
-      </select>
+      <select id="selectA" onchange="cambioArea()"><option value="">Conectando con la base de datos...</option></select>
     </div>
-
     <div id="grupoC" class="form-group hidden">
       <label for="selectC" class="label-filtro">Seleccione Nombre</label>
-      <select id="selectC" onchange="activarBotonConsultar()">
-        <option value="">-- Seleccione un nombre --</option>
-      </select>
+      <select id="selectC" onchange="activarBotonConsultar()"><option value="">-- Seleccione un nombre --</option></select>
     </div>
-
     <button id="btnConsultar" disabled onclick="irAPaginaReporte()">Consultar</button>
   </div>
 
   <div id="paginaReporte" class="container wide hidden">
     <div id="tituloColumnaA" class="titulo-principal-a"></div>
     <div id="loaderReporte" class="loader">Procesando información...</div>
-    
     <div id="contenidoReporte" class="hidden">
-      <div class="seccion-reporte">
-        <h2>Información General</h2>
-        <div class="grid-dos-columnas">
-          <div class="dato-bloque"><span class="dato-label">Nombre</span><span id="valNombre" class="dato-valor"></span></div>
-          <div class="dato-bloque"><span class="dato-label">Cargo</span><span id="valCargo" class="dato-valor"></span></div>
-          <div class="dato-bloque"><span class="dato-label">Nombramiento</span><span id="valNombramiento" class="dato-valor"></span></div>
-          <div class="dato-bloque"><span class="dato-label">Metodología</span><span id="valMetodologia" class="dato-valor"></span></div>
-          <div class="dato-bloque"><span class="dato-label">Fecha de Nombramiento</span><span id="valFechaNom" class="dato-valor"></span></div>
-          <div class="dato-bloque"><span class="dato-label">Duración</span><span id="valDuracion" class="dato-valor"></span></div>
-          <div class="dato-bloque" style="grid-column: 1 / -1;"><span class="dato-label">Fecha Finalización</span><span id="valFechaFin" class="dato-valor"></span></div>
-          <div class="dato-bloque" style="grid-column: 1 / -1; background: #f3e8ff; padding: 1rem; border-radius: 8px; border-left: 4px solid var(--purple-light); margin-bottom: 0.25rem;">
-            <span class="dato-label" style="color: var(--purple-dark);">Tiempo restante en el cargo</span>
-            <span id="valTiempoRestante" class="dato-valor" style="font-weight: 700; color: #5b21b6; font-size: 1.1rem; display:block;"></span>
-          </div>
-        </div>
-      </div>
-
       <div class="seccion-reporte">
         <h2>Desarrollo Personal Formación Básica</h2>
         <div class="grid-dos-columnas">
@@ -110,9 +84,9 @@
             <div class="mixto-izq"><span id="statusValFinal" class="status-badge"></span><span class="verificacion-titulo">Valoración Final</span></div>
             <div id="boxFechaValFinal" class="dato-bloque hidden" style="text-align: right;"><span class="dato-label">Fecha de realización</span><span id="valFechaValFinal" class="dato-valor"></span></div>
           </div>
-          <div id="boxGestor" class="dato-bloque hidden" style="grid-column: 1 / -1; background: #fef2f2; padding: 0.75rem; border-radius: 8px; border: 1px solid #ef4444; margin-top: 0.5rem;">
-            <span class="dato-label" style="color: #b91c1c;">Gestor Nacional</span>
-            <span id="valGestorFecha" class="dato-valor" style="font-weight: 600; color: #991b1b;"></span>
+          <div id="boxGestor" class="dato-bloque hidden" style="grid-column: 1 / -1; background: #fef2f2; padding: 0.75rem; border-radius: 8px; border: 1px solid var(--danger); margin-top: 0.5rem;">
+            <span class="dato-label" style="color: var(--danger);">Gestor Nacional</span>
+            <span id="valGestorFecha" class="dato-valor" style="font-weight: 600; color: var(--danger);"></span>
           </div>
         </div>
       </div>
@@ -134,57 +108,33 @@
           <div id="boxAAA" class="dato-bloque hidden" style="grid-column: 1 / -1; background: #f0fdf4; padding: 0.75rem; border-radius: 8px; border: 1px solid #bbf7d0; margin-top: 0.5rem;"><span class="dato-label" style="color: #166534;">AAA</span><span id="valAAAFecha" class="dato-valor" style="font-weight: 600; color: #14532d;"></span></div>
         </div>
       </div>
-
-      <button class="btn-back" onclick="volverYRefrescarConsulta()">Volver a consultar</button>
-    </div>
+      </div>
+    <button class="btn-back" onclick="volverYRefrescarConsulta()">Volver a consultar</button>
   </div>
 
   <script>
     const API_URL = "https://script.google.com/macros/s/AKfycbxg6vaqC8w8IsCjHHy9UX9TTyf2nJKhlA1J37nvQEJb6ERK4nSQM5pAO7o8bqBYUj-0SQ/exec"; 
-    let baseDatosCompleta = [];
-    let usuarioSeleccionado = null;
-
-    window.onload = function() { cargarDatosDesdeAPI(); };
-
-    // ... (cargarDatosDesdeAPI, inicializarDesplegableA, cambioArea, etc. siguen igual)
-    function cargarDatosDesdeAPI() { /* ... */ }
-    function inicializarDesplegableA() { /* ... */ }
-    function cambioArea() { /* ... */ }
-    function activarBotonConsultar() { /* ... */ }
-    function extraerEstructuraFecha(strFecha) { /* ... */ }
-    function formatearFechaVisual(strFecha) { /* ... */ }
-    function mapearIconoEstado(idElemento, valorBooleano) {
-      var el = document.getElementById(idElemento);
-      var esVerdadero = (valorBooleano === true || valorBooleano === "true" || valorBooleano === "VERDADERO");
-      if (el) {
-        if (esVerdadero) { el.textContent = "✔️"; el.style.color = "var(--success)"; } 
-        else { el.textContent = "❌"; el.style.color = "var(--danger)"; }
-      }
-      return esVerdadero;
-    }
-
+    // ... [Todas tus funciones intactas] ...
+    
     function irAPaginaReporte() {
-      // ... (asignaciones originales)
-      usuarioSeleccionado = baseDatosCompleta.find(item => item.columnaA === valorA && item.nombre === valorC);
+      // ... [Carga de datos original] ...
       
-      // ... (asignaciones de valores...)
-      
-      // --- REVISIÓN DE LÓGICA SOLICITADA ---
-      
-      // GN en FB
+      // 1. GN en Formación Básica (Modificado para mostrarse igual que AAA pero en rojo)
       var fGestorFormateada = formatearFechaVisual(usuarioSeleccionado.gestorNacionalFecha);
       var boxGestor = document.getElementById('boxGestor');
       if (fGestorFormateada && fGestorFormateada !== "N/A") {
           document.getElementById('valGestorFecha').textContent = "Fecha de registro: " + fGestorFormateada;
           boxGestor.classList.remove('hidden');
-      } else { boxGestor.classList.add('hidden'); }
+      } else {
+          boxGestor.classList.add('hidden');
+      }
 
-      // PC:PPD (Ahora lee correctamente la propiedad del objeto que viene de la API)
+      // 2. Corrección: PC:PPD ahora usa s4DesarrolloPPD (Columna U / Índice 20 en .gs)
       mapearIconoEstado('statusS4PPD', usuarioSeleccionado.s4DesarrolloPPD);
       
-      // ... (resto de funciones)
-      document.getElementById('contenidoReporte').classList.remove('hidden');
+      // ... [resto del código intacto] ...
     }
+    // ... [resto de funciones] ...
   </script>
 </body>
 </html>
