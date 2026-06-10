@@ -115,7 +115,7 @@
             <div class="mixto-izq"><span id="statusValFinal" class="status-badge"></span><span class="verificacion-titulo">Valoración Final</span></div>
             <div id="boxFechaValFinal" class="dato-bloque hidden" style="text-align: right;"><span class="dato-label">Fecha de realización</span><span id="valFechaValFinal" class="dato-valor"></span></div>
           </div>
-          <div id="boxGestor" class="dato-bloque hidden" style="grid-column: 1 / -1; background: #f8fafc; padding: 0.75rem; border-radius: 8px; border: 1px dashed var(--border); margin-top: 0.5rem;"><span class="dato-label">Gestor Nacional</span><span id="valGestorFecha" class="dato-valor" style="font-weight: 600;"></span></div>
+          <div id="boxGestor" class="dato-bloque" style="grid-column: 1 / -1; background: #f8fafc; padding: 0.75rem; border-radius: 8px; border: 1px dashed var(--border); margin-top: 0.5rem;"><span class="dato-label">Gestor Nacional</span><span id="valGestorFecha" class="dato-valor" style="font-weight: 600;"></span></div>
         </div>
       </div>
 
@@ -224,7 +224,7 @@
     function activarBotonConsultar() { document.getElementById('btnConsultar').disabled = (document.getElementById('selectC').value === ""); }
 
     function extraerEstructuraFecha(strFecha) {
-      if(!strFecha || strFecha === "N/A" || strFecha.toString().trim() === "") return null;
+      if(!strFecha || strFecha === "N/A" || strFecha.toString().trim() === "" || strFecha === "undefined") return null;
       let texto = strFecha.toString().trim();
       if (texto.includes('T') && texto.includes('/')) {
         let partesSlash = texto.split('/');
@@ -240,7 +240,7 @@
 
     function formatearFechaVisual(strFecha) {
       let objetoFecha = extraerEstructuraFecha(strFecha);
-      if (!objetoFecha) return strFecha || "N/A";
+      if (!objetoFecha) return "N/A";
       return String(objetoFecha.getDate()).padStart(2, '0') + "/" + String(objetoFecha.getMonth() + 1).padStart(2, '0') + "/" + objetoFecha.getFullYear();
     }
 
@@ -257,6 +257,7 @@
     function irAPaginaReporte() {
       var valorA = document.getElementById('selectA').value;
       var valorC = document.getElementById('selectC').value;
+      
       usuarioSeleccionado = baseDatosCompleta.find(item => item.columnaA === valorA && item.nombre === valorC);
       if(!usuarioSeleccionado) return;
 
@@ -296,7 +297,7 @@
       } else { document.getElementById('valTiempoRestante').textContent = "Sin fecha de finalización registrada"; }
 
       // Carga Formación Básica
-      document.getElementById('valAsesorPersonal').textContent = usuarioSeleccionado.asesorPersonal;
+      document.getElementById('valAsesorPersonal').textContent = usuarioSeleccionado.asesorPersonal || "N/A";
       mapearIconoEstado('statusPPD', usuarioSeleccionado.desarrolloPPD);
       var esValInicialTrue = mapearIconoEstado('statusValInicial', usuarioSeleccionado.valoracionInicial);
       var f1Formateada = formatearFechaVisual(usuarioSeleccionado.fechaValoracionInicial);
@@ -305,18 +306,19 @@
       var f2Formateada = formatearFechaVisual(usuarioSeleccionado.fechaValoracionFinal);
       if (esValFinalTrue && f2Formateada !== "N/A") { document.getElementById('valFechaValFinal').textContent = f2Formateada; document.getElementById('boxFechaValFinal').classList.remove('hidden'); } else { document.getElementById('boxFechaValFinal').classList.add('hidden'); }
       
-      // Corrección bloque Gestor Nacional
-      var fGestorFormateada = formatearFechaVisual(usuarioSeleccionado.gestorNacionalFecha);
-      if (fGestorFormateada && fGestorFormateada !== "N/A" && fGestorFormateada !== "undefined") { 
-          document.getElementById('valGestorFecha').textContent = "Fecha de registro: " + fGestorFormateada; 
-          document.getElementById('boxGestor').classList.remove('hidden'); 
+      // Bloque Gestor Nacional con lógica estricta
+      var fGestor = formatearFechaVisual(usuarioSeleccionado.gestorNacionalFecha);
+      var boxGestor = document.getElementById('boxGestor');
+      if (fGestor !== "N/A") { 
+          document.getElementById('valGestorFecha').textContent = fGestor;
+          boxGestor.classList.remove('hidden'); 
       } else { 
-          document.getElementById('boxGestor').classList.add('hidden'); 
+          boxGestor.classList.add('hidden'); 
       }
 
       // Carga Perfeccionamiento Continuo
       let valoresObjeto = Object.values(usuarioSeleccionado);
-      mapearIconoEstado('statusS4PPD', valoresObjeto[20]); // Índice 20
+      mapearIconoEstado('statusS4PPD', valoresObjeto[20]);
 
       var esS4ValInicialTrue = mapearIconoEstado('statusS4ValInicial', usuarioSeleccionado.s4ValoracionInicial);
       var fS4Nom1 = formatearFechaVisual(usuarioSeleccionado.s4FechaValoracionInicial);
@@ -324,12 +326,11 @@
       var esS4ValFinalTrue = mapearIconoEstado('statusS4ValFinal', usuarioSeleccionado.s4ValoracionFinal);
       var fS4Nom2 = formatearFechaVisual(usuarioSeleccionado.s4FechaValoracionFinal);
       if (esS4ValFinalTrue && fS4Nom2 !== "N/A") { document.getElementById('valFechaS4ValFinal').textContent = fS4Nom2; document.getElementById('boxFechaS4ValFinal').classList.remove('hidden'); } else { document.getElementById('boxFechaS4ValFinal').classList.add('hidden'); }
-      var fAAAFormateada = formatearFechaVisual(usuarioSeleccionado.aaaFecha);
-      if (fAAAFormateada && fAAAFormateada !== "N/A" && fAAAFormateada !== "undefined") { document.getElementById('valAAAFecha').textContent = "Fecha de acreditación: " + fAAAFormateada; document.getElementById('boxAAA').classList.remove('hidden'); } else { document.getElementById('boxAAA').classList.add('hidden'); }
+      var fAAA = formatearFechaVisual(usuarioSeleccionado.aaaFecha);
+      if (fAAA !== "N/A") { document.getElementById('valAAAFecha').textContent = fAAA; document.getElementById('boxAAA').classList.remove('hidden'); } else { document.getElementById('boxAAA').classList.add('hidden'); }
 
       document.getElementById('loaderReporte').classList.add('hidden');
       document.getElementById('contenidoReporte').classList.remove('hidden');
-      
       solicitarListaArchivosDrive();
     }
 
@@ -337,36 +338,24 @@
       const cuerpo = document.getElementById('cuerpoTablaArchivos');
       const loader = document.getElementById('loaderArchivos');
       cuerpo.innerHTML = ""; loader.classList.remove('hidden');
-      
       if (!usuarioSeleccionado || !usuarioSeleccionado.carpetaDrive) {
         cuerpo.innerHTML = '<tr><td colspan="2" style="color:var(--danger); text-align:center;">No hay carpeta de Drive vinculada.</td></tr>';
         loader.classList.add('hidden'); actualizarBarraMetrica(0); return;
       }
-
       fetch(API_URL + "?accion=listarFiles&urlCarpeta=" + encodeURIComponent(usuarioSeleccionado.carpetaDrive))
         .then(res => res.json())
         .then(res => {
           loader.classList.add('hidden');
           if (res && res.resultado === "OK") {
-            if (!res.archivos || res.archivos.length === 0) {
-              cuerpo.innerHTML = '<tr><td colspan="2" style="text-align:center; color:var(--text-light); font-style:italic; padding: 2rem 0;">La carpeta está vacía. Sube un archivo abajo.</td></tr>';
-              actualizarBarraMetrica(0); return;
-            }
+            if (!res.archivos || res.archivos.length === 0) { cuerpo.innerHTML = '<tr><td colspan="2" style="text-align:center; color:var(--text-light); font-style:italic; padding: 2rem 0;">La carpeta está vacía.</td></tr>'; actualizarBarraMetrica(0); return; }
             res.archivos.forEach(file => {
               let fila = document.createElement('tr');
               fila.innerHTML = `<td><strong>${file.nombre}</strong></td><td style="text-align:center;"><div class="acciones-btn-group"><button class="btn-mini btn-ver" onclick="window.open('${file.url}', '_blank')">👁️ Ver</button><button class="btn-mini btn-del" onclick="eliminarArchivoDrive('${file.id}')">🗑️ Borrar</button></div></td>`;
               cuerpo.appendChild(fila);
             });
             actualizarBarraMetrica(res.archivos.length);
-          } else {
-            cuerpo.innerHTML = '<tr><td colspan="2" style="text-align:center; color:var(--text-light); font-style:italic; padding: 2rem 0;">La carpeta está vacía. Sube un archivo abajo.</td></tr>';
-            actualizarBarraMetrica(0);
-          }
-        }).catch(err => {
-          loader.classList.add('hidden');
-          cuerpo.innerHTML = '<tr><td colspan="2" style="text-align:center; color:var(--text-light); font-style:italic; padding: 2rem 0;">La carpeta está vacía. Sube un archivo abajo.</td></tr>';
-          actualizarBarraMetrica(0);
-        });
+          } else { cuerpo.innerHTML = '<tr><td colspan="2" style="text-align:center; color:var(--text-light); font-style:italic; padding: 2rem 0;">La carpeta está vacía.</td></tr>'; actualizarBarraMetrica(0); }
+        }).catch(err => { loader.classList.add('hidden'); cuerpo.innerHTML = '<tr><td colspan="2" style="text-align:center; color:var(--text-light); font-style:italic; padding: 2rem 0;">Error al cargar.</td></tr>'; actualizarBarraMetrica(0); });
     }
 
     function actualizarBarraMetrica(cantidadArchivos) {
@@ -383,38 +372,23 @@
       const statusDiv = document.getElementById('statusEnvio');
       const btn = document.getElementById('btnSubirArchivo');
       const tipoDoc = document.getElementById('tipoDocCarga').value;
-
       if (!fileInput.files || fileInput.files.length === 0) { alert("Por favor, selecciona un archivo."); return; }
       const archivo = fileInput.files[0];
       const reader = new FileReader();
-      statusDiv.style.color = "var(--primary)"; statusDiv.textContent = "⏳ Subiendo documento...";
+      statusDiv.style.color = "var(--primary)"; statusDiv.textContent = "⏳ Subiendo...";
       btn.disabled = true;
-
       reader.onload = function(e) {
-        const base64String = e.target.result.split(',')[1];
-        const payload = {
-          archivoBase64: base64String,
-          tipoMime: archivo.type,
-          nombreOriginal: archivo.name,
-          urlCarpeta: usuarioSeleccionado.carpetaDrive,
-          nombreUsuario: usuarioSeleccionado.nombre,
-          tipoDocumento: tipoDoc
-        };
+        const payload = { archivoBase64: e.target.result.split(',')[1], tipoMime: archivo.type, nombreOriginal: archivo.name, urlCarpeta: usuarioSeleccionado.carpetaDrive, nombreUsuario: usuarioSeleccionado.nombre, tipoDocumento: tipoDoc };
         fetch(API_URL, { method: "POST", body: JSON.stringify(payload) })
         .then(res => res.json())
-        .then(res => {
-          fileInput.value = ""; statusDiv.style.color = "var(--success)"; statusDiv.textContent = "✔️ ¡Subido con éxito!";
-          setTimeout(() => { statusDiv.textContent = ""; solicitarListaArchivosDrive(); btn.disabled = false; }, 1500);
-        }).catch(err => {
-          fileInput.value = ""; statusDiv.style.color = "var(--success)"; statusDiv.textContent = "✔️ Guardado con éxito en Drive.";
-          setTimeout(() => { statusDiv.textContent = ""; solicitarListaArchivosDrive(); btn.disabled = false; }, 1500);
-        });
+        .then(res => { fileInput.value = ""; statusDiv.style.color = "var(--success)"; statusDiv.textContent = "✔️ ¡Subido!"; setTimeout(() => { statusDiv.textContent = ""; solicitarListaArchivosDrive(); btn.disabled = false; }, 1500); })
+        .catch(err => { fileInput.value = ""; statusDiv.style.color = "var(--success)"; statusDiv.textContent = "✔️ ¡Subido!"; setTimeout(() => { statusDiv.textContent = ""; solicitarListaArchivosDrive(); btn.disabled = false; }, 1500); });
       };
       reader.readAsDataURL(archivo);
     }
 
     function eliminarArchivoDrive(id) {
-      if (!confirm("¿Está seguro de que desea eliminar este archivo?")) return;
+      if (!confirm("¿Eliminar archivo?")) return;
       document.getElementById('loaderArchivos').classList.remove('hidden');
       fetch(API_URL, { method: "POST", body: JSON.stringify({ accion: "eliminar", fileId: id }) })
       .then(res => res.json()).then(res => { solicitarListaArchivosDrive(); })
@@ -424,7 +398,6 @@
     function volverYRefrescarConsulta() {
       document.getElementById('paginaReporte').classList.add('hidden'); document.getElementById('paginaFiltros').classList.remove('hidden');
       document.getElementById('selectA').value = ""; document.getElementById('grupoC').classList.add('hidden');
-      document.getElementById('statusEnvio').textContent = ""; document.getElementById('inputArchivo').value = "";
       document.getElementById('btnConsultar').disabled = true; cargarDatosDesdeAPI();
     }
   </script>
