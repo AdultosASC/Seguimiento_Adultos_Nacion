@@ -4,6 +4,9 @@
   <meta charset="UTF-8">
   <title>Dirección Nacional de Adultos</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+  
   <style>
     :root { --primary: #6366f1; --purple-dark: #4c1d95; --bg: #f8fafc; --success: #10b981; --danger: #ef4444; }
     body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); padding: 2rem 1rem; }
@@ -13,6 +16,7 @@
     .btn-tab.active { background: var(--primary); color: white; }
     .section-content { display: none; }
     .section-content.active { display: block; }
+    .grafico-wrapper { margin-bottom: 30px; background: #fff; padding: 15px; border-radius: 8px; border: 1px solid #e2e8f0; }
     table { width: 100%; border-collapse: collapse; margin-top: 1rem; font-size: 0.75rem; }
     th, td { padding: 6px; border: 1px solid #e2e8f0; text-align: center; }
     th { background: #f1f5f9; }
@@ -31,7 +35,12 @@
 
   <div id="general" class="section-content active">
     <h2>Resumen Nacional</h2>
-    <div id="stats">Cargando datos...</div>
+    <div class="grafico-wrapper">
+        <canvas id="chartFB"></canvas>
+    </div>
+    <div class="grafico-wrapper">
+        <canvas id="chartPC"></canvas>
+    </div>
   </div>
 
   <div id="area" class="section-content">
@@ -45,11 +54,10 @@
   const API_URL = "https://script.google.com/macros/s/AKfycbxg6vaqC8w8IsCjHHy9UX9TTyf2nJKhlA1J37nvQEJb6ERK4nSQM5pAO7o8bqBYUj-0SQ/exec";
   let db = [];
 
-  // Función maestra para procesar cualquier columna de tipo booleano/estado
   function procesarDato(valor) {
-    if (valor === null || valor === undefined || valor === "" || valor === "N/A" || valor === "FALSE") return '<span class="equis">❌</span>';
+    if (valor === null || valor === undefined || valor === "" || valor === "N/A" || valor === "FALSE") return false;
     var v = String(valor).trim().toUpperCase();
-    return (v === "TRUE" || v === "VERDADERO" || v === "1" || v === "V" || v === "SI") ? '<span class="chulo">✔️</span>' : '<span class="equis">❌</span>';
+    return (v === "TRUE" || v === "VERDADERO" || v === "1" || v === "V" || v === "SI");
   }
 
   fetch(API_URL).then(r => r.json()).then(data => {
@@ -57,7 +65,40 @@
     const areas = [...new Set(db.map(i => i.columnaA))].filter(Boolean).sort();
     const sel = document.getElementById('selArea');
     areas.forEach(a => { if(a) sel.innerHTML += `<option value="${a}">${a}</option>`; });
-  }).catch(e => console.error("Error al cargar datos:", e));
+    
+    // Inicializar gráficos una vez cargada la base
+    iniciarGraficos();
+  });
+
+  function iniciarGraficos() {
+    Chart.register(ChartDataLabels);
+    const total = db.filter(p => p.nombre && p.nombre.trim() !== "").length;
+
+    const configChart = (id, labels, dataSet) => ({
+      type: 'bar',
+      data: { labels: labels, datasets: [{ label: 'Cumplimiento (%)', data: dataSet, backgroundColor: '#6366f1' }] },
+      options: {
+        responsive: true,
+        plugins: {
+          datalabels: {
+            anchor: 'end', align: 'top',
+            formatter: (val) => ((val / total) * 100).toFixed(0) + '%'
+          }
+        },
+        scales: { y: { beginAtZero: true, max: total } }
+      }
+    });
+
+    new Chart(document.getElementById('chartFB'), configChart('chartFB', 
+      ['FB: VI', 'FB: PPD', 'FB: VF', 'GN'], 
+      [db.filter(p => procesarDato(p.valoracionInicial)).length, db.filter(p => procesarDato(p.desarrolloPPD)).length, db.filter(p => procesarDato(p.valoracionFinal)).length, db.filter(p => procesarDato(p.gestorNacionalFecha)).length]
+    ));
+
+    new Chart(document.getElementById('chartPC'), configChart('chartPC', 
+      ['PC: VI', 'PC: PPD', 'PC: VF', 'AAA'], 
+      [db.filter(p => procesarDato(p.s4ValoracionInicial)).length, db.filter(p => procesarDato(p.s4DesarrolloPPD)).length, db.filter(p => procesarDato(p.s4ValoracionFinal)).length, db.filter(p => procesarDato(p.aaaFecha)).length]
+    ));
+  }
 
   function tab(id, btn) {
     document.querySelectorAll('.section-content').forEach(s => s.classList.remove('active'));
@@ -69,28 +110,19 @@
   function render() {
     const area = document.getElementById('selArea').value;
     if (!area) return;
-
     const filtrados = db.filter(i => i.columnaA === area && i.nombre && i.nombre.trim() !== "");
-    
-    // Encabezados organizados
-    let html = `<table><tr>
-      <th>Nombre</th><th>Cargo</th><th>FB: VI</th><th>FB: PPD</th><th>FB: VF</th>
-      <th>GN</th><th>PC: VI</th><th>PC: PPD</th><th>PC: VF</th><th>AAA</th>
-    </tr>`;
-    
+    let html = `<table><tr><th>Nombre</th><th>Cargo</th><th>FB: VI</th><th>FB: PPD</th><th>FB: VF</th><th>GN</th><th>PC: VI</th><th>PC: PPD</th><th>PC: VF</th><th>AAA</th></tr>`;
     filtrados.forEach(p => {
-      // Usamos p.GN, p.PCPPD y p.AAA procesándolos con la misma función
       html += `<tr>
-        <td>${p.nombre || "Sin nombre"}</td>
-        <td>${p.cargo || "Sin cargo"}</td>
-        <td>${procesarDato(p.valoracionInicial)}</td>
-        <td>${procesarDato(p.desarrolloPPD)}</td>
-        <td>${procesarDato(p.valoracionFinal)}</td>
-        <td>${procesarDato(p.GN)}</td>
-        <td>${procesarDato(p.s4ValoracionInicial)}</td>
-        <td>${procesarDato(p.PCPPD)}</td>
-        <td>${procesarDato(p.s4ValoracionFinal)}</td>
-        <td>${procesarDato(p.AAA)}</td>
+        <td>${p.nombre || "Sin nombre"}</td><td>${p.cargo || "Sin cargo"}</td>
+        <td>${procesarDato(p.valoracionInicial) ? '<span class="chulo">✔️</span>' : '<span class="equis">❌</span>'}</td>
+        <td>${procesarDato(p.desarrolloPPD) ? '<span class="chulo">✔️</span>' : '<span class="equis">❌</span>'}</td>
+        <td>${procesarDato(p.valoracionFinal) ? '<span class="chulo">✔️</span>' : '<span class="equis">❌</span>'}</td>
+        <td>${procesarDato(p.gestorNacionalFecha) ? '<span class="chulo">✔️</span>' : '<span class="equis">❌</span>'}</td>
+        <td>${procesarDato(p.s4ValoracionInicial) ? '<span class="chulo">✔️</span>' : '<span class="equis">❌</span>'}</td>
+        <td>${procesarDato(p.s4DesarrolloPPD) ? '<span class="chulo">✔️</span>' : '<span class="equis">❌</span>'}</td>
+        <td>${procesarDato(p.s4ValoracionFinal) ? '<span class="chulo">✔️</span>' : '<span class="equis">❌</span>'}</td>
+        <td>${procesarDato(p.aaaFecha) ? '<span class="chulo">✔️</span>' : '<span class="equis">❌</span>'}</td>
       </tr>`;
     });
     document.getElementById('tablaDiv').innerHTML = html + "</table>";
