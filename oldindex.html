@@ -48,32 +48,31 @@
   </style>
 </head>
 <body>
-
   <div id="paginaFiltros" class="container">...</div>
   <div id="paginaReporte" class="container wide hidden">...</div>
 
   <script>
-    // ... [Variables y funciones de carga inicial IGUALES] ...
+    // ... [Variables y funciones originales cargadas aquí] ...
 
     function irAPaginaReporte() {
-      // ... [Toda tu lógica de carga de datos IGUAL] ...
+      // 1. CARGA ORIGINAL DE DATOS
+      // ... (todo tu código original de asignación de elementos)
 
-      // --- MODIFICACIÓN 1: Desarrollo Personal Formación Básica ---
-      // (Agregamos GN con color rojo al estilo de AAA)
+      // MODIFICACIÓN 1: GN en Formación Básica (con estilo rojo)
       var fGestorFormateada = formatearFechaVisual(usuarioSeleccionado.gestorNacionalFecha);
       var boxGestor = document.getElementById('boxGestor');
       if (fGestorFormateada && fGestorFormateada !== "N/A") {
           document.getElementById('valGestorFecha').textContent = "Fecha de registro: " + fGestorFormateada;
-          document.getElementById('valGestorFecha').style.color = "var(--danger)"; // Color rojo
+          document.getElementById('valGestorFecha').style.color = "var(--danger)"; // Rojo
           boxGestor.style.borderColor = "var(--danger)";
           boxGestor.classList.remove('hidden');
       } else { boxGestor.classList.add('hidden'); }
 
-      // --- MODIFICACIÓN 2: Desarrollo Personal Perfeccionamiento Continuo ---
-      // Corregimos la secuencia lógica para PC:PPD (que es s4DesarrolloPPD)
+      // MODIFICACIÓN 2: Secuencia lógica PC:PPD
+      // Se asegura que PPD tome el valor correcto de s4DesarrolloPPD
       mapearIconoEstado('statusS4PPD', usuarioSeleccionado.s4DesarrolloPPD);
       
-      // ... [El resto de tu lógica IGUAL] ...
+      // ... [El resto de tu lógica original intacta] ...
     }
   </script>
 </body>
