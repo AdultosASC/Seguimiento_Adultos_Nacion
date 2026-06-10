@@ -48,51 +48,26 @@
   </style>
 </head>
 <body>
-
-  <div id="paginaFiltros" class="container">
-    <div class="header-institucional">Dirección Nacional de <br>Adultos en el Movimiento</div>
-    <h1>Consulta/Registro de Información</h1>
-    <div class="form-group">
-      <label for="selectA" class="label-filtro">Seleccione Área Estratégica</label>
-      <select id="selectA" onchange="cambioArea()"><option value="">Conectando con la base de datos...</option></select>
-    </div>
-    <div id="grupoC" class="form-group hidden">
-      <label for="selectC" class="label-filtro">Seleccione Nombre</label>
-      <select id="selectC" onchange="activarBotonConsultar()"><option value="">-- Seleccione un nombre --</option></select>
-    </div>
-    <button id="btnConsultar" disabled onclick="irAPaginaReporte()">Consultar</button>
-  </div>
-
-  <div id="paginaReporte" class="container wide hidden">
-    <div id="tituloColumnaA" class="titulo-principal-a"></div>
-    <div id="loaderReporte" class="loader">Procesando información...</div>
-    <div id="contenidoReporte" class="hidden">
-      <div id="valNombre" class="dato-valor"></div> 
-      <div id="boxGestor" class="dato-bloque hidden" style="grid-column: 1 / -1; background: #fdf2f2; padding: 0.75rem; border-radius: 8px; border: 1px solid #fecaca; margin-top: 0.5rem;">
-          <span class="dato-label" style="color: #991b1b;">Gestor Nacional</span>
-          <span id="valGestorFecha" class="dato-valor" style="font-weight: 600; color: #991b1b;"></span>
-      </div>
-      
-      </div>
-    <button class="btn-back" onclick="volverYRefrescarConsulta()">Volver a consultar</button>
-  </div>
+  <div id="paginaFiltros" class="container">...</div>
+  <div id="paginaReporte" class="container wide hidden">...</div>
 
   <script>
-    // ... [Variables y funciones de carga IGUALES] ...
-
+    // ... [MANTENGO TODAS LAS FUNCIONES IGUALES] ...
+    
     function irAPaginaReporte() {
-      // ... [Toda tu lógica original de asignación] ...
-
-      // MODIFICACIÓN: Visualización de GN (Gestor Nacional) igual a AAA
+      // ... (código anterior de asignación de datos)
+      
+      // --- MODIFICACIÓN: Bloque Gestor Nacional (GN) ---
       var fGestorFormateada = formatearFechaVisual(usuarioSeleccionado.gestorNacionalFecha);
+      var boxGestor = document.getElementById('boxGestor');
       if (fGestorFormateada && fGestorFormateada !== "N/A") {
           document.getElementById('valGestorFecha').textContent = "Fecha de registro: " + fGestorFormateada;
-          document.getElementById('boxGestor').classList.remove('hidden');
+          boxGestor.classList.remove('hidden');
       } else {
-          document.getElementById('boxGestor').classList.add('hidden');
+          boxGestor.classList.add('hidden');
       }
-
-      // ... [resto de lógica]
+      
+      // ... (continúa el resto de tu código exactamente igual)
     }
   </script>
 </body>
