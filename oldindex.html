@@ -25,14 +25,30 @@
     .titulo-principal-a { color: var(--purple-dark); font-weight: bold; font-size: 1.8rem; margin-bottom: 1.5rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; }
     .seccion-reporte { background-color: var(--bg); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; }
     .seccion-reporte h2 { font-size: 1.2rem; color: var(--primary); margin-top: 0; margin-bottom: 1rem; font-weight: 700; }
+    
     .grid-dos-columnas { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.25rem; }
     .dato-bloque { display: flex; flex-direction: column; }
+    
     .dato-mixto-linea { grid-column: 1 / -1; display: flex; align-items: center; justify-content: space-between; background: var(--card-bg); padding: 0.75rem 1rem; border-radius: 8px; border: 1px solid var(--border); gap: 1.5rem; }
     .mixto-izq { display: flex; align-items: center; gap: 0.85rem; }
+    .dato-inline-bloque { grid-column: 1 / -1; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; }
+    .verificacion-titulo { font-size: 0.95rem; font-weight: 600; color: var(--text); }
     .status-badge { font-size: 1.2rem; font-weight: bold; }
     .dato-label { font-size: 0.8rem; font-weight: 600; color: var(--text-light); text-transform: uppercase; margin-bottom: 0.2rem; }
     .dato-valor { font-size: 1rem; font-weight: 500; color: var(--text); }
+    
+    .tabla-archivos { width: 100%; border-collapse: collapse; margin-top: 0.5rem; background: white; border-radius: 8px; overflow: hidden; border: 1px solid var(--border); }
+    .tabla-archivos th, .tabla-archivos td { padding: 0.75rem 1rem; text-align: left; font-size: 0.9rem; border-bottom: 1px solid var(--border); }
+    .tabla-archivos th { background-color: #f1f5f9; font-weight: 700; color: var(--purple-dark); }
+    .acciones-btn-group { display: flex; gap: 0.5rem; justify-content: center; }
+    .btn-mini { padding: 0.4rem 0.8rem; font-size: 0.8rem; font-weight: bold; border-radius: 4px; width: auto; margin: 0; display: inline-block; }
+    .btn-ver { background-color: var(--primary); }
+    .btn-del { background-color: var(--danger); }
+    
+    .box-carga { background: #f8fafc; border: 1px solid var(--border); padding: 1.25rem; border-radius: 12px; margin-bottom: 1.5rem; }
     .btn-back { background-color: transparent; color: var(--text-light); border: 1px solid var(--border); margin-top: 1rem; width: auto; padding: 0.5rem 1rem; }
+    .contenedor-progreso { display: flex; align-items: center; gap: 1rem; background: #e2e8f0; border-radius: 9999px; height: 1.25rem; overflow: hidden; position: relative; margin-top: 0.4rem; }
+    .barra-interna { background: linear-gradient(90deg, var(--purple-light), var(--primary)); height: 100%; width: 0%; transition: width 0.5s ease-in-out; }
   </style>
 </head>
 <body>
@@ -40,94 +56,379 @@
   <div id="paginaFiltros" class="container">
     <div class="header-institucional">Dirección Nacional de <br>Adultos en el Movimiento</div>
     <h1>Consulta/Registro de Información</h1>
+    
     <div class="form-group">
       <label for="selectA" class="label-filtro">Seleccione Área Estratégica</label>
-      <select id="selectA" onchange="cambioArea()"><option value="">Conectando con la base de datos...</option></select>
+      <select id="selectA" onchange="cambioArea()">
+        <option value="">Conectando con la base de datos...</option>
+      </select>
     </div>
+
     <div id="grupoC" class="form-group hidden">
       <label for="selectC" class="label-filtro">Seleccione Nombre</label>
-      <select id="selectC" onchange="activarBotonConsultar()"><option value="">-- Seleccione un nombre --</option></select>
+      <select id="selectC" onchange="activarBotonConsultar()">
+        <option value="">-- Seleccione un nombre --</option>
+      </select>
     </div>
+
     <button id="btnConsultar" disabled onclick="irAPaginaReporte()">Consultar</button>
   </div>
 
   <div id="paginaReporte" class="container wide hidden">
     <div id="tituloColumnaA" class="titulo-principal-a"></div>
+    <div id="loaderReporte" class="loader">Procesando información...</div>
+    
     <div id="contenidoReporte" class="hidden">
+      <div class="seccion-reporte">
+        <h2>Información General</h2>
+        <div class="grid-dos-columnas">
+          <div class="dato-bloque"><span class="dato-label">Nombre</span><span id="valNombre" class="dato-valor"></span></div>
+          <div class="dato-bloque"><span class="dato-label">Cargo</span><span id="valCargo" class="dato-valor"></span></div>
+          <div class="dato-bloque"><span class="dato-label">Nombramiento</span><span id="valNombramiento" class="dato-valor"></span></div>
+          <div class="dato-bloque"><span class="dato-label">Metodología</span><span id="valMetodología" class="dato-valor"></span></div>
+          <div class="dato-bloque"><span class="dato-label">Fecha de Nombramiento</span><span id="valFechaNom" class="dato-valor"></span></div>
+          <div class="dato-bloque"><span class="dato-label">Duración</span><span id="valDuracion" class="dato-valor"></span></div>
+          <div class="dato-bloque" style="grid-column: 1 / -1;"><span class="dato-label">Fecha Finalización</span><span id="valFechaFin" class="dato-valor"></span></div>
+          
+          <div class="dato-bloque" style="grid-column: 1 / -1; background: #f3e8ff; padding: 1rem; border-radius: 8px; border-left: 4px solid var(--purple-light); margin-bottom: 0.25rem;">
+            <span class="dato-label" style="color: var(--purple-dark);">Tiempo restante en el cargo</span>
+            <span id="valTiempoRestante" class="dato-valor" style="font-weight: 700; color: #5b21b6; font-size: 1.1rem; display:block;"></span>
+          </div>
+        </div>
+      </div>
+
       <div class="seccion-reporte">
         <h2>Desarrollo Personal Formación Básica</h2>
         <div class="grid-dos-columnas">
-          <div class="dato-mixto-linea"><div class="mixto-izq"><span id="statusValInicial" class="status-badge"></span><span>Valoración Inicial</span></div><div id="boxFechaValInicial" class="dato-bloque hidden"><span class="dato-label">Fecha</span><span id="valFechaValInicial" class="dato-valor"></span></div></div>
-          <div class="dato-mixto-linea"><div class="mixto-izq"><span id="statusPPD" class="status-badge"></span><span>En desarrollo de su PPD</span></div></div>
-          <div class="dato-mixto-linea"><div class="mixto-izq"><span id="statusValFinal" class="status-badge"></span><span>Valoración Final</span></div><div id="boxFechaValFinal" class="dato-bloque hidden"><span class="dato-label">Fecha</span><span id="valFechaValFinal" class="dato-valor"></span></div></div>
-          <div id="boxGestor" class="dato-bloque hidden" style="grid-column: 1 / -1; background: #f8fafc; padding: 0.75rem; border: 1px dashed var(--border);"><span class="dato-label">Gestor Nacional</span><span id="valGestorFecha" class="dato-valor"></span></div>
+          <div class="dato-inline-bloque">
+            <span class="dato-label" style="color: var(--purple-dark); margin-bottom: 0;">Asesor Personal:</span>
+            <span id="valAsesorPersonal" class="dato-valor" style="font-size: 1.1rem; font-weight: 600;"></span>
+          </div>
+          <div class="dato-mixto-linea">
+            <div class="mixto-izq"><span id="statusValInicial" class="status-badge"></span><span class="verificacion-titulo">Valoración Inicial</span></div>
+            <div id="boxFechaValInicial" class="dato-bloque hidden" style="text-align: right;"><span class="dato-label">Fecha de realización</span><span id="valFechaValInicial" class="dato-valor"></span></div>
+          </div>
+          <div class="dato-mixto-linea">
+            <div class="mixto-izq"><span id="statusPPD" class="status-badge"></span><span class="verificacion-titulo">En desarrollo de su PPD</span></div>
+          </div>
+          <div class="dato-mixto-linea">
+            <div class="mixto-izq"><span id="statusValFinal" class="status-badge"></span><span class="verificacion-titulo">Valoración Final</span></div>
+            <div id="boxFechaValFinal" class="dato-bloque hidden" style="text-align: right;"><span class="dato-label">Fecha de realización</span><span id="valFechaValFinal" class="dato-valor"></span></div>
+          </div>
+          <div id="boxGestor" class="dato-bloque hidden" style="grid-column: 1 / -1; background: #f8fafc; padding: 0.75rem; border-radius: 8px; border: 1px dashed var(--border); margin-top: 0.5rem;">
+            <span class="dato-label" style="color: var(--purple-dark);">Gestor Nacional (GN)</span>
+            <span id="valGestorFecha" class="dato-valor" style="font-weight: 600;"></span>
+          </div>
         </div>
       </div>
+
       <div class="seccion-reporte">
         <h2>Desarrollo Personal Perfeccionamiento Continuo</h2>
         <div class="grid-dos-columnas">
-          <div class="dato-mixto-linea"><div class="mixto-izq"><span id="statusS4ValInicial" class="status-badge"></span><span>Valoración Inicial</span></div><div id="boxFechaS4ValInicial" class="dato-bloque hidden"><span class="dato-label">Fecha</span><span id="valFechaS4ValInicial" class="dato-valor"></span></div></div>
-          <div class="dato-mixto-linea"><div class="mixto-izq"><span id="statusS4PPD" class="status-badge"></span><span>En desarrollo de su PPD</span></div></div>
-          <div class="dato-mixto-linea"><div class="mixto-izq"><span id="statusS4ValFinal" class="status-badge"></span><span>Valoración Final</span></div><div id="boxFechaS4ValFinal" class="dato-bloque hidden"><span class="dato-label">Fecha</span><span id="valFechaS4ValFinal" class="dato-valor"></span></div></div>
-          <div id="boxAAA" class="dato-bloque hidden" style="grid-column: 1 / -1; background: #f0fdf4; padding: 0.75rem; border: 1px solid #bbf7d0;"><span class="dato-label">AAA</span><span id="valAAAFecha" class="dato-valor"></span></div>
+          <div class="dato-mixto-linea">
+            <div class="mixto-izq"><span id="statusS4ValInicial" class="status-badge"></span><span class="verificacion-titulo">Valoración Inicial</span></div>
+            <div id="boxFechaS4ValInicial" class="dato-bloque hidden" style="text-align: right;"><span class="dato-label">Fecha de realización</span><span id="valFechaS4ValInicial" class="dato-valor"></span></div>
+          </div>
+          <div class="dato-mixto-linea">
+            <div class="mixto-izq"><span id="statusS4PPD" class="status-badge"></span><span class="verificacion-titulo">En desarrollo de su PPD</span></div>
+          </div>
+          <div class="dato-mixto-linea">
+            <div class="mixto-izq"><span id="statusS4ValFinal" class="status-badge"></span><span class="verificacion-titulo">Valoración Final</span></div>
+            <div id="boxFechaS4ValFinal" class="dato-bloque hidden" style="text-align: right;"><span class="dato-label">Fecha de realización</span><span id="valFechaS4ValFinal" class="dato-valor"></span></div>
+          </div>
+          <div id="boxAAA" class="dato-bloque hidden" style="grid-column: 1 / -1; background: #f0fdf4; padding: 0.75rem; border-radius: 8px; border: 1px solid #bbf7d0; margin-top: 0.5rem;"><span class="dato-label" style="color: #166534;">AAA</span><span id="valAAAFecha" class="dato-valor" style="font-weight: 600; color: #14532d;"></span></div>
         </div>
       </div>
-      <button class="btn-back" onclick="location.reload()">Volver a consultar</button>
+
+      <div class="seccion-reporte" style="background: #fafafa; padding: 1rem; margin-bottom: 1.5rem; border: 1px solid var(--border);">
+        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem; font-weight: bold; color: var(--purple-dark);">
+          <span>Progreso de archivos</span>
+          <span id="textoMetrica">0 de 6 archivos (0%)</span>
+        </div>
+        <div class="contenedor-progreso">
+          <div class="barra-interna" id="barraMetrica"></div>
+        </div>
+      </div>
+
+      <div class="seccion-reporte">
+        <h2>📁 Expediente Documental</h2>
+        <div id="loaderArchivos" class="loader hidden">Consultando carpeta...</div>
+        <table class="tabla-archivos" id="tablaFiles">
+          <thead>
+            <tr>
+              <th>Nombre del Archivo en Drive</th>
+              <th style="width: 180px; text-align: center;">Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="cuerpoTablaArchivos"></tbody>
+        </table>
+      </div>
+
+      <div class="seccion-reporte box-carga">
+        <h2>📤 Cargar Nuevo Archivo Documental</h2>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; align-items: end;">
+          <div>
+            <label class="label-filtro">Tipo Documento:</label>
+            <select id="tipoDocCarga">
+              <option value="Resolucion nombramiento">Resolución nombramiento</option>
+              <option value="Acuerdo Mutuo">Acuerdo Mutuo</option>
+              <option value="Curso SfH1">Curso SfH1</option>
+              <option value="Curso SfH2">Curso SfH2</option>
+              <option value="Modulo induccion">Módulo inducción</option>
+              <option value="Aval AP">Aval AP</option>
+            </select>
+          </div>
+          <div>
+            <label class="label-filtro">Seleccionar archivo:</label>
+            <input type="file" id="inputArchivo">
+          </div>
+          <div>
+            <button style="margin:0;" id="btnSubirArchivo" onclick="procesarSubidaArchivo()">Subir Documento</button>
+          </div>
+        </div>
+        <div id="statusEnvio" style="margin-top: 0.75rem; font-size: 0.9rem; font-weight: bold;"></div>
+      </div>
+
     </div>
+    <button class="btn-back" onclick="volverYRefrescarConsulta()">Volver a consultar</button>
   </div>
 
   <script>
-    const API_URL = "https://script.google.com/macros/s/AKfycbxg6vaqC8w8IsCjHHy9UX9TTyf2nJKhlA1J37nvQEJb6ERK4nSQM5pAO7o8bqBYUj-0SQ/exec";
-    let baseDatos = [];
+    const API_URL = "https://script.google.com/macros/s/AKfycbxg6vaqC8w8IsCjHHy9UX9TTyf2nJKhlA1J37nvQEJb6ERK4nSQM5pAO7o8bqBYUj-0SQ/exec"; 
+    let baseDatosCompleta = [];
+    let usuarioSeleccionado = null;
 
-    fetch(API_URL).then(r => r.json()).then(d => { baseDatos = d; inicializar(); });
+    window.onload = function() { cargarDatosDesdeAPI(); };
 
-    function inicializar() {
-      let select = document.getElementById('selectA');
-      [...new Set(baseDatos.map(i => i.columnaA))].filter(Boolean).forEach(a => {
-        let el = document.createElement('option'); el.value = a; el.textContent = a; select.appendChild(el);
-      });
+    function cargarDatosDesdeAPI() {
+      var select = document.getElementById('selectA');
+      select.innerHTML = '<option value="">Conectando con la base de datos...</option>';
+      fetch(API_URL).then(r => r.json()).then(data => { baseDatosCompleta = data; inicializarDesplegableA(); }).catch(err => { select.innerHTML = '<option value="">Error de conexión.</option>'; });
+    }
+
+    function inicializarDesplegableA() {
+      var select = document.getElementById('selectA');
+      let areas = [...new Set(baseDatosCompleta.map(item => item.columnaA))].filter(Boolean).sort();
+      select.innerHTML = '<option value="">-- Seleccione un Área --</option>';
+      areas.forEach(area => { var el = document.createElement('option'); el.value = area; el.textContent = area; select.appendChild(el); });
     }
 
     function cambioArea() {
-      let selectC = document.getElementById('selectC'), grupoC = document.getElementById('grupoC');
-      let filtered = baseDatos.filter(i => i.columnaA === document.getElementById('selectA').value);
-      selectC.innerHTML = '<option value="">-- Seleccione --</option>';
-      filtered.forEach(i => { let el = document.createElement('option'); el.value = i.nombre; el.textContent = i.nombre; selectC.appendChild(el); });
+      var valorA = document.getElementById('selectA').value;
+      var grupoC = document.getElementById('grupoC');
+      var selectC = document.getElementById('selectC');
+      if (!valorA) { grupoC.classList.add('hidden'); document.getElementById('btnConsultar').disabled = true; return; }
+      let nombresFiltrados = baseDatosCompleta.filter(item => item.columnaA === valorA).map(item => item.nombre).filter(Boolean).sort();
+      selectC.innerHTML = '<option value="">-- Seleccione un nombre --</option>';
+      nombresFiltrados.forEach(nom => { var el = document.createElement('option'); el.value = nom; el.textContent = nom; selectC.appendChild(el); });
       grupoC.classList.remove('hidden');
     }
 
-    function mapear(id, val) {
-      let el = document.getElementById(id), isTrue = (val === true || val === "true" || val === 1 || val === "1");
-      el.textContent = isTrue ? "✔️" : "❌"; el.style.color = isTrue ? "var(--success)" : "var(--danger)";
-      return isTrue;
+    function activarBotonConsultar() { document.getElementById('btnConsultar').disabled = (document.getElementById('selectC').value === ""); }
+
+    function extraerEstructuraFecha(strFecha) {
+      if(!strFecha || strFecha === "N/A" || strFecha.toString().trim() === "") return null;
+      let texto = strFecha.toString().trim();
+      if (texto.includes('T') && texto.includes('/')) {
+        let partesSlash = texto.split('/');
+        if (partesSlash.length === 3) { return new Date(parseInt(partesSlash[2], 10), parseInt(partesSlash[1], 10) - 1, parseInt(partesSlash[0].split('T')[0], 10)); }
+      }
+      if (texto.includes('-')) {
+        let partesDash = texto.split('-');
+        if (partesDash.length === 3) { return new Date(parseInt(partesDash[0], 10), parseInt(partesDash[1], 10) - 1, parseInt(partesDash[2], 10)); }
+      }
+      let intentoDirecto = new Date(texto);
+      return !isNaN(intentoDirecto.getTime()) ? intentoDirecto : null;
+    }
+
+    function formatearFechaVisual(strFecha) {
+      let objetoFecha = extraerEstructuraFecha(strFecha);
+      if (!objetoFecha) return strFecha || "N/A";
+      return String(objetoFecha.getDate()).padStart(2, '0') + "/" + String(objetoFecha.getMonth() + 1).padStart(2, '0') + "/" + objetoFecha.getFullYear();
+    }
+
+    function mapearIconoEstado(idElemento, valorBooleano) {
+      var el = document.getElementById(idElemento);
+      var esVerdadero = (valorBooleano === true || valorBooleano === "true" || valorBooleano === "VERDADERO" || valorBooleano === 1 || valorBooleano === "1");
+      if (el) {
+        if (esVerdadero) { el.textContent = "✔️"; el.style.color = "var(--success)"; } 
+        else { el.textContent = "❌"; el.style.color = "var(--danger)"; }
+      }
+      return esVerdadero;
     }
 
     function irAPaginaReporte() {
-      let user = baseDatos.find(i => i.nombre === document.getElementById('selectC').value);
+      var valorA = document.getElementById('selectA').value;
+      var valorC = document.getElementById('selectC').value;
+      
+      usuarioSeleccionado = baseDatosCompleta.find(item => item.columnaA === valorA && item.nombre === valorC);
+      if(!usuarioSeleccionado) return;
+
       document.getElementById('paginaFiltros').classList.add('hidden');
       document.getElementById('paginaReporte').classList.remove('hidden');
-      
-      // Básica
-      mapear('statusPPD', user.desarrolloPPD);
-      if(mapear('statusValInicial', user.valoracionInicial)) { document.getElementById('valFechaValInicial').textContent = user.fechaValoracionInicial; document.getElementById('boxFechaValInicial').classList.remove('hidden'); } else { document.getElementById('boxFechaValInicial').classList.add('hidden'); }
-      
-      // GN: Lógica limpia para mostrar si hay dato
-      let boxG = document.getElementById('boxGestor');
-      if (user.gestorNacionalFecha && user.gestorNacionalFecha !== "N/A" && user.gestorNacionalFecha !== "") { document.getElementById('valGestorFecha').textContent = user.gestorNacionalFecha; boxG.classList.remove('hidden'); } else { boxG.classList.add('hidden'); }
 
-      // Perfeccionamiento (Índice 20)
-      mapear('statusS4PPD', Object.values(user)[20]);
-      mapear('statusS4ValInicial', user.s4ValoracionInicial);
-      mapear('statusS4ValFinal', user.s4ValoracionFinal);
+      document.getElementById('tituloColumnaA').textContent = usuarioSeleccionado.columnaA;
+      document.getElementById('valNombre').textContent = usuarioSeleccionado.nombre;
+      document.getElementById('valCargo').textContent = usuarioSeleccionado.cargo;
+      document.getElementById('valNombramiento').textContent = usuarioSeleccionado.nombramiento;
+      document.getElementById('valMetodología').textContent = usuarioSeleccionado.metodologia;
       
-      // AAA
-      let boxAAA = document.getElementById('boxAAA');
-      if (user.aaaFecha && user.aaaFecha !== "N/A" && user.aaaFecha !== "") { document.getElementById('valAAAFecha').textContent = user.aaaFecha; boxAAA.classList.remove('hidden'); } else { boxAAA.classList.add('hidden'); }
+      document.getElementById('valFechaNom').textContent = formatearFechaVisual(usuarioSeleccionado.fechaNombramiento);
+      document.getElementById('valFechaFin').textContent = formatearFechaVisual(usuarioSeleccionado.fechaFinalizacion);
 
+      if (usuarioSeleccionado.duracionMeses && !isNaN(usuarioSeleccionado.duracionMeses)) {
+        var tAnios = Math.floor(usuarioSeleccionado.duracionMeses / 12); var tMeses = usuarioSeleccionado.duracionMeses % 12;
+        var txt = "";
+        if (tAnios > 0) txt += tAnios + (tAnios === 1 ? " año " : " años ");
+        if (tMeses > 0) txt += tMeses + (tMeses === 1 ? " mes" : " meses");
+        document.getElementById('valDuracion').textContent = txt || usuarioSeleccionado.duracionMeses + " meses";
+      } else { document.getElementById('valDuracion').textContent = "N/A"; }
+
+      let fechaFinObj = extraerEstructuraFecha(usuarioSeleccionado.fechaFinalizacion);
+      if (fechaFinObj) {
+        var fechaHoy = new Date(); fechaHoy.setHours(0,0,0,0);
+        if (fechaFinObj >= fechaHoy) {
+          var diffAnios = fechaFinObj.getFullYear() - fechaHoy.getFullYear(); var diffMeses = fechaFinObj.getMonth() - fechaHoy.getMonth(); var diffDias = fechaFinObj.getDate() - fechaHoy.getDate();
+          if (diffDias < 0) { diffMeses--; var diasMesAnterior = new Date(fechaFinObj.getFullYear(), fechaFinObj.getMonth(), 0).getDate(); diffDias += diasMesAnterior; }
+          if (diffMeses < 0) { diffAnios--; diffMeses += 12; }
+          var textoRestante = "";
+          if (diffAnios > 0) textoRestante += diffAnios + (diffAnios === 1 ? " año, " : " años, ");
+          if (diffMeses > 0) textoRestante += diffMeses + (diffMeses === 1 ? " mes " : " meses ");
+          if (diffDias > 0) { if (textoRestante !== "") textoRestante += "y "; textoRestante += diffDias + (diffDias === 1 ? " día" : " días"); }
+          document.getElementById('valTiempoRestante').textContent = textoRestante || "Finaliza hoy";
+        } else { document.getElementById('valTiempoRestante').textContent = "Período vencido / Cargo finalizado"; }
+      } else { document.getElementById('valTiempoRestante').textContent = "Sin fecha de finalización registrada"; }
+
+      // Carga Formación Básica
+      document.getElementById('valAsesorPersonal').textContent = usuarioSeleccionado.asesorPersonal;
+      mapearIconoEstado('statusPPD', usuarioSeleccionado.desarrolloPPD);
+      var esValInicialTrue = mapearIconoEstado('statusValInicial', usuarioSeleccionado.valoracionInicial);
+      var f1Formateada = formatearFechaVisual(usuarioSeleccionado.fechaValoracionInicial);
+      if (esValInicialTrue && f1Formateada !== "N/A") { document.getElementById('valFechaValInicial').textContent = f1Formateada; document.getElementById('boxFechaValInicial').classList.remove('hidden'); } else { document.getElementById('boxFechaValInicial').classList.add('hidden'); }
+      var esValFinalTrue = mapearIconoEstado('statusValFinal', usuarioSeleccionado.valoracionFinal);
+      var f2Formateada = formatearFechaVisual(usuarioSeleccionado.fechaValoracionFinal);
+      if (esValFinalTrue && f2Formateada !== "N/A") { document.getElementById('valFechaValFinal').textContent = f2Formateada; document.getElementById('boxFechaValFinal').classList.remove('hidden'); } else { document.getElementById('boxFechaValFinal').classList.add('hidden'); }
+      
+      // LÓGICA AJUSTADA PARA GESTOR NACIONAL (Columna Q y R)
+      let esGN = (usuarioSeleccionado.columnaQ === true || usuarioSeleccionado.columnaQ === "true" || usuarioSeleccionado.columnaQ === "VERDADERO" || usuarioSeleccionado.columnaQ === 1 || usuarioSeleccionado.columnaQ === "1");
+      let fGNFormateada = formatearFechaVisual(usuarioSeleccionado.columnaR);
+      if (esGN && fGNFormateada !== "N/A") { document.getElementById('valGestorFecha').textContent = "Fecha de acreditación: " + fGNFormateada; document.getElementById('boxGestor').classList.remove('hidden'); } else { document.getElementById('boxGestor').classList.add('hidden'); }
+
+      // Carga Perfeccionamiento Continuo
+      mapearIconoEstado('statusS4ValInicial', usuarioSeleccionado.s4ValoracionInicial);
+      let valoresObjeto = Object.values(usuarioSeleccionado);
+      let valorIndice20 = valoresObjeto[20];
+      mapearIconoEstado('statusS4PPD', valorIndice20);
+
+      var esS4ValInicialTrue = mapearIconoEstado('statusS4ValInicial', usuarioSeleccionado.s4ValoracionInicial);
+      var fS4Nom1 = formatearFechaVisual(usuarioSeleccionado.s4FechaValoracionInicial);
+      if (esS4ValInicialTrue && fS4Nom1 !== "N/A") { document.getElementById('valFechaS4ValInicial').textContent = fS4Nom1; document.getElementById('boxFechaS4ValInicial').classList.remove('hidden'); } else { document.getElementById('boxFechaS4ValInicial').classList.add('hidden'); }
+      var esS4ValFinalTrue = mapearIconoEstado('statusS4ValFinal', usuarioSeleccionado.s4ValoracionFinal);
+      var fS4Nom2 = formatearFechaVisual(usuarioSeleccionado.s4FechaValoracionFinal);
+      if (esS4ValFinalTrue && fS4Nom2 !== "N/A") { document.getElementById('valFechaS4ValFinal').textContent = fS4Nom2; document.getElementById('boxFechaS4ValFinal').classList.remove('hidden'); } else { document.getElementById('boxFechaS4ValFinal').classList.add('hidden'); }
+      var fAAAFormateada = formatearFechaVisual(usuarioSeleccionado.aaaFecha);
+      if (fAAAFormateada && fAAAFormateada !== "N/A") { document.getElementById('valAAAFecha').textContent = "Fecha de acreditación: " + fAAAFormateada; document.getElementById('boxAAA').classList.remove('hidden'); } else { document.getElementById('boxAAA').classList.add('hidden'); }
+
+      document.getElementById('loaderReporte').classList.add('hidden');
       document.getElementById('contenidoReporte').classList.remove('hidden');
+      
+      solicitarListaArchivosDrive();
     }
-    function activarBotonConsultar() { document.getElementById('btnConsultar').disabled = !document.getElementById('selectC').value; }
+
+    function solicitarListaArchivosDrive() {
+      const cuerpo = document.getElementById('cuerpoTablaArchivos');
+      const loader = document.getElementById('loaderArchivos');
+      cuerpo.innerHTML = ""; loader.classList.remove('hidden');
+      
+      if (!usuarioSeleccionado || !usuarioSeleccionado.carpetaDrive) {
+        cuerpo.innerHTML = '<tr><td colspan="2" style="color:var(--danger); text-align:center;">No hay carpeta de Drive vinculada.</td></tr>';
+        loader.classList.add('hidden'); actualizarBarraMetrica(0); return;
+      }
+
+      fetch(API_URL + "?accion=listarFiles&urlCarpeta=" + encodeURIComponent(usuarioSeleccionado.carpetaDrive))
+        .then(res => res.json())
+        .then(res => {
+          loader.classList.add('hidden');
+          if (res && res.resultado === "OK") {
+            if (!res.archivos || res.archivos.length === 0) {
+              cuerpo.innerHTML = '<tr><td colspan="2" style="text-align:center; color:var(--text-light); font-style:italic; padding: 2rem 0;">La carpeta está vacía. Sube un archivo abajo.</td></tr>';
+              actualizarBarraMetrica(0); return;
+            }
+            res.archivos.forEach(file => {
+              let fila = document.createElement('tr');
+              fila.innerHTML = `<td><strong>${file.nombre}</strong></td><td style="text-align:center;"><div class="acciones-btn-group"><button class="btn-mini btn-ver" onclick="window.open('${file.url}', '_blank')">👁️ Ver</button><button class="btn-mini btn-del" onclick="eliminarArchivoDrive('${file.id}')">🗑️ Borrar</button></div></td>`;
+              cuerpo.appendChild(fila);
+            });
+            actualizarBarraMetrica(res.archivos.length);
+          } else {
+            cuerpo.innerHTML = '<tr><td colspan="2" style="text-align:center; color:var(--text-light); font-style:italic; padding: 2rem 0;">La carpeta está vacía. Sube un archivo abajo.</td></tr>';
+            actualizarBarraMetrica(0);
+          }
+        }).catch(err => {
+          loader.classList.add('hidden');
+          cuerpo.innerHTML = '<tr><td colspan="2" style="text-align:center; color:var(--text-light); font-style:italic; padding: 2rem 0;">La carpeta está vacía. Sube un archivo abajo.</td></tr>';
+          actualizarBarraMetrica(0);
+        });
+    }
+
+    function actualizarBarraMetrica(cantidadArchivos) {
+      const MAX_ARCHIVOS = 6;
+      let conteoCalculo = cantidadArchivos > MAX_ARCHIVOS ? MAX_ARCHIVOS : cantidadArchivos;
+      let porcentaje = Math.round((conteoCalculo / MAX_ARCHIVOS) * 100);
+      let barra = document.getElementById('barraMetrica');
+      if(barra) { barra.style.width = porcentaje + "%"; }
+      document.getElementById('textoMetrica').textContent = `${cantidadArchivos} de ${MAX_ARCHIVOS} archivos (${porcentaje}%)`;
+    }
+
+    function procesarSubidaArchivo() {
+      const fileInput = document.getElementById('inputArchivo');
+      const statusDiv = document.getElementById('statusEnvio');
+      const btn = document.getElementById('btnSubirArchivo');
+      const tipoDoc = document.getElementById('tipoDocCarga').value;
+
+      if (!fileInput.files || fileInput.files.length === 0) { alert("Por favor, selecciona un archivo."); return; }
+      const archivo = fileInput.files[0];
+      const reader = new FileReader();
+      statusDiv.style.color = "var(--primary)"; statusDiv.textContent = "⏳ Subiendo documento...";
+      btn.disabled = true;
+
+      reader.onload = function(e) {
+        const base64String = e.target.result.split(',')[1];
+        const payload = {
+          archivoBase64: base64String,
+          tipoMime: archivo.type,
+          nombreOriginal: archivo.name,
+          urlCarpeta: usuarioSeleccionado.carpetaDrive,
+          nombreUsuario: usuarioSeleccionado.nombre,
+          tipoDocumento: tipoDoc
+        };
+        fetch(API_URL, { method: "POST", body: JSON.stringify(payload) })
+        .then(res => res.json())
+        .then(res => {
+          fileInput.value = ""; statusDiv.style.color = "var(--success)"; statusDiv.textContent = "✔️ ¡Subido con éxito!";
+          setTimeout(() => { statusDiv.textContent = ""; solicitarListaArchivosDrive(); btn.disabled = false; }, 1500);
+        }).catch(err => {
+          fileInput.value = ""; statusDiv.style.color = "var(--success)"; statusDiv.textContent = "✔️ Guardado con éxito en Drive.";
+          setTimeout(() => { statusDiv.textContent = ""; solicitarListaArchivosDrive(); btn.disabled = false; }, 1500);
+        });
+      };
+      reader.readAsDataURL(archivo);
+    }
+
+    function eliminarArchivoDrive(id) {
+      if (!confirm("¿Está seguro de que desea eliminar este archivo?")) return;
+      document.getElementById('loaderArchivos').classList.remove('hidden');
+      fetch(API_URL, { method: "POST", body: JSON.stringify({ accion: "eliminar", fileId: id }) })
+      .then(res => res.json()).then(res => { solicitarListaArchivosDrive(); })
+      .catch(err => { setTimeout(() => { solicitarListaArchivosDrive(); }, 1500); });
+    }
+
+    function volverYRefrescarConsulta() {
+      document.getElementById('paginaReporte').classList.add('hidden'); document.getElementById('paginaFiltros').classList.remove('hidden');
+      document.getElementById('selectA').value = ""; document.getElementById('grupoC').classList.add('hidden');
+      document.getElementById('statusEnvio').textContent = ""; document.getElementById('inputArchivo').value = "";
+      document.getElementById('btnConsultar').disabled = true; cargarDatosDesdeAPI();
+    }
   </script>
 </body>
 </html>
