@@ -86,10 +86,8 @@
           <div class="dato-bloque"><span class="dato-label">Cargo</span><span id="valCargo" class="dato-valor"></span></div>
           <div class="dato-bloque"><span class="dato-label">Nombramiento</span><span id="valNombramiento" class="dato-valor"></span></div>
           <div class="dato-bloque"><span class="dato-label">Metodología</span><span id="valMetodología" class="dato-valor"></span></div>
-          <div class="dato-bloque"><span class="dato-label">Resolución</span><span id="valResolucion" class="dato-valor"></span></div>
           <div class="dato-bloque"><span class="dato-label">Fecha de Nombramiento</span><span id="valFechaNom" class="dato-valor"></span></div>
           <div class="dato-bloque"><span class="dato-label">Duración</span><span id="valDuracion" class="dato-valor"></span></div>
-          <div class="dato-bloque"><span class="dato-label">Líder</span><span id="valLider" class="dato-valor"></span></div>
           <div class="dato-bloque" style="grid-column: 1 / -1;"><span class="dato-label">Fecha Finalización</span><span id="valFechaFin" class="dato-valor"></span></div>
           
           <div class="dato-bloque" style="grid-column: 1 / -1; background: #f3e8ff; padding: 1rem; border-radius: 8px; border-left: 4px solid var(--purple-light); margin-bottom: 0.25rem;">
@@ -108,14 +106,12 @@
           </div>
           <div class="dato-mixto-linea">
             <div class="mixto-izq"><span id="statusValInicial" class="status-badge"></span><span class="verificacion-titulo">Valoración Inicial</span></div>
-            <div id="boxFechaValInicial" class="dato-bloque hidden" style="text-align: right;"><span class="dato-label">Fecha de realización</span><span id="valFechaValInicial" class="dato-valor"></span></div>
           </div>
           <div class="dato-mixto-linea">
             <div class="mixto-izq"><span id="statusPPD" class="status-badge"></span><span class="verificacion-titulo">En desarrollo de su PPD</span></div>
           </div>
           <div class="dato-mixto-linea">
             <div class="mixto-izq"><span id="statusValFinal" class="status-badge"></span><span class="verificacion-titulo">Valoración Final</span></div>
-            <div id="boxFechaValFinal" class="dato-bloque hidden" style="text-align: right;"><span class="dato-label">Fecha de realización</span><span id="valFechaValFinal" class="dato-valor"></span></div>
           </div>
           <div id="boxGN" class="dato-bloque hidden" style="grid-column: 1 / -1; background: #f8fafc; padding: 0.75rem; border-radius: 8px; border: 1px dashed var(--border); margin-top: 0.5rem;"><span class="dato-label">GN</span><span id="valGN" class="dato-valor" style="font-weight: 600;"></span></div>
           <div id="boxGestor" class="dato-bloque hidden" style="grid-column: 1 / -1; background: #f8fafc; padding: 0.75rem; border-radius: 8px; border: 1px dashed var(--border); margin-top: 0.5rem;"><span class="dato-label">Gestor Nacional</span><span id="valGestorFecha" class="dato-valor" style="font-weight: 600;"></span></div>
@@ -265,8 +261,6 @@
       document.getElementById('valCargo').textContent = usuarioSeleccionado.cargo;
       document.getElementById('valNombramiento').textContent = usuarioSeleccionado.nombramiento;
       document.getElementById('valMetodología').textContent = usuarioSeleccionado.metodologia;
-      document.getElementById('valResolucion').textContent = usuarioSeleccionado.resolucion || "N/A";
-      document.getElementById('valLider').textContent = usuarioSeleccionado.lider || "N/A";
       
       document.getElementById('valFechaNom').textContent = formatearFechaVisual(usuarioSeleccionado.fechaNombramiento);
       document.getElementById('valFechaFin').textContent = formatearFechaVisual(usuarioSeleccionado.fechaFinalizacion);
@@ -279,7 +273,6 @@
         document.getElementById('valDuracion').textContent = txt || usuarioSeleccionado.duracionMeses + " meses";
       } else { document.getElementById('valDuracion').textContent = "N/A"; }
 
-      // Tiempo restante lógica...
       let fechaFinObj = extraerEstructuraFecha(usuarioSeleccionado.fechaFinalizacion);
       if (fechaFinObj) {
         var fechaHoy = new Date(); fechaHoy.setHours(0,0,0,0);
@@ -298,14 +291,10 @@
       // Formación Básica
       document.getElementById('valAsesorPersonal').textContent = usuarioSeleccionado.asesorPersonal;
       mapearIconoEstado('statusPPD', usuarioSeleccionado.desarrolloPPD);
-      var esValInicialTrue = mapearIconoEstado('statusValInicial', usuarioSeleccionado.valoracionInicial);
-      if (esValInicialTrue) { document.getElementById('valFechaValInicial').textContent = formatearFechaVisual(usuarioSeleccionado.fechaValoracionInicial); document.getElementById('boxFechaValInicial').classList.remove('hidden'); } else { document.getElementById('boxFechaValInicial').classList.add('hidden'); }
-      
-      var esValFinalTrue = mapearIconoEstado('statusValFinal', usuarioSeleccionado.valoracionFinal);
-      if (esValFinalTrue) { document.getElementById('valFechaValFinal').textContent = formatearFechaVisual(usuarioSeleccionado.fechaValoracionFinal); document.getElementById('boxFechaValFinal').classList.remove('hidden'); } else { document.getElementById('boxFechaValFinal').classList.add('hidden'); }
+      mapearIconoEstado('statusValInicial', usuarioSeleccionado.valoracionInicial);
+      mapearIconoEstado('statusValFinal', usuarioSeleccionado.valoracionFinal);
       
       if (usuarioSeleccionado.GN) { document.getElementById('valGN').textContent = usuarioSeleccionado.GN; document.getElementById('boxGN').classList.remove('hidden'); } else { document.getElementById('boxGN').classList.add('hidden'); }
-      
       if (usuarioSeleccionado.gestorNacionalFecha) { document.getElementById('valGestorFecha').textContent = formatearFechaVisual(usuarioSeleccionado.gestorNacionalFecha); document.getElementById('boxGestor').classList.remove('hidden'); } else { document.getElementById('boxGestor').classList.add('hidden'); }
 
       // Perfeccionamiento Continuo
@@ -324,7 +313,6 @@
       solicitarListaArchivosDrive();
     }
 
-    // Funciones de Drive y subida se mantienen intactas...
     function solicitarListaArchivosDrive() {
       const cuerpo = document.getElementById('cuerpoTablaArchivos');
       const loader = document.getElementById('loaderArchivos');
