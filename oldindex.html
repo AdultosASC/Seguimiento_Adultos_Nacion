@@ -137,7 +137,6 @@
           <div id="boxAAAFecha" class="dato-bloque hidden" style="grid-column: 1 / -1; background: var(--green-bg); padding: 0.75rem; border-radius: 8px; border: 1px solid var(--green-border); margin-top: 0.5rem;"><span class="dato-label" style="color: var(--green-text);">Fecha AAA</span><span id="valAAAFecha" class="dato-valor" style="font-weight: 600; color: var(--green-text);"></span></div>
         </div>
       </div>
-
       <div class="seccion-reporte" style="background: #fafafa; padding: 1rem; margin-bottom: 1.5rem; border: 1px solid var(--border);">
         <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem; font-weight: bold; color: var(--purple-dark);">
           <span>Progreso de archivos</span>
@@ -289,7 +288,6 @@
         } else { document.getElementById('valTiempoRestante').textContent = "Período vencido / Cargo finalizado"; }
       } else { document.getElementById('valTiempoRestante').textContent = "Sin fecha de finalización registrada"; }
 
-      // Formación Básica
       document.getElementById('valAsesorPersonal').textContent = usuarioSeleccionado.asesorPersonal;
       mapearIconoEstado('statusPPD', usuarioSeleccionado.desarrolloPPD);
       mapearIconoEstado('statusValInicial', usuarioSeleccionado.valoracionInicial);
@@ -298,9 +296,9 @@
       if (usuarioSeleccionado.GN) { document.getElementById('valGN').textContent = usuarioSeleccionado.GN; document.getElementById('boxGN').classList.remove('hidden'); } else { document.getElementById('boxGN').classList.add('hidden'); }
       if (usuarioSeleccionado.gestorNacionalFecha) { document.getElementById('valGestorFecha').textContent = formatearFechaVisual(usuarioSeleccionado.gestorNacionalFecha); document.getElementById('boxGestor').classList.remove('hidden'); } else { document.getElementById('boxGestor').classList.add('hidden'); }
 
-      // Perfeccionamiento Continuo - Sección revisada
+      // Perfeccionamiento Continuo - Verificación de índice 20 para s4DesarrolloPPD
       mapearIconoEstado('statusS4ValInicial', usuarioSeleccionado.s4ValoracionInicial);
-      mapearIconoEstado('statusS4PPD', usuarioSeleccionado.s4DesarrolloPPD); // Verificado: usa s4DesarrolloPPD que viene del indice 20
+      mapearIconoEstado('statusS4PPD', usuarioSeleccionado.s4DesarrolloPPD);
       mapearIconoEstado('statusS4ValFinal', usuarioSeleccionado.s4ValoracionFinal);
       
       if (usuarioSeleccionado.s4FechaValoracionInicial) { document.getElementById('valFechaS4ValInicial').textContent = formatearFechaVisual(usuarioSeleccionado.s4FechaValoracionInicial); document.getElementById('boxFechaS4ValInicial').classList.remove('hidden'); }
@@ -327,9 +325,8 @@
       fetch(API_URL + "?accion=listarFiles&urlCarpeta=" + encodeURIComponent(usuarioSeleccionado.carpetaDrive))
         .then(res => res.json())
         .then(res => {
-          loader.classList.remove('hidden');
+          loader.classList.add('hidden');
           if (res && res.resultado === "OK") {
-            loader.classList.add('hidden');
             if (!res.archivos || res.archivos.length === 0) {
               cuerpo.innerHTML = '<tr><td colspan="2" style="text-align:center; color:var(--text-light); font-style:italic; padding: 2rem 0;">La carpeta está vacía.</td></tr>';
               actualizarBarraMetrica(0); return;
