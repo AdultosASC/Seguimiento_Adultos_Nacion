@@ -100,7 +100,6 @@
           <div class="dato-mixto-linea"><div class="mixto-izq"><span id="statusS4PPD" class="status-badge"></span><span class="verificacion-titulo">En desarrollo de su PPD</span></div></div>
           <div class="dato-mixto-linea"><div class="mixto-izq"><span id="statusS4ValFinal" class="status-badge"></span><span class="verificacion-titulo">Valoración Final</span></div></div>
           <div id="boxAAA" class="dato-bloque hidden" style="grid-column: 1 / -1; background: var(--green-bg); padding: 0.75rem; border-radius: 8px; border: 1px solid var(--green-border); margin-top: 0.5rem;"><span class="dato-label" style="color: var(--green-text);">AAA</span><span id="valAAA" class="dato-valor" style="font-weight: 600; color: var(--green-text);"></span></div>
-          <div id="boxAAAFecha" class="dato-bloque hidden" style="grid-column: 1 / -1; background: var(--green-bg); padding: 0.75rem; border-radius: 8px; border: 1px solid var(--green-border); margin-top: 0.5rem;"><span class="dato-label" style="color: var(--green-text);">Fecha AAA</span><span id="valAAAFecha" class="dato-valor" style="font-weight: 600; color: var(--green-text);"></span></div>
         </div>
       </div>
       <div class="seccion-reporte" style="background: #fafafa; padding: 1rem; margin-bottom: 1.5rem; border: 1px solid var(--border);">
@@ -184,10 +183,12 @@
       document.getElementById('valMetodología').textContent = usuarioSeleccionado.metodologia;
       document.getElementById('valFechaNom').textContent = formatearFechaVisual(usuarioSeleccionado.fechaNombramiento);
       document.getElementById('valFechaFin').textContent = formatearFechaVisual(usuarioSeleccionado.fechaFinalizacion);
+      
       if (usuarioSeleccionado.duracionMeses && !isNaN(usuarioSeleccionado.duracionMeses)) {
         var tAnios = Math.floor(usuarioSeleccionado.duracionMeses / 12); var tMeses = usuarioSeleccionado.duracionMeses % 12;
         document.getElementById('valDuracion').textContent = (tAnios > 0 ? tAnios + (tAnios === 1 ? " año " : " años ") : "") + (tMeses > 0 ? tMeses + (tMeses === 1 ? " mes" : " meses") : "") || usuarioSeleccionado.duracionMeses + " meses";
       } else { document.getElementById('valDuracion').textContent = "N/A"; }
+      
       let fechaFinObj = extraerEstructuraFecha(usuarioSeleccionado.fechaFinalizacion);
       if (fechaFinObj) {
         var fechaHoy = new Date(); fechaHoy.setHours(0,0,0,0);
@@ -198,10 +199,12 @@
           document.getElementById('valTiempoRestante').textContent = (diffAnios > 0 ? diffAnios + (diffAnios === 1 ? " año, " : " años, ") : "") + (diffMeses > 0 ? diffMeses + (diffMeses === 1 ? " mes " : " meses ") : "") + (diffDias > 0 ? (diffDias + (diffDias === 1 ? " día" : " días")) : "") || "Finaliza hoy";
         } else { document.getElementById('valTiempoRestante').textContent = "Período vencido / Cargo finalizado"; }
       } else { document.getElementById('valTiempoRestante').textContent = "Sin fecha de finalización registrada"; }
+      
       document.getElementById('valAsesorPersonal').textContent = usuarioSeleccionado.asesorPersonal;
       mapearIconoEstado('statusPPD', usuarioSeleccionado.desarrolloPPD);
       mapearIconoEstado('statusValInicial', usuarioSeleccionado.valoracionInicial);
       mapearIconoEstado('statusValFinal', usuarioSeleccionado.valoracionFinal);
+      
       if (usuarioSeleccionado.GN) { document.getElementById('valGN').textContent = usuarioSeleccionado.GN; document.getElementById('boxGN').classList.remove('hidden'); } else { document.getElementById('boxGN').classList.add('hidden'); }
       if (usuarioSeleccionado.gestorNacionalFecha) { document.getElementById('valGestorFecha').textContent = formatearFechaVisual(usuarioSeleccionado.gestorNacionalFecha); document.getElementById('boxGestor').classList.remove('hidden'); } else { document.getElementById('boxGestor').classList.add('hidden'); }
       
@@ -210,7 +213,6 @@
       mapearIconoEstado('statusS4ValFinal', usuarioSeleccionado.s4ValoracionFinal);
       
       if (usuarioSeleccionado.AAA && usuarioSeleccionado.AAA.toString().trim() !== "") { document.getElementById('valAAA').textContent = usuarioSeleccionado.AAA; document.getElementById('boxAAA').classList.remove('hidden'); } else { document.getElementById('boxAAA').classList.add('hidden'); }
-      if (usuarioSeleccionado.aaaFecha && usuarioSeleccionado.aaaFecha.toString().trim() !== "" && usuarioSeleccionado.aaaFecha !== "N/A") { document.getElementById('valAAAFecha').textContent = formatearFechaVisual(usuarioSeleccionado.aaaFecha); document.getElementById('boxAAAFecha').classList.remove('hidden'); } else { document.getElementById('boxAAAFecha').classList.add('hidden'); }
       
       document.getElementById('loaderReporte').classList.add('hidden');
       document.getElementById('contenidoReporte').classList.remove('hidden');
