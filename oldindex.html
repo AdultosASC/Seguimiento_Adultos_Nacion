@@ -161,6 +161,7 @@
       if (!objetoFecha) return strFecha || "N/A";
       return String(objetoFecha.getDate()).padStart(2, '0') + "/" + String(objetoFecha.getMonth() + 1).padStart(2, '0') + "/" + objetoFecha.getFullYear();
     }
+    // Función optimizada para detección universal de verdaderos
     function mapearIconoEstado(idElemento, valor) {
       var el = document.getElementById(idElemento);
       var esVerdadero = (valor === true || valor === "true" || valor === "VERDADERO" || valor === 1 || valor === "1" || valor === "TRUE");
@@ -203,10 +204,12 @@
       mapearIconoEstado('statusValFinal', usuarioSeleccionado.valoracionFinal);
       if (usuarioSeleccionado.GN) { document.getElementById('valGN').textContent = usuarioSeleccionado.GN; document.getElementById('boxGN').classList.remove('hidden'); } else { document.getElementById('boxGN').classList.add('hidden'); }
       if (usuarioSeleccionado.gestorNacionalFecha) { document.getElementById('valGestorFecha').textContent = formatearFechaVisual(usuarioSeleccionado.gestorNacionalFecha); document.getElementById('boxGestor').classList.remove('hidden'); } else { document.getElementById('boxGestor').classList.add('hidden'); }
-      // Corrección precisa para columna U (Indice 20 / s4DesarrolloPPD)
+      
+      // Corrección crítica para s4DesarrolloPPD (Columna U)
       mapearIconoEstado('statusS4ValInicial', usuarioSeleccionado.s4ValoracionInicial);
       mapearIconoEstado('statusS4PPD', usuarioSeleccionado.s4DesarrolloPPD);
       mapearIconoEstado('statusS4ValFinal', usuarioSeleccionado.s4ValoracionFinal);
+      
       if (usuarioSeleccionado.AAA) { document.getElementById('valAAA').textContent = usuarioSeleccionado.AAA; document.getElementById('boxAAA').classList.remove('hidden'); }
       document.getElementById('loaderReporte').classList.add('hidden');
       document.getElementById('contenidoReporte').classList.remove('hidden');
