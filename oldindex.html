@@ -115,10 +115,9 @@
             <div class="mixto-izq"><span id="statusValFinal" class="status-badge"></span><span class="verificacion-titulo">Valoración Final</span></div>
             <div id="boxFechaValFinal" class="dato-bloque hidden" style="text-align: right;"><span class="dato-label">Fecha de realización</span><span id="valFechaValFinal" class="dato-valor"></span></div>
           </div>
-          <div id="boxGestor" class="dato-bloque hidden" style="grid-column: 1 / -1; background: #f8fafc; padding: 0.75rem; border-radius: 8px; border: 1px dashed var(--border); margin-top: 0.5rem;">
-            <span class="dato-label" style="color: var(--purple-dark);">Gestor Nacional (GN)</span>
-            <span id="valGestorFecha" class="dato-valor" style="font-weight: 600;"></span>
-          </div>
+          <div id="boxGestor" class="dato-bloque hidden" style="grid-column: 1 / -1; background: #f8fafc; padding: 0.75rem; border-radius: 8px; border: 1px dashed var(--border); margin-top: 0.5rem;"><span class="dato-label" style="color: var(--purple-dark);">Gestor Nacional (GN)</span><span id="valGestorFecha" class="dato-valor" style="font-weight: 600;"></span></div>
+          
+          <div id="boxAAA_FB" class="dato-bloque hidden" style="grid-column: 1 / -1; background: #f0fdf4; padding: 0.75rem; border-radius: 8px; border: 1px solid #bbf7d0; margin-top: 0.5rem;"><span class="dato-label" style="color: #166534;">AAA - Formación Básica</span><span id="valAAAFecha_FB" class="dato-valor" style="font-weight: 600; color: #14532d;"></span></div>
         </div>
       </div>
 
@@ -309,10 +308,14 @@
       var f2Formateada = formatearFechaVisual(usuarioSeleccionado.fechaValoracionFinal);
       if (esValFinalTrue && f2Formateada !== "N/A") { document.getElementById('valFechaValFinal').textContent = f2Formateada; document.getElementById('boxFechaValFinal').classList.remove('hidden'); } else { document.getElementById('boxFechaValFinal').classList.add('hidden'); }
       
-      // LÓGICA AJUSTADA PARA GESTOR NACIONAL (Columna Q y R)
+      // GN
       let esGN = (usuarioSeleccionado.columnaQ === true || usuarioSeleccionado.columnaQ === "true" || usuarioSeleccionado.columnaQ === "VERDADERO" || usuarioSeleccionado.columnaQ === 1 || usuarioSeleccionado.columnaQ === "1");
       let fGNFormateada = formatearFechaVisual(usuarioSeleccionado.columnaR);
       if (esGN && fGNFormateada !== "N/A") { document.getElementById('valGestorFecha').textContent = "Fecha de acreditación: " + fGNFormateada; document.getElementById('boxGestor').classList.remove('hidden'); } else { document.getElementById('boxGestor').classList.add('hidden'); }
+
+      // AAA en Formación Básica (Asumiré columna 'aaaFechaFB' en tus datos, ajusta si es otra)
+      let fAAA_FB = formatearFechaVisual(usuarioSeleccionado.aaaFechaFB);
+      if (fAAA_FB && fAAA_FB !== "N/A") { document.getElementById('valAAAFecha_FB').textContent = "Fecha de acreditación: " + fAAA_FB; document.getElementById('boxAAA_FB').classList.remove('hidden'); } else { document.getElementById('boxAAA_FB').classList.add('hidden'); }
 
       // Carga Perfeccionamiento Continuo
       mapearIconoEstado('statusS4ValInicial', usuarioSeleccionado.s4ValoracionInicial);
@@ -334,17 +337,15 @@
       
       solicitarListaArchivosDrive();
     }
-
+    // ... (El resto de funciones como solicitarListaArchivosDrive, actualizarBarraMetrica, etc., se mantienen iguales)
     function solicitarListaArchivosDrive() {
       const cuerpo = document.getElementById('cuerpoTablaArchivos');
       const loader = document.getElementById('loaderArchivos');
       cuerpo.innerHTML = ""; loader.classList.remove('hidden');
-      
       if (!usuarioSeleccionado || !usuarioSeleccionado.carpetaDrive) {
         cuerpo.innerHTML = '<tr><td colspan="2" style="color:var(--danger); text-align:center;">No hay carpeta de Drive vinculada.</td></tr>';
         loader.classList.add('hidden'); actualizarBarraMetrica(0); return;
       }
-
       fetch(API_URL + "?accion=listarFiles&urlCarpeta=" + encodeURIComponent(usuarioSeleccionado.carpetaDrive))
         .then(res => res.json())
         .then(res => {
