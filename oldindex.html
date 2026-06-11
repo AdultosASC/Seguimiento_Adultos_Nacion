@@ -137,6 +137,7 @@
           <div id="boxAAAFecha" class="dato-bloque hidden" style="grid-column: 1 / -1; background: var(--green-bg); padding: 0.75rem; border-radius: 8px; border: 1px solid var(--green-border); margin-top: 0.5rem;"><span class="dato-label" style="color: var(--green-text);">Fecha AAA</span><span id="valAAAFecha" class="dato-valor" style="font-weight: 600; color: var(--green-text);"></span></div>
         </div>
       </div>
+      
       <div class="seccion-reporte" style="background: #fafafa; padding: 1rem; margin-bottom: 1.5rem; border: 1px solid var(--border);">
         <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem; font-weight: bold; color: var(--purple-dark);">
           <span>Progreso de archivos</span>
@@ -296,7 +297,7 @@
       if (usuarioSeleccionado.GN) { document.getElementById('valGN').textContent = usuarioSeleccionado.GN; document.getElementById('boxGN').classList.remove('hidden'); } else { document.getElementById('boxGN').classList.add('hidden'); }
       if (usuarioSeleccionado.gestorNacionalFecha) { document.getElementById('valGestorFecha').textContent = formatearFechaVisual(usuarioSeleccionado.gestorNacionalFecha); document.getElementById('boxGestor').classList.remove('hidden'); } else { document.getElementById('boxGestor').classList.add('hidden'); }
 
-      // Perfeccionamiento Continuo - Verificación de índice 20 para s4DesarrolloPPD
+      // Seccion verificada: Perfeccionamiento Continuo - Columna U (Indice 20 / s4DesarrolloPPD)
       mapearIconoEstado('statusS4ValInicial', usuarioSeleccionado.s4ValoracionInicial);
       mapearIconoEstado('statusS4PPD', usuarioSeleccionado.s4DesarrolloPPD);
       mapearIconoEstado('statusS4ValFinal', usuarioSeleccionado.s4ValoracionFinal);
