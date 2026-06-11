@@ -100,6 +100,7 @@
           <div class="dato-mixto-linea"><div class="mixto-izq"><span id="statusS4PPD" class="status-badge"></span><span class="verificacion-titulo">En desarrollo de su PPD</span></div></div>
           <div class="dato-mixto-linea"><div class="mixto-izq"><span id="statusS4ValFinal" class="status-badge"></span><span class="verificacion-titulo">Valoración Final</span></div></div>
           <div id="boxAAA" class="dato-bloque hidden" style="grid-column: 1 / -1; background: var(--green-bg); padding: 0.75rem; border-radius: 8px; border: 1px solid var(--green-border); margin-top: 0.5rem;"><span class="dato-label" style="color: var(--green-text);">AAA</span><span id="valAAA" class="dato-valor" style="font-weight: 600; color: var(--green-text);"></span></div>
+          <div id="boxAAAFecha" class="dato-bloque hidden" style="grid-column: 1 / -1; background: var(--green-bg); padding: 0.75rem; border-radius: 8px; border: 1px solid var(--green-border); margin-top: 0.5rem;"><span class="dato-label" style="color: var(--green-text);">Fecha AAA</span><span id="valAAAFecha" class="dato-valor" style="font-weight: 600; color: var(--green-text);"></span></div>
         </div>
       </div>
       <div class="seccion-reporte" style="background: #fafafa; padding: 1rem; margin-bottom: 1.5rem; border: 1px solid var(--border);">
@@ -204,16 +205,12 @@
       if (usuarioSeleccionado.GN) { document.getElementById('valGN').textContent = usuarioSeleccionado.GN; document.getElementById('boxGN').classList.remove('hidden'); } else { document.getElementById('boxGN').classList.add('hidden'); }
       if (usuarioSeleccionado.gestorNacionalFecha) { document.getElementById('valGestorFecha').textContent = formatearFechaVisual(usuarioSeleccionado.gestorNacionalFecha); document.getElementById('boxGestor').classList.remove('hidden'); } else { document.getElementById('boxGestor').classList.add('hidden'); }
       
-      // Corrección precisa: s4DesarrolloPPD es columna U (Índice 20)
       mapearIconoEstado('statusS4ValInicial', usuarioSeleccionado.s4ValoracionInicial);
       mapearIconoEstado('statusS4PPD', usuarioSeleccionado.s4DesarrolloPPD);
       mapearIconoEstado('statusS4ValFinal', usuarioSeleccionado.s4ValoracionFinal);
       
-      // AAA condicional y precisa
-      if (usuarioSeleccionado.AAA && usuarioSeleccionado.AAA.toString().trim() !== "") { 
-        document.getElementById('valAAA').textContent = usuarioSeleccionado.AAA; 
-        document.getElementById('boxAAA').classList.remove('hidden'); 
-      } else { document.getElementById('boxAAA').classList.add('hidden'); }
+      if (usuarioSeleccionado.AAA && usuarioSeleccionado.AAA.toString().trim() !== "") { document.getElementById('valAAA').textContent = usuarioSeleccionado.AAA; document.getElementById('boxAAA').classList.remove('hidden'); } else { document.getElementById('boxAAA').classList.add('hidden'); }
+      if (usuarioSeleccionado.aaaFecha && usuarioSeleccionado.aaaFecha.toString().trim() !== "" && usuarioSeleccionado.aaaFecha !== "N/A") { document.getElementById('valAAAFecha').textContent = formatearFechaVisual(usuarioSeleccionado.aaaFecha); document.getElementById('boxAAAFecha').classList.remove('hidden'); } else { document.getElementById('boxAAAFecha').classList.add('hidden'); }
       
       document.getElementById('loaderReporte').classList.add('hidden');
       document.getElementById('contenidoReporte').classList.remove('hidden');
