@@ -9,7 +9,6 @@
       --primary: #6366f1; --primary-hover: #4f46e5; --purple-dark: #4c1d95; --purple-light: #8b5cf6;
       --bg: #f8fafc; --card-bg: #ffffff; --text: #1e293b; --text-light: #64748b; --border: #e2e8f0;
       --success: #10b981; --danger: #ef4444;
-      /* Verde usado en AAA */
       --green-bg: #f0fdf4; --green-border: #bbf7d0; --green-text: #166534;
     }
     body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 2rem 1rem; display: flex; justify-content: center; align-items: center; min-height: 100vh; box-sizing: border-box; }
@@ -138,6 +137,7 @@
           <div id="boxAAAFecha" class="dato-bloque hidden" style="grid-column: 1 / -1; background: var(--green-bg); padding: 0.75rem; border-radius: 8px; border: 1px solid var(--green-border); margin-top: 0.5rem;"><span class="dato-label" style="color: var(--green-text);">Fecha AAA</span><span id="valAAAFecha" class="dato-valor" style="font-weight: 600; color: var(--green-text);"></span></div>
         </div>
       </div>
+
       <div class="seccion-reporte" style="background: #fafafa; padding: 1rem; margin-bottom: 1.5rem; border: 1px solid var(--border);">
         <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem; font-weight: bold; color: var(--purple-dark);">
           <span>Progreso de archivos</span>
@@ -289,6 +289,7 @@
         } else { document.getElementById('valTiempoRestante').textContent = "Período vencido / Cargo finalizado"; }
       } else { document.getElementById('valTiempoRestante').textContent = "Sin fecha de finalización registrada"; }
 
+      // Formación Básica
       document.getElementById('valAsesorPersonal').textContent = usuarioSeleccionado.asesorPersonal;
       mapearIconoEstado('statusPPD', usuarioSeleccionado.desarrolloPPD);
       mapearIconoEstado('statusValInicial', usuarioSeleccionado.valoracionInicial);
@@ -297,8 +298,9 @@
       if (usuarioSeleccionado.GN) { document.getElementById('valGN').textContent = usuarioSeleccionado.GN; document.getElementById('boxGN').classList.remove('hidden'); } else { document.getElementById('boxGN').classList.add('hidden'); }
       if (usuarioSeleccionado.gestorNacionalFecha) { document.getElementById('valGestorFecha').textContent = formatearFechaVisual(usuarioSeleccionado.gestorNacionalFecha); document.getElementById('boxGestor').classList.remove('hidden'); } else { document.getElementById('boxGestor').classList.add('hidden'); }
 
+      // Perfeccionamiento Continuo - Sección revisada
       mapearIconoEstado('statusS4ValInicial', usuarioSeleccionado.s4ValoracionInicial);
-      mapearIconoEstado('statusS4PPD', usuarioSeleccionado.s4DesarrolloPPD);
+      mapearIconoEstado('statusS4PPD', usuarioSeleccionado.s4DesarrolloPPD); // Verificado: usa s4DesarrolloPPD que viene del indice 20
       mapearIconoEstado('statusS4ValFinal', usuarioSeleccionado.s4ValoracionFinal);
       
       if (usuarioSeleccionado.s4FechaValoracionInicial) { document.getElementById('valFechaS4ValInicial').textContent = formatearFechaVisual(usuarioSeleccionado.s4FechaValoracionInicial); document.getElementById('boxFechaS4ValInicial').classList.remove('hidden'); }
@@ -325,8 +327,9 @@
       fetch(API_URL + "?accion=listarFiles&urlCarpeta=" + encodeURIComponent(usuarioSeleccionado.carpetaDrive))
         .then(res => res.json())
         .then(res => {
-          loader.classList.add('hidden');
+          loader.classList.remove('hidden');
           if (res && res.resultado === "OK") {
+            loader.classList.add('hidden');
             if (!res.archivos || res.archivos.length === 0) {
               cuerpo.innerHTML = '<tr><td colspan="2" style="text-align:center; color:var(--text-light); font-style:italic; padding: 2rem 0;">La carpeta está vacía.</td></tr>';
               actualizarBarraMetrica(0); return;
