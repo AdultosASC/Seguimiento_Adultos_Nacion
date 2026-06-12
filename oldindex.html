@@ -8,53 +8,41 @@
     :root {
       --primary: #6366f1; --primary-hover: #4f46e5; --purple-dark: #4c1d95; --purple-light: #8b5cf6;
       --bg: #f8fafc; --card-bg: #ffffff; --text: #1e293b; --text-light: #64748b; --border: #e2e8f0;
-      --success: #10b981; --danger: #ef4444;
-      --green-bg: #f0fdf4; --green-border: #bbf7d0; --green-text: #166534;
+      --success: #10b981; --danger: #ef4444; --green-bg: #f0fdf4; --green-border: #bbf7d0; --green-text: #166534;
     }
-    body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 2rem 1rem; display: flex; justify-content: center; align-items: center; min-height: 100vh; box-sizing: border-box; }
-    .container { background-color: var(--card-bg); padding: 2.5rem; border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05); width: 100%; max-width: 450px; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 2rem 1rem; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+    .container { background-color: var(--card-bg); padding: 2.5rem; border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05); width: 100%; max-width: 450px; }
     .container.wide { max-width: 850px; }
     .header-institucional { color: var(--purple-dark); font-size: 1.25rem; font-weight: 700; text-align: center; margin-bottom: 1.5rem; border-bottom: 2px dashed var(--border); padding-bottom: 1rem; }
     h1 { font-size: 1.4rem; font-weight: 700; margin: 0 0 1.5rem 0; text-align: center; }
     .form-group { margin-bottom: 1.5rem; }
     .label-filtro { display: block; font-size: 0.9rem; font-weight: 700; color: var(--purple-dark); margin-bottom: 0.6rem; }
-    select, input[type="file"] { width: 100%; padding: 0.75rem 1rem; font-size: 1rem; background-color: var(--bg); border: 1px solid var(--border); border-radius: 8px; color: var(--text); outline: none; box-sizing: border-box; }
+    select, input[type="file"] { width: 100%; padding: 0.75rem 1rem; font-size: 1rem; background-color: var(--bg); border: 1px solid var(--border); border-radius: 8px; color: var(--text); }
     button { width: 100%; padding: 0.75rem 1rem; font-size: 1rem; font-weight: 600; color: white; background-color: var(--primary); border: none; border-radius: 8px; cursor: pointer; margin-top: 1rem; }
     button:hover { background-color: var(--primary-hover); }
     button:disabled { background-color: var(--border); cursor: not-allowed; }
     .hidden { display: none !important; }
     .titulo-principal-a { color: var(--purple-dark); font-weight: bold; font-size: 1.8rem; margin-bottom: 1.5rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; }
     .seccion-reporte { background-color: var(--bg); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; }
-    .seccion-reporte h2 { font-size: 1.2rem; color: var(--primary); margin-top: 0; margin-bottom: 1rem; font-weight: 700; }
+    .seccion-reporte h2 { font-size: 1.2rem; color: var(--primary); margin-bottom: 1rem; font-weight: 700; }
     .grid-dos-columnas { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.25rem; }
     .dato-bloque { display: flex; flex-direction: column; }
-    .dato-mixto-linea { grid-column: 1 / -1; display: flex; align-items: center; justify-content: space-between; background: var(--card-bg); padding: 0.75rem 1rem; border-radius: 8px; border: 1px solid var(--border); gap: 1.5rem; }
-    .mixto-izq { display: flex; align-items: center; gap: 0.85rem; }
-    .dato-inline-bloque { grid-column: 1 / -1; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; }
-    .verificacion-titulo { font-size: 0.95rem; font-weight: 600; color: var(--text); }
-    .status-badge { font-size: 1.2rem; font-weight: bold; }
-    .dato-label { font-size: 0.8rem; font-weight: 600; color: var(--text-light); text-transform: uppercase; margin-bottom: 0.2rem; }
-    .dato-valor { font-size: 1rem; font-weight: 500; color: var(--text); }
-    .tabla-archivos { width: 100%; border-collapse: collapse; margin-top: 0.5rem; background: white; border-radius: 8px; overflow: hidden; border: 1px solid var(--border); }
-    .tabla-archivos th, .tabla-archivos td { padding: 0.75rem 1rem; text-align: left; font-size: 0.9rem; border-bottom: 1px solid var(--border); }
-    .tabla-archivos th { background-color: #f1f5f9; font-weight: 700; color: var(--purple-dark); }
-    .acciones-btn-group { display: flex; gap: 0.5rem; justify-content: center; }
-    .btn-mini { padding: 0.4rem 0.8rem; font-size: 0.8rem; font-weight: bold; border-radius: 4px; width: auto; margin: 0; display: inline-block; }
-    .btn-ver { background-color: var(--primary); }
-    .btn-del { background-color: var(--danger); }
-    .box-carga { background: #f8fafc; border: 1px solid var(--border); padding: 1.25rem; border-radius: 12px; margin-bottom: 1.5rem; }
-    .btn-back { background-color: transparent; color: var(--text-light); border: 1px solid var(--border); margin-top: 1rem; width: auto; padding: 0.5rem 1rem; }
-    .contenedor-progreso { display: flex; align-items: center; gap: 1rem; background: #e2e8f0; border-radius: 9999px; height: 1.25rem; overflow: hidden; position: relative; margin-top: 0.4rem; }
-    .barra-interna { background: linear-gradient(90deg, var(--purple-light), var(--primary)); height: 100%; width: 0%; transition: width 0.5s ease-in-out; }
+    .dato-mixto-linea { grid-column: 1 / -1; display: flex; align-items: center; justify-content: space-between; background: white; padding: 0.75rem 1rem; border-radius: 8px; border: 1px solid var(--border); }
+    .dato-inline-bloque { grid-column: 1 / -1; margin-bottom: 0.5rem; }
+    .verificacion-titulo { font-size: 0.95rem; font-weight: 600; }
+    .status-badge { font-size: 1.2rem; font-weight: bold; margin-right: 10px; }
+    .dato-label { font-size: 0.8rem; font-weight: 600; color: var(--text-light); text-transform: uppercase; }
+    .dato-valor { font-size: 1rem; font-weight: 500; }
+    .btn-back { background-color: transparent; color: var(--text-light); border: 1px solid var(--border); width: auto; padding: 0.5rem 1rem; }
   </style>
 </head>
 <body>
   <div id="paginaFiltros" class="container">
     <div class="header-institucional">Dirección Nacional de <br>Adultos en el Movimiento</div>
-    <h1>Consulta/Registro de Información</h1>
+    <h1>Consulta de Información</h1>
     <div class="form-group">
       <label for="selectA" class="label-filtro">Seleccione Área Estratégica</label>
-      <select id="selectA" onchange="cambioArea()"><option value="">Conectando con la base de datos...</option></select>
+      <select id="selectA" onchange="cambioArea()"><option value="">Cargando...</option></select>
     </div>
     <div id="grupoC" class="form-group hidden">
       <label for="selectC" class="label-filtro">Seleccione Nombre</label>
@@ -65,9 +53,79 @@
 
   <div id="paginaReporte" class="container wide hidden">
     <div id="tituloColumnaA" class="titulo-principal-a"></div>
-    <div id="loaderReporte" class="loader">Procesando información...</div>
-    <div id="contenidoReporte" class="hidden">
+    <div id="contenidoReporte">
       <div class="seccion-reporte">
         <h2>Información General</h2>
         <div class="grid-dos-columnas">
-          <div class="dato-bloque"><span class="
+          <div class="dato-bloque"><span class="dato-label">Nombre</span><span id="valNombre" class="dato-valor"></span></div>
+          <div class="dato-bloque"><span class="dato-label">Cargo</span><span id="valCargo" class="dato-valor"></span></div>
+          <div class="dato-bloque" style="grid-column: 1 / -1;"><span class="dato-label">Tiempo restante en el cargo</span><span id="valTiempoRestante" class="dato-valor" style="font-weight:700;"></span></div>
+        </div>
+      </div>
+      <div class="seccion-reporte">
+        <div class="dato-inline-bloque"><span class="dato-label">Asesor Personal:</span><span id="valAsesorPersonal" class="dato-valor"></span></div>
+      </div>
+      <div class="seccion-reporte">
+        <h2>Desarrollo Personal Perfeccionamiento Continuo</h2>
+        <div class="grid-dos-columnas">
+          <div class="dato-mixto-linea"><div class="mixto-izq"><span id="statusS4ValInicial" class="status-badge"></span><span class="verificacion-titulo">Valoración Inicial</span></div></div>
+          <div class="dato-mixto-linea"><div class="mixto-izq"><span id="statusS4PPD" class="status-badge"></span><span class="verificacion-titulo">En desarrollo de su PPD (PCPPD)</span></div></div>
+          <div class="dato-mixto-linea"><div class="mixto-izq"><span id="statusS4ValFinal" class="status-badge"></span><span class="verificacion-titulo">Valoración Final</span></div></div>
+          <div id="boxAAA" class="dato-bloque hidden" style="grid-column: 1 / -1;"><span class="dato-label">AAA</span><span id="valAAA" class="dato-valor"></span></div>
+        </div>
+      </div>
+    </div>
+    <button class="btn-back" onclick="location.reload()">Volver a consultar</button>
+  </div>
+
+  <script>
+    const API_URL = "https://script.google.com/macros/s/AKfycbxg6vaqC8w8IsCjHHy9UX9TTyf2nJKhlA1J37nvQEJb6ERK4nSQM5pAO7o8bqBYUj-0SQ/exec"; 
+    let baseDatos = [];
+    
+    fetch(API_URL).then(r => r.json()).then(data => {
+      baseDatos = data;
+      let areas = [...new Set(data.map(i => i.columnaA))].sort();
+      let selectA = document.getElementById('selectA');
+      selectA.innerHTML = '<option value="">-- Seleccione un Área --</option>' + areas.map(a => `<option value="${a}">${a}</option>`).join('');
+    });
+
+    function cambioArea() {
+      let valorA = document.getElementById('selectA').value;
+      let selectC = document.getElementById('selectC');
+      let nombres = baseDatos.filter(i => i.columnaA === valorA).map(i => i.nombre).sort();
+      selectC.innerHTML = '<option value="">-- Seleccione un nombre --</option>' + nombres.map(n => `<option value="${n}">${n}</option>`).join('');
+      document.getElementById('grupoC').classList.remove('hidden');
+    }
+
+    function activarBotonConsultar() { document.getElementById('btnConsultar').disabled = !document.getElementById('selectC').value; }
+
+    function mapearIconoEstado(id, valor) {
+      let el = document.getElementById(id);
+      let esVerdadero = (valor == "true" || valor == "1" || valor == "VERDADERO" || valor === true);
+      el.textContent = esVerdadero ? "✔️" : "❌";
+      el.style.color = esVerdadero ? "var(--success)" : "var(--danger)";
+    }
+
+    function irAPaginaReporte() {
+      let usuario = baseDatos.find(i => i.nombre === document.getElementById('selectC').value);
+      document.getElementById('paginaFiltros').classList.add('hidden');
+      document.getElementById('paginaReporte').classList.remove('hidden');
+      
+      document.getElementById('tituloColumnaA').textContent = usuario.columnaA;
+      document.getElementById('valNombre').textContent = usuario.nombre;
+      document.getElementById('valCargo').textContent = usuario.cargo;
+      document.getElementById('valAsesorPersonal').textContent = usuario.asesorPersonal;
+      document.getElementById('valTiempoRestante').textContent = usuario.fechaFinalizacion; // Ajustar según lógica de fecha
+      
+      mapearIconoEstado('statusS4ValInicial', usuario.s4ValoracionInicial);
+      mapearIconoEstado('statusS4PPD', usuario.PCPPD); // Sincronizado con codigo.gs
+      mapearIconoEstado('statusS4ValFinal', usuario.s4ValoracionFinal);
+      
+      if(usuario.AAA) { 
+        document.getElementById('valAAA').textContent = usuario.AAA;
+        document.getElementById('boxAAA').classList.remove('hidden');
+      }
+    }
+  </script>
+</body>
+</html>
