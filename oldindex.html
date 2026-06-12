@@ -203,10 +203,13 @@
       mapearIconoEstado('statusValFinal', usuarioSeleccionado.valoracionFinal);
       if (usuarioSeleccionado.GN) { document.getElementById('valGN').textContent = usuarioSeleccionado.GN; document.getElementById('boxGN').classList.remove('hidden'); } else { document.getElementById('boxGN').classList.add('hidden'); }
       if (usuarioSeleccionado.gestorNacionalFecha) { document.getElementById('valGestorFecha').textContent = formatearFechaVisual(usuarioSeleccionado.gestorNacionalFecha); document.getElementById('boxGestor').classList.remove('hidden'); } else { document.getElementById('boxGestor').classList.add('hidden'); }
+      
       mapearIconoEstado('statusS4ValInicial', usuarioSeleccionado.s4ValoracionInicial);
       mapearIconoEstado('statusS4PPD', usuarioSeleccionado.s4DesarrolloPPD);
       mapearIconoEstado('statusS4ValFinal', usuarioSeleccionado.s4ValoracionFinal);
+      
       if (usuarioSeleccionado.AAA && usuarioSeleccionado.AAA.toString().trim() !== "") { document.getElementById('valAAA').textContent = usuarioSeleccionado.AAA; document.getElementById('boxAAA').classList.remove('hidden'); } else { document.getElementById('boxAAA').classList.add('hidden'); }
+      
       document.getElementById('loaderReporte').classList.add('hidden');
       document.getElementById('contenidoReporte').classList.remove('hidden');
       solicitarListaArchivosDrive();
@@ -215,7 +218,10 @@
       const cuerpo = document.getElementById('cuerpoTablaArchivos');
       const loader = document.getElementById('loaderArchivos');
       cuerpo.innerHTML = ""; loader.classList.remove('hidden');
-      if (!usuarioSeleccionado || !usuarioSeleccionado.carpetaDrive) { cuerpo.innerHTML = '<tr><td colspan="2" style="color:var(--danger); text-align:center;">No hay carpeta de Drive vinculada.</td></tr>'; loader.classList.add('hidden'); actualizarBarraMetrica(0); return; }
+      if (!usuarioSeleccionado || !usuarioSeleccionado.carpetaDrive) { 
+        cuerpo.innerHTML = '<tr><td colspan="2" style="color:var(--danger); text-align:center;">No hay carpeta de Drive vinculada.</td></tr>'; 
+        loader.classList.add('hidden'); actualizarBarraMetrica(0); return; 
+      }
       fetch(API_URL + "?accion=listarFiles&urlCarpeta=" + encodeURIComponent(usuarioSeleccionado.carpetaDrive))
         .then(res => res.json())
         .then(res => {
@@ -228,7 +234,12 @@
               cuerpo.appendChild(fila);
             });
             actualizarBarraMetrica(res.archivos.length);
-          }
+          } else { throw new Error(res.mensaje || "Error desconocido"); }
+        })
+        .catch(err => { 
+          console.error("Error al listar:", err); 
+          loader.classList.add('hidden'); 
+          cuerpo.innerHTML = '<tr><td colspan="2" style="text-align:center; color:var(--danger);">Error cargando archivos. Intenta de nuevo.</td></tr>'; 
         });
     }
     function actualizarBarraMetrica(cantidadArchivos) {
