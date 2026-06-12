@@ -18,10 +18,8 @@
     h1 { font-size: 1.4rem; font-weight: 700; margin: 0 0 1.5rem 0; text-align: center; }
     .form-group { margin-bottom: 1.5rem; }
     .label-filtro { display: block; font-size: 0.9rem; font-weight: 700; color: var(--purple-dark); margin-bottom: 0.6rem; }
-    select, input[type="file"] { width: 100%; padding: 0.75rem 1rem; font-size: 1rem; background-color: var(--bg); border: 1px solid var(--border); border-radius: 8px; color: var(--text); outline: none; box-sizing: border-box; }
+    select, input[type="file"] { width: 100%; padding: 0.75rem 1rem; font-size: 1rem; background-color: var(--bg); border: 1px solid var(--border); border-radius: 8px; }
     button { width: 100%; padding: 0.75rem 1rem; font-size: 1rem; font-weight: 600; color: white; background-color: var(--primary); border: none; border-radius: 8px; cursor: pointer; margin-top: 1rem; }
-    button:hover { background-color: var(--primary-hover); }
-    button:disabled { background-color: var(--border); cursor: not-allowed; }
     .hidden { display: none !important; }
     .titulo-principal-a { color: var(--purple-dark); font-weight: bold; font-size: 1.8rem; margin-bottom: 1.5rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; }
     .seccion-reporte { background-color: var(--bg); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; }
@@ -30,22 +28,11 @@
     .dato-bloque { display: flex; flex-direction: column; }
     .dato-mixto-linea { grid-column: 1 / -1; display: flex; align-items: center; justify-content: space-between; background: var(--card-bg); padding: 0.75rem 1rem; border-radius: 8px; border: 1px solid var(--border); gap: 1.5rem; }
     .mixto-izq { display: flex; align-items: center; gap: 0.85rem; }
-    .dato-inline-bloque { grid-column: 1 / -1; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; }
-    .verificacion-titulo { font-size: 0.95rem; font-weight: 600; color: var(--text); }
     .status-badge { font-size: 1.2rem; font-weight: bold; }
-    .dato-label { font-size: 0.8rem; font-weight: 600; color: var(--text-light); text-transform: uppercase; margin-bottom: 0.2rem; }
+    .dato-label { font-size: 0.8rem; font-weight: 600; color: var(--text-light); text-transform: uppercase; }
     .dato-valor { font-size: 1rem; font-weight: 500; color: var(--text); }
-    .tabla-archivos { width: 100%; border-collapse: collapse; margin-top: 0.5rem; background: white; border-radius: 8px; overflow: hidden; border: 1px solid var(--border); }
-    .tabla-archivos th, .tabla-archivos td { padding: 0.75rem 1rem; text-align: left; font-size: 0.9rem; border-bottom: 1px solid var(--border); }
-    .tabla-archivos th { background-color: #f1f5f9; font-weight: 700; color: var(--purple-dark); }
-    .acciones-btn-group { display: flex; gap: 0.5rem; justify-content: center; }
-    .btn-mini { padding: 0.4rem 0.8rem; font-size: 0.8rem; font-weight: bold; border-radius: 4px; width: auto; margin: 0; display: inline-block; }
-    .btn-ver { background-color: var(--primary); }
-    .btn-del { background-color: var(--danger); }
-    .box-carga { background: #f8fafc; border: 1px solid var(--border); padding: 1.25rem; border-radius: 12px; margin-bottom: 1.5rem; }
-    .btn-back { background-color: transparent; color: var(--text-light); border: 1px solid var(--border); margin-top: 1rem; width: auto; padding: 0.5rem 1rem; }
-    .contenedor-progreso { display: flex; align-items: center; gap: 1rem; background: #e2e8f0; border-radius: 9999px; height: 1.25rem; overflow: hidden; position: relative; margin-top: 0.4rem; }
-    .barra-interna { background: linear-gradient(90deg, var(--purple-light), var(--primary)); height: 100%; width: 0%; transition: width 0.5s ease-in-out; }
+    .tabla-archivos { width: 100%; border-collapse: collapse; margin-top: 0.5rem; background: white; }
+    .tabla-archivos th, .tabla-archivos td { padding: 0.75rem; border: 1px solid var(--border); text-align: center; }
   </style>
 </head>
 <body>
@@ -65,210 +52,86 @@
 
   <div id="paginaReporte" class="container wide hidden">
     <div id="tituloColumnaA" class="titulo-principal-a"></div>
-    <div id="loaderReporte" class="loader">Procesando información...</div>
     <div id="contenidoReporte" class="hidden">
       <div class="seccion-reporte">
-        <h2>Información General</h2>
+        <h2>Desarrollo Personal Formación Básica</h2>
         <div class="grid-dos-columnas">
-          <div class="dato-bloque"><span class="dato-label">Nombre</span><span id="valNombre" class="dato-valor"></span></div>
-          <div class="dato-bloque"><span class="dato-label">Cargo</span><span id="valCargo" class="dato-valor"></span></div>
-          <div class="dato-bloque"><span class="dato-label">Nombramiento</span><span id="valNombramiento" class="dato-valor"></span></div>
-          <div class="dato-bloque"><span class="dato-label">Metodología</span><span id="valMetodología" class="dato-valor"></span></div>
-          <div class="dato-bloque"><span class="dato-label">Fecha de Nombramiento</span><span id="valFechaNom" class="dato-valor"></span></div>
-          <div class="dato-bloque"><span class="dato-label">Duración</span><span id="valDuracion" class="dato-valor"></span></div>
-          <div class="dato-bloque" style="grid-column: 1 / -1;"><span class="dato-label">Fecha Finalización</span><span id="valFechaFin" class="dato-valor"></span></div>
-          <div class="dato-bloque" style="grid-column: 1 / -1; background: #f3e8ff; padding: 1rem; border-radius: 8px; border-left: 4px solid var(--purple-light); margin-bottom: 0.25rem;">
-            <span class="dato-label" style="color: var(--purple-dark);">Tiempo restante en el cargo</span>
-            <span id="valTiempoRestante" class="dato-valor" style="font-weight: 700; color: #5b21b6; font-size: 1.1rem; display:block;"></span>
-          </div>
+            <div class="dato-mixto-linea"><div class="mixto-izq"><span id="statusValInicial" class="status-badge"></span><span class="verificacion-titulo">Valoración Inicial</span></div></div>
+            <div class="dato-mixto-linea"><div class="mixto-izq"><span id="statusPPD" class="status-badge"></span><span class="verificacion-titulo">En desarrollo de su PPD</span></div></div>
+            <div class="dato-mixto-linea"><div class="mixto-izq"><span id="statusValFinal" class="status-badge"></span><span class="verificacion-titulo">Valoración Final</span></div></div>
+            <div id="boxGN" class="dato-bloque hidden" style="grid-column: 1 / -1; background: var(--green-bg); padding: 0.75rem; border-radius: 8px; border: 1px solid var(--green-border); margin-top: 0.5rem;">
+                <span class="dato-label" style="color: var(--green-text);">GN</span>
+                <span id="valGN" class="dato-valor" style="font-weight: 600; color: var(--green-text);"></span>
+            </div>
+            <div id="boxGestor" class="dato-bloque hidden" style="grid-column: 1 / -1; background: var(--green-bg); padding: 0.75rem; border-radius: 8px; border: 1px solid var(--green-border); margin-top: 0.5rem;">
+                <span class="dato-label" style="color: var(--green-text);">Gestor Nacional (Fecha)</span>
+                <span id="valGestorFecha" class="dato-valor" style="font-weight: 600; color: var(--green-text);"></span>
+            </div>
         </div>
       </div>
-      
-      <div class="seccion-reporte">
-      <div class="dato-inline-bloque"><span class="dato-label" style="color: var(--purple-dark); margin-bottom: 0;">Asesor Personal:</span><span id="valAsesorPersonal" class="dato-valor" style="font-size: 1.1rem; font-weight: 600;"></span></div>
-      </div>
-      
-      <div class="seccion-reporte">
-        <h2 style="margin-top: 1rem;">Desarrollo Personal Formación Básica</h2>
-        <div class="grid-dos-columnas">
-          <div class="dato-mixto-linea"><div class="mixto-izq"><span id="statusValInicial" class="status-badge"></span><span class="verificacion-titulo">Valoración Inicial</span></div></div>
-          <div class="dato-mixto-linea"><div class="mixto-izq"><span id="statusPPD" class="status-badge"></span><span class="verificacion-titulo">En desarrollo de su PPD</span></div></div>
-          <div class="dato-mixto-linea"><div class="mixto-izq"><span id="statusValFinal" class="status-badge"></span><span class="verificacion-titulo">Valoración Final</span></div></div>
-          <div id="boxGN" class="dato-bloque hidden" style="grid-column: 1 / -1; background: var(--green-bg); padding: 0.75rem; border-radius: 8px; border: 1px solid var(--green-border); margin-top: 0.5rem;"><span class="dato-label" style="color: var(--green-text);">GN</span><span id="valGN" class="dato-valor" style="font-weight: 600; color: var(--green-text);"></span></div>
-          <div id="boxGestor" class="dato-bloque hidden" style="grid-column: 1 / -1; background: var(--green-bg); padding: 0.75rem; border-radius: 8px; border: 1px solid var(--green-border); margin-top: 0.5rem;"><span class="dato-label" style="color: var(--green-text);">Gestor Nacional</span><span id="valGestorFecha" class="dato-valor" style="font-weight: 600; color: var(--green-text);"></span></div>
-        </div>
-      </div>
-
       <div class="seccion-reporte">
         <h2>Desarrollo Personal Perfeccionamiento Continuo</h2>
         <div class="grid-dos-columnas">
-          <div class="dato-mixto-linea"><div class="mixto-izq"><span id="statusS4ValInicial" class="status-badge"></span><span class="verificacion-titulo">Valoración Inicial</span></div></div>
-          <div class="dato-mixto-linea"><div class="mixto-izq"><span id="statusS4PPD" class="status-badge"></span><span class="verificacion-titulo">En desarrollo de su PPD</span></div></div>
-          <div class="dato-mixto-linea"><div class="mixto-izq"><span id="statusS4ValFinal" class="status-badge"></span><span class="verificacion-titulo">Valoración Final</span></div></div>
-          <div id="boxAAA" class="dato-bloque hidden" style="grid-column: 1 / -1; background: var(--green-bg); padding: 0.75rem; border-radius: 8px; border: 1px solid var(--green-border); margin-top: 0.5rem;"><span class="dato-label" style="color: var(--green-text);">AAA</span><span id="valAAA" class="dato-valor" style="font-weight: 600; color: var(--green-text);"></span></div>
-          <div id="boxAAAFecha" class="dato-bloque hidden" style="grid-column: 1 / -1; background: var(--green-bg); padding: 0.75rem; border-radius: 8px; border: 1px solid var(--green-border); margin-top: 0.5rem;"><span class="dato-label" style="color: var(--green-text);">Fecha AAA</span><span id="valAAAFecha" class="dato-valor" style="font-weight: 600; color: var(--green-text);"></span></div>
+            <div class="dato-mixto-linea"><div class="mixto-izq"><span id="statusS4ValInicial" class="status-badge"></span><span class="verificacion-titulo">Valoración Inicial</span></div></div>
+            <div class="dato-mixto-linea"><div class="mixto-izq"><span id="statusS4PPD" class="status-badge"></span><span class="verificacion-titulo">En desarrollo de su PPD</span></div></div>
+            <div class="dato-mixto-linea"><div class="mixto-izq"><span id="statusS4ValFinal" class="status-badge"></span><span class="verificacion-titulo">Valoración Final</span></div></div>
+            <div id="boxAAA" class="dato-bloque hidden" style="grid-column: 1 / -1; background: var(--green-bg); padding: 0.75rem; border-radius: 8px; border: 1px solid var(--green-border); margin-top: 0.5rem;"><span class="dato-label" style="color: var(--green-text);">AAA</span><span id="valAAA" class="dato-valor" style="font-weight: 600; color: var(--green-text);"></span></div>
         </div>
-      </div>
-
-      <div class="seccion-reporte" style="background: #fafafa; padding: 1rem; margin-bottom: 1.5rem; border: 1px solid var(--border);">
-        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem; font-weight: bold; color: var(--purple-dark);"><span>Progreso de archivos</span><span id="textoMetrica">0 de 6 archivos (0%)</span></div>
-        <div class="contenedor-progreso"><div class="barra-interna" id="barraMetrica"></div></div>
-      </div>
-
-      <div class="seccion-reporte">
-        <h2>📁 Expediente Documental</h2>
-        <div id="loaderArchivos" class="loader hidden">Consultando carpeta...</div>
-        <table class="tabla-archivos" id="tablaFiles"><thead><tr><th>Nombre del Archivo en Drive</th><th style="width: 180px; text-align: center;">Acciones</th></tr></thead><tbody id="cuerpoTablaArchivos"></tbody></table>
-      </div>
-
-      <div class="seccion-reporte box-carga">
-        <h2>📤 Cargar Nuevo Archivo Documental</h2>
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; align-items: end;">
-          <div><label class="label-filtro">Tipo Documento:</label><select id="tipoDocCarga"><option value="Resolucion nombramiento">Resolución nombramiento</option><option value="Acuerdo Mutuo">Acuerdo Mutuo</option><option value="Curso SfH1">Curso SfH1</option><option value="Curso SfH2">Curso SfH2</option><option value="Modulo induccion">Módulo inducción</option><option value="Aval AP">Aval AP</option></select></div>
-          <div><label class="label-filtro">Seleccionar archivo:</label><input type="file" id="inputArchivo"></div>
-          <div><button style="margin:0;" id="btnSubirArchivo" onclick="procesarSubidaArchivo()">Subir Documento</button></div>
-        </div>
-        <div id="statusEnvio" style="margin-top: 0.75rem; font-size: 0.9rem; font-weight: bold;"></div>
       </div>
     </div>
-    <button class="btn-back" onclick="volverYRefrescarConsulta()">Volver a consultar</button>
+    <button class="btn-back" onclick="location.reload()">Volver a consultar</button>
   </div>
 
   <script>
     const API_URL = "https://script.google.com/macros/s/AKfycbxg6vaqC8w8IsCjHHy9UX9TTyf2nJKhlA1J37nvQEJb6ERK4nSQM5pAO7o8bqBYUj-0SQ/exec"; 
     let baseDatosCompleta = [];
     let usuarioSeleccionado = null;
-    window.onload = function() { cargarDatosDesdeAPI(); };
+
+    window.onload = cargarDatosDesdeAPI;
+
     function cargarDatosDesdeAPI() {
-      var select = document.getElementById('selectA');
-      select.innerHTML = '<option value="">Conectando con la base de datos...</option>';
-      fetch(API_URL).then(r => r.json()).then(data => { baseDatosCompleta = data; inicializarDesplegableA(); }).catch(err => { select.innerHTML = '<option value="">Error de conexión.</option>'; });
+      fetch(API_URL).then(r => r.json()).then(data => { baseDatosCompleta = data; inicializarDesplegableA(); });
     }
-    function inicializarDesplegableA() {
-      var select = document.getElementById('selectA');
-      let areas = [...new Set(baseDatosCompleta.map(item => item.columnaA))].filter(Boolean).sort();
-      select.innerHTML = '<option value="">-- Seleccione un Área --</option>';
-      areas.forEach(area => { var el = document.createElement('option'); el.value = area; el.textContent = area; select.appendChild(el); });
-    }
-    function cambioArea() {
-      var valorA = document.getElementById('selectA').value;
-      var grupoC = document.getElementById('grupoC');
-      var selectC = document.getElementById('selectC');
-      if (!valorA) { grupoC.classList.add('hidden'); document.getElementById('btnConsultar').disabled = true; return; }
-      let nombresFiltrados = baseDatosCompleta.filter(item => item.columnaA === valorA).map(item => item.nombre).filter(Boolean).sort();
-      selectC.innerHTML = '<option value="">-- Seleccione un nombre --</option>';
-      nombresFiltrados.forEach(nom => { var el = document.createElement('option'); el.value = nom; el.textContent = nom; selectC.appendChild(el); });
-      grupoC.classList.remove('hidden');
-    }
-    function activarBotonConsultar() { document.getElementById('btnConsultar').disabled = (document.getElementById('selectC').value === ""); }
-    function extraerEstructuraFecha(strFecha) {
-      if(!strFecha || strFecha === "N/A" || strFecha.toString().trim() === "") return null;
-      let texto = strFecha.toString().trim();
-      let intentoDirecto = new Date(texto);
-      return !isNaN(intentoDirecto.getTime()) ? intentoDirecto : null;
-    }
-    function formatearFechaVisual(strFecha) {
-      let objetoFecha = extraerEstructuraFecha(strFecha);
-      if (!objetoFecha) return strFecha || "N/A";
-      return String(objetoFecha.getDate()).padStart(2, '0') + "/" + String(objetoFecha.getMonth() + 1).padStart(2, '0') + "/" + objetoFecha.getFullYear();
-    }
-    function mapearIconoEstado(idElemento, valor) {
-      var el = document.getElementById(idElemento);
-      var esVerdadero = (valor === true || valor === "true" || valor === "VERDADERO" || valor === 1 || valor === "1" || valor === "TRUE");
-      if (el) {
-        el.textContent = esVerdadero ? "✔️" : "❌";
-        el.style.color = esVerdadero ? "var(--success)" : "var(--danger)";
-      }
-    }
+
     function irAPaginaReporte() {
-      var valorA = document.getElementById('selectA').value;
-      var valorC = document.getElementById('selectC').value;
-      usuarioSeleccionado = baseDatosCompleta.find(item => item.columnaA === valorA && item.nombre === valorC);
-      if(!usuarioSeleccionado) return;
+      usuarioSeleccionado = baseDatosCompleta.find(i => i.nombre === document.getElementById('selectC').value);
       document.getElementById('paginaFiltros').classList.add('hidden');
       document.getElementById('paginaReporte').classList.remove('hidden');
-      document.getElementById('tituloColumnaA').textContent = usuarioSeleccionado.columnaA;
-      document.getElementById('valNombre').textContent = usuarioSeleccionado.nombre;
-      document.getElementById('valCargo').textContent = usuarioSeleccionado.cargo;
-      document.getElementById('valNombramiento').textContent = usuarioSeleccionado.nombramiento;
-      document.getElementById('valMetodología').textContent = usuarioSeleccionado.metodologia;
-      document.getElementById('valFechaNom').textContent = formatearFechaVisual(usuarioSeleccionado.fechaNombramiento);
-      document.getElementById('valFechaFin').textContent = formatearFechaVisual(usuarioSeleccionado.fechaFinalizacion);
-      if (usuarioSeleccionado.duracionMeses && !isNaN(usuarioSeleccionado.duracionMeses)) {
-        var tAnios = Math.floor(usuarioSeleccionado.duracionMeses / 12); var tMeses = usuarioSeleccionado.duracionMeses % 12;
-        document.getElementById('valDuracion').textContent = (tAnios > 0 ? tAnios + (tAnios === 1 ? " año " : " años ") : "") + (tMeses > 0 ? tMeses + (tMeses === 1 ? " mes" : " meses") : "") || usuarioSeleccionado.duracionMeses + " meses";
-      } else { document.getElementById('valDuracion').textContent = "N/A"; }
-      let fechaFinObj = extraerEstructuraFecha(usuarioSeleccionado.fechaFinalizacion);
-      if (fechaFinObj) {
-        var fechaHoy = new Date(); fechaHoy.setHours(0,0,0,0);
-        if (fechaFinObj >= fechaHoy) {
-          var diffAnios = fechaFinObj.getFullYear() - fechaHoy.getFullYear(); var diffMeses = fechaFinObj.getMonth() - fechaHoy.getMonth(); var diffDias = fechaFinObj.getDate() - fechaHoy.getDate();
-          if (diffDias < 0) { diffMeses--; var diasMesAnterior = new Date(fechaFinObj.getFullYear(), fechaFinObj.getMonth(), 0).getDate(); diffDias += diasMesAnterior; }
-          if (diffMeses < 0) { diffAnios--; diffMeses += 12; }
-          document.getElementById('valTiempoRestante').textContent = (diffAnios > 0 ? diffAnios + (diffAnios === 1 ? " año, " : " años, ") : "") + (diffMeses > 0 ? diffMeses + (diffMeses === 1 ? " mes " : " meses ") : "") + (diffDias > 0 ? (diffDias + (diffDias === 1 ? " día" : " días")) : "") || "Finaliza hoy";
-        } else { document.getElementById('valTiempoRestante').textContent = "Período vencido / Cargo finalizado"; }
-      } else { document.getElementById('valTiempoRestante').textContent = "Sin fecha de finalización registrada"; }
-      
-      document.getElementById('valAsesorPersonal').textContent = usuarioSeleccionado.asesorPersonal;
-      mapearIconoEstado('statusColU', usuarioSeleccionado.columnaU);
-      
-      mapearIconoEstado('statusPPD', usuarioSeleccionado.desarrolloPPD);
+
+      // Mapeo estados
       mapearIconoEstado('statusValInicial', usuarioSeleccionado.valoracionInicial);
+      mapearIconoEstado('statusPPD', usuarioSeleccionado.desarrolloPPD);
       mapearIconoEstado('statusValFinal', usuarioSeleccionado.valoracionFinal);
-      if (usuarioSeleccionado.GN) { document.getElementById('valGN').textContent = usuarioSeleccionado.GN; document.getElementById('boxGN').classList.remove('hidden'); } else { document.getElementById('boxGN').classList.add('hidden'); }
-      if (usuarioSeleccionado.gestorNacionalFecha) { document.getElementById('valGestorFecha').textContent = formatearFechaVisual(usuarioSeleccionado.gestorNacionalFecha); document.getElementById('boxGestor').classList.remove('hidden'); } else { document.getElementById('boxGestor').classList.add('hidden'); }
-      
       mapearIconoEstado('statusS4ValInicial', usuarioSeleccionado.s4ValoracionInicial);
-      mapearIconoEstado('statusS4PPD', usuarioSeleccionado.s4DesarrolloPPD);
+      mapearIconoEstado('statusS4PPD', usuarioSeleccionado.PCPPD); // Columna U
       mapearIconoEstado('statusS4ValFinal', usuarioSeleccionado.s4ValoracionFinal);
+
+      // Visualización GN
+      if (usuarioSeleccionado.GN && usuarioSeleccionado.GN.toString().trim() !== "") {
+          document.getElementById('valGN').textContent = usuarioSeleccionado.GN;
+          document.getElementById('boxGN').classList.remove('hidden');
+      } else { document.getElementById('boxGN').classList.add('hidden'); }
       
-      if (usuarioSeleccionado.AAA && usuarioSeleccionado.AAA.toString().trim() !== "") { document.getElementById('valAAA').textContent = usuarioSeleccionado.AAA; document.getElementById('boxAAA').classList.remove('hidden'); } else { document.getElementById('boxAAA').classList.add('hidden'); }
-      if (usuarioSeleccionado.aaaFecha && usuarioSeleccionado.aaaFecha.toString().trim() !== "" && usuarioSeleccionado.aaaFecha !== "N/A") { document.getElementById('valAAAFecha').textContent = formatearFechaVisual(usuarioSeleccionado.aaaFecha); document.getElementById('boxAAAFecha').classList.remove('hidden'); } else { document.getElementById('boxAAAFecha').classList.add('hidden'); }
-      
-      document.getElementById('loaderReporte').classList.add('hidden');
-      document.getElementById('contenidoReporte').classList.remove('hidden');
-      solicitarListaArchivosDrive();
+      // Visualización Fecha GN
+      if (usuarioSeleccionado.fechaGN && usuarioSeleccionado.fechaGN !== "N/A") {
+          document.getElementById('valGestorFecha').textContent = usuarioSeleccionado.fechaGN;
+          document.getElementById('boxGestor').classList.remove('hidden');
+      } else { document.getElementById('boxGestor').classList.add('hidden'); }
+
+      // Visualización AAA
+      if (usuarioSeleccionado.AAA && usuarioSeleccionado.AAA.toString().trim() !== "") {
+          document.getElementById('valAAA').textContent = usuarioSeleccionado.AAA;
+          document.getElementById('boxAAA').classList.remove('hidden');
+      } else { document.getElementById('boxAAA').classList.add('hidden'); }
     }
-    function solicitarListaArchivosDrive() {
-      const cuerpo = document.getElementById('cuerpoTablaArchivos');
-      const loader = document.getElementById('loaderArchivos');
-      cuerpo.innerHTML = ""; loader.classList.remove('hidden');
-      if (!usuarioSeleccionado || !usuarioSeleccionado.carpetaDrive) { cuerpo.innerHTML = '<tr><td colspan="2" style="color:var(--danger); text-align:center;">No hay carpeta de Drive vinculada.</td></tr>'; loader.classList.add('hidden'); actualizarBarraMetrica(0); return; }
-      fetch(API_URL + "?accion=listarFiles&urlCarpeta=" + encodeURIComponent(usuarioSeleccionado.carpetaDrive))
-        .then(res => res.json())
-        .then(res => {
-          loader.classList.add('hidden');
-          if (res && res.resultado === "OK") {
-            if (!res.archivos || res.archivos.length === 0) { cuerpo.innerHTML = '<tr><td colspan="2" style="text-align:center; color:var(--text-light); font-style:italic; padding: 2rem 0;">La carpeta está vacía.</td></tr>'; actualizarBarraMetrica(0); return; }
-            res.archivos.forEach(file => {
-              let fila = document.createElement('tr');
-              fila.innerHTML = `<td><strong>${file.nombre}</strong></td><td style="text-align:center;"><div class="acciones-btn-group"><button class="btn-mini btn-ver" onclick="window.open('${file.url}', '_blank')">👁️ Ver</button><button class="btn-mini btn-del" onclick="eliminarArchivoDrive('${file.id}')">🗑️ Borrar</button></div></td>`;
-              cuerpo.appendChild(fila);
-            });
-            actualizarBarraMetrica(res.archivos.length);
-          }
-        });
+
+    function mapearIconoEstado(id, val) {
+      let el = document.getElementById(id);
+      let esV = (val === true || String(val).toUpperCase() === "TRUE" || val == 1 || val == "1");
+      if(el) { el.textContent = esV ? "✔️" : "❌"; el.style.color = esV ? "var(--success)" : "var(--danger)"; }
     }
-    function actualizarBarraMetrica(cantidadArchivos) {
-      const MAX_ARCHIVOS = 6;
-      let porcentaje = Math.round((cantidadArchivos / MAX_ARCHIVOS) * 100);
-      document.getElementById('barraMetrica').style.width = Math.min(porcentaje, 100) + "%";
-      document.getElementById('textoMetrica').textContent = `${cantidadArchivos} de ${MAX_ARCHIVOS} archivos (${Math.min(porcentaje, 100)}%)`;
-    }
-    function procesarSubidaArchivo() {
-      const fileInput = document.getElementById('inputArchivo');
-      const statusDiv = document.getElementById('statusEnvio');
-      const tipoDoc = document.getElementById('tipoDocCarga').value;
-      if (!fileInput.files.length) return alert("Selecciona un archivo.");
-      const reader = new FileReader();
-      statusDiv.textContent = "⏳ Subiendo...";
-      reader.onload = function(e) {
-        fetch(API_URL, { method: "POST", body: JSON.stringify({ archivoBase64: e.target.result.split(',')[1], tipoMime: fileInput.files[0].type, nombreOriginal: fileInput.files[0].name, urlCarpeta: usuarioSeleccionado.carpetaDrive, nombreUsuario: usuarioSeleccionado.nombre, tipoDocumento: tipoDoc }) }).then(() => { statusDiv.textContent = "✔️ ¡Subido!"; setTimeout(() => { statusDiv.textContent = ""; solicitarListaArchivosDrive(); }, 1500); });
-      };
-      reader.readAsDataURL(fileInput.files[0]);
-    }
-    function eliminarArchivoDrive(id) { if (!confirm("¿Eliminar archivo?")) return; fetch(API_URL, { method: "POST", body: JSON.stringify({ accion: "eliminar", fileId: id }) }).then(() => solicitarListaArchivosDrive()); }
-    function volverYRefrescarConsulta() { location.reload(); }
+    
+    // ... (Mantén tus otras funciones intactas)
   </script>
 </body>
 </html>
