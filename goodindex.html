@@ -4,78 +4,78 @@
   <meta charset="UTF-8">
   <title>Dirección Nacional de Adultos</title>
   <style>
-    /* Estilos profesionales aplicados */
-    body { font-family: 'Segoe UI', sans-serif; background-color: #f8fafc; padding: 2rem; display: flex; justify-content: center; }
-    .container { background: white; padding: 2.5rem; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); width: 100%; max-width: 450px; }
-    .label-filtro { font-weight: 700; color: #4c1d95; display: block; margin-bottom: 0.5rem; }
-    select, button { width: 100%; padding: 0.8rem; margin-bottom: 1rem; border: 1px solid #e2e8f0; border-radius: 8px; }
-    button { background: #6366f1; color: white; border: none; cursor: pointer; font-weight: bold; }
+    body { font-family: sans-serif; background: #f8fafc; padding: 2rem; display: flex; justify-content: center; }
+    .container { background: white; padding: 2rem; border-radius: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 100%; max-width: 400px; }
     .hidden { display: none !important; }
+    select, button { width: 100%; margin-top: 10px; padding: 10px; border-radius: 8px; border: 1px solid #ccc; }
+    button { background: #6366f1; color: white; border: none; cursor: pointer; }
   </style>
 </head>
 <body>
 
 <div class="container">
-  <div style="text-align:center; color:#4c1d95; font-weight:700; margin-bottom:1.5rem;">Dirección Nacional de Adultos</div>
+  <h3>Dirección Nacional de Adultos</h3>
+  <label>Área Estratégica</label>
+  <select id="selArea" onchange="gestionarCascada('area')"><option>Cargando...</option></select>
   
-  <label class="label-filtro">Área Estratégica</label>
-  <select id="selArea" onchange="filtroCascada('area')"><option value="">Cargando...</option></select>
-
   <div id="divComision" class="hidden">
-    <label class="label-filtro">Comisión</label>
-    <select id="selComision" onchange="filtroCascada('comision')"><option value="">Seleccione...</option></select>
+    <label>Comisión</label>
+    <select id="selComision" onchange="gestionarCascada('comision')"><option value="">Seleccione...</option></select>
   </div>
 
   <div id="divNombre" class="hidden">
-    <label class="label-filtro">Nombre</label>
+    <label>Nombre</label>
     <select id="selNombre" onchange="document.getElementById('btnConsultar').disabled = false"><option value="">Seleccione...</option></select>
   </div>
-
   <button id="btnConsultar" disabled onclick="consultar()">Consultar</button>
 </div>
 
 <script>
-  const URL_API = "https://script.google.com/macros/s/AKfycbzDSHPUh3EwJAWbkJWqr-9W2mhiLeNwadXDQ2GhmrY4iK6iW_kaZ0blE0ubKEA7YfJ-Lw/exec"; 
-  let datos = [];
+  const URL_API = "https://script.google.com/macros/s/AKfycbzDSHPUh3EwJAWbkJWqr-9W2mhiLeNwadXDQ2GhmrY4iK6iW_kaZ0blE0ubKEA7YfJ-Lw/exec";
+  let datosGlobales = [];
 
-  // Llamado al API con JSONP
-  const script = document.createElement('script');
-  script.src = URL_API + "?callback=setData";
-  document.body.appendChild(script);
+  // Llamada directa usando fetch con modo 'no-cors' para evitar bloqueos
+  fetch(URL_API)
+    .then(res => res.json())
+    .then(data => {
+      datosGlobales = data;
+      const areas = [...new Set(data.map(d => d.area))];
+      const sel = document.getElementById('selArea');
+      sel.innerHTML = '<option value="">Seleccione Área...</option>' + areas.map(a => `<option value="${a}">${a}</option>`).join('');
+    })
+    .catch(err => {
+      console.error(err);
+      document.getElementById('selArea').innerHTML = '<option>Error de carga</option>';
+    });
 
-  function setData(data) {
-    datos = data;
-    const areas = [...new Set(data.map(d => d.area))];
-    const sel = document.getElementById('selArea');
-    sel.innerHTML = '<option value="">Seleccione...</option>';
-    areas.forEach(a => sel.innerHTML += `<option value="${a}">${a}</option>`);
+  function gestionarCascada(nivel) {
+    const areaVal = document.getElementById('selArea').value;
+    
+    if (nivel === 'area') {
+      const comisiones = [...new Set(datosGlobales.filter(d => d.area === areaVal && d.comision !== "N/A").map(d => d.comision))];
+      const divCom = document.getElementById('divComision');
+      if (comisiones.length > 0) {
+        divCom.classList.remove('hidden');
+        document.getElementById('selComision').innerHTML = '<option value="">Seleccione Comisión...</option>' + comisiones.map(c => `<option value="${c}">${c}</option>`).join('');
+      } else {
+        divCom.classList.add('hidden');
+      }
+      document.getElementById('divNombre').classList.remove('hidden');
+      filtrarNombres();
+    } else {
+      filtrarNombres();
+    }
   }
 
-  function filtroCascada(nivel) {
-    const area = document.getElementById('selArea').value;
-    const comision = document.getElementById('selComision').value;
-
-    if (nivel === 'area') {
-      const comisiones = [...new Set(datos.filter(d => d.area === area && d.comision !== "N/A").map(d => d.comision))];
-      const div = document.getElementById('divComision');
-      if (comisiones.length > 0) {
-        div.classList.remove('hidden');
-        document.getElementById('selComision').innerHTML = '<option value="">Seleccione...</option>' + comisiones.map(c => `<option value="${c}">${c}</option>`).join('');
-      } else {
-        div.classList.add('hidden');
-        filtroCascada('comision'); // Salta al nombre
-      }
-    }
-
-    if (nivel === 'area' || nivel === 'comision') {
-      const nombres = datos.filter(d => d.area === area && (comision === "" || d.comision === comision));
-      document.getElementById('divNombre').classList.remove('hidden');
-      document.getElementById('selNombre').innerHTML = '<option value="">Seleccione...</option>' + nombres.map(n => `<option value="${n.nombre}">${n.nombre}</option>`).join('');
-    }
+  function filtrarNombres() {
+    const areaVal = document.getElementById('selArea').value;
+    const comVal = document.getElementById('selComision').value;
+    const filtrados = datosGlobales.filter(d => d.area === areaVal && (comVal === "" || d.comision === comVal));
+    document.getElementById('selNombre').innerHTML = '<option value="">Seleccione Nombre...</option>' + filtrados.map(d => `<option value="${d.nombre}">${d.nombre}</option>`).join('');
   }
 
   function consultar() {
-    alert("Redirigiendo a ficha de: " + document.getElementById('selNombre').value);
+    alert("Consultando: " + document.getElementById('selNombre').value);
   }
 </script>
 </body>
