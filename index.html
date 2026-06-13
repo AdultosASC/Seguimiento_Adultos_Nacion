@@ -2,75 +2,98 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dirección Nacional de Adultos</title>
   <style>
-    :root {
-      --primary: #6366f1; --primary-hover: #4f46e5; --purple-dark: #4c1d95; --purple-light: #8b5cf6;
-      --bg: #f8fafc; --card-bg: #ffffff; --text: #1e293b; --text-light: #64748b; --border: #e2e8f0;
-    }
-    body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 2rem 1rem; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
-    .container { background-color: var(--card-bg); padding: 2.5rem; border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05); width: 100%; max-width: 450px; }
+    body { font-family: sans-serif; background: #f8fafc; padding: 2rem; display: flex; justify-content: center; }
+    .container { background: white; padding: 2rem; border-radius: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 100%; max-width: 400px; }
     
-    /* MEJORA DE ESPACIADO: Se añade margin-bottom a los grupos de formulario */
-    .form-group { margin-bottom: 2rem !important; } 
+    /* Esta sección añade el aire que necesitabas sin tocar la lógica */
+    .field-wrapper { margin-bottom: 1.5rem; }
     
-    .label-filtro { display: block; font-size: 0.95rem; font-weight: 700; color: var(--purple-dark); margin-bottom: 0.8rem; }
-    select { width: 100%; padding: 0.85rem 1rem; font-size: 1rem; background-color: var(--bg); border: 1px solid var(--border); border-radius: 8px; box-sizing: border-box; }
-    button { width: 100%; padding: 0.85rem; font-size: 1rem; font-weight: 600; color: white; background-color: var(--primary); border: none; border-radius: 8px; cursor: pointer; transition: background 0.3s; }
-    button:disabled { background-color: var(--border); }
     .hidden { display: none !important; }
+    select, button { width: 100%; margin-top: 5px; padding: 12px; border-radius: 8px; border: 1px solid #ccc; box-sizing: border-box; }
+    button { background: #6366f1; color: white; border: none; cursor: pointer; font-weight: bold; }
+    button:disabled { background: #cbd5e1; }
   </style>
 </head>
 <body>
 
-  <div id="paginaFiltros" class="container">
-    <h1 style="font-size: 1.4rem; margin-bottom: 2rem; text-align: center;">Dirección Nacional de Adultos</h1>
-    
-    <div class="form-group">
-      <label for="selectA" class="label-filtro">Área Estratégica</label>
-      <select id="selectA" onchange="cambioArea()">
-        <option value="">Conectando...</option>
-      </select>
-    </div>
-
-    <div id="grupoC" class="form-group hidden">
-      <label for="selectC" class="label-filtro">Nombre</label>
-      <select id="selectC" onchange="activarBotonConsultar()">
-        <option value="">-- Seleccione un nombre --</option>
-      </select>
-    </div>
-
-    <button id="btnConsultar" disabled onclick="irAPaginaReporte()">Consultar</button>
+<div class="container" id="paginaFiltros">
+  <h3>Dirección Nacional de Adultos</h3>
+  
+  <div class="field-wrapper">
+    <label>Área Estratégica</label>
+    <select id="selectA" onchange="gestionarCascada('area')"><option>Cargando...</option></select>
+  </div>
+  
+  <div id="grupoC" class="field-wrapper hidden">
+    <label>Comisión</label>
+    <select id="selectC" onchange="gestionarCascada('comision')"><option value="">Seleccione...</option></select>
   </div>
 
-  <script>
-    // Tu lógica funcional permanece intacta
-    const API_URL = "https://script.google.com/macros/s/AKfycbw4okkl5_lnmqxK6b2eFL1uG6f92_Fu8BHDun4tvGtrexAECEAdEk1Kf3P9AfL29EH4/exec";
-    let baseDatosCompleta = [];
+  <div id="grupoN" class="field-wrapper hidden">
+    <label>Nombre</label>
+    <select id="selectN" onchange="document.getElementById('btnConsultar').disabled = false"><option value="">Seleccione...</option></select>
+  </div>
+  
+  <button id="btnConsultar" disabled onclick="consultar()">Consultar</button>
+</div>
 
-    window.onload = function() { 
-        fetch(API_URL).then(r => r.json()).then(data => { 
-            baseDatosCompleta = data; 
-            var select = document.getElementById('selectA');
-            let areas = [...new Set(data.map(item => item.columnaA))].filter(Boolean).sort();
-            select.innerHTML = '<option value="">-- Seleccione un Área --</option>' + areas.map(a => `<option value="${a}">${a}</option>`).join('');
-        });
-    };
+<script>
+  const API_URL = "https://script.google.com/macros/s/AKfycbw4okkl5_lnmqxK6b2eFL1uG6f92_Fu8BHDun4tvGtrexAECEAdEk1Kf3P9AfL29EH4/exec";
+  let datosGlobales = [];
 
-    function cambioArea() {
-      var valorA = document.getElementById('selectA').value;
-      var grupoC = document.getElementById('grupoC');
-      var selectC = document.getElementById('selectC');
-      if (!valorA) { grupoC.classList.add('hidden'); return; }
-      let nombresFiltrados = baseDatosCompleta.filter(item => item.columnaA === valorA).map(item => item.nombre).filter(Boolean).sort();
-      selectC.innerHTML = '<option value="">-- Seleccione un nombre --</option>' + nombresFiltrados.map(n => `<option value="${n}">${n}</option>`).join('');
-      grupoC.classList.remove('hidden');
-    }
+  fetch(API_URL)
+    .then(res => res.json())
+    .then(data => {
+      datosGlobales = data;
+      const areas = [...new Set(data.map(d => d.area).filter(a => a && a.trim() !== ""))];
+      document.getElementById('selectA').innerHTML = '<option value="">Seleccione Área...</option>' + 
+        areas.map(a => `<option value="${a}">${a}</option>`).join('');
+    });
 
-    function activarBotonConsultar() { document.getElementById('btnConsultar').disabled = (document.getElementById('selectC').value === ""); }
+  function gestionarCascada(nivel) {
+    const areaVal = document.getElementById('selectA').value;
     
-    function irAPaginaReporte() { /* ... tu lógica de redirección ... */ }
-  </script>
+    if (nivel === 'area') {
+      const comisiones = [...new Set(datosGlobales
+        .filter(d => d.area === areaVal && d.comision && d.comision.toString().trim() !== "")
+        .map(d => d.comision))];
+      
+      const divCom = document.getElementById('grupoC');
+      if (comisiones.length > 0) {
+        divCom.classList.remove('hidden');
+        document.getElementById('selectC').innerHTML = '<option value="">Seleccione Comisión...</option>' + 
+          comisiones.map(c => `<option value="${c}">${c}</option>`).join('');
+      } else {
+        divCom.classList.add('hidden');
+        document.getElementById('selectC').value = "";
+      }
+      document.getElementById('grupoN').classList.remove('hidden');
+      filtrarNombres();
+    } else {
+      filtrarNombres();
+    }
+  }
+
+  function filtrarNombres() {
+    const areaVal = document.getElementById('selectA').value;
+    const comVal = document.getElementById('selectC').value;
+    const divComHidden = document.getElementById('grupoC').classList.contains('hidden');
+    
+    const filtrados = datosGlobales.filter(d => 
+      d.area === areaVal && 
+      d.nombre && d.nombre.trim() !== "" &&
+      (divComHidden || d.comision === comVal)
+    );
+    
+    document.getElementById('selectN').innerHTML = '<option value="">Seleccione Nombre...</option>' + 
+      filtrados.map(d => `<option value="${d.nombre}">${d.nombre}</option>`).join('');
+  }
+
+  function consultar() {
+    alert("Consultando: " + document.getElementById('selectN').value);
+  }
+</script>
 </body>
 </html>
