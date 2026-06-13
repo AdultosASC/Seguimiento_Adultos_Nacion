@@ -4,64 +4,67 @@
   <meta charset="UTF-8">
   <title>Dirección Nacional de Adultos</title>
   <style>
-    body { font-family: sans-serif; background: #f8fafc; padding: 2rem; }
-    .container { background: white; padding: 2rem; border-radius: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 100%; max-width: 500px; margin: auto; }
+    body { font-family: sans-serif; background: #f8fafc; padding: 2rem; display: flex; justify-content: center; }
+    .container { background: white; padding: 2rem; border-radius: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 100%; max-width: 400px; }
     .hidden { display: none !important; }
-    select, button { width: 100%; margin-top: 10px; padding: 10px; }
+    select, button { width: 100%; margin-top: 10px; padding: 10px; border-radius: 8px; border: 1px solid #ccc; }
+    button { background: #6366f1; color: white; border: none; cursor: pointer; }
   </style>
 </head>
 <body>
-<div class="container" id="paginaFiltros">
+
+<div class="container">
   <h3>Dirección Nacional de Adultos</h3>
-  <label>Área</label>
-  <select id="selectA" onchange="gestionarCascada('area')"><option value="">Cargando datos...</option></select>
+  <label>Área Estratégica</label>
+  <select id="selectA" onchange="gestionarCascada('area')"><option>Cargando...</option></select>
   
   <div id="grupoC" class="hidden">
     <label>Comisión</label>
-    <select id="selectC" onchange="gestionarCascada('comision')"></select>
+    <select id="selectC" onchange="gestionarCascada('comision')"><option value="">Seleccione...</option></select>
   </div>
 
   <div id="grupoN" class="hidden">
     <label>Nombre</label>
-    <select id="selectN" onchange="document.getElementById('btnConsultar').disabled = false"></select>
+    <select id="selectN" onchange="document.getElementById('btnConsultar').disabled = false"><option value="">Seleccione...</option></select>
   </div>
   <button id="btnConsultar" disabled onclick="consultar()">Consultar</button>
 </div>
 
-<div class="container hidden" id="paginaReporte">
-  <h3 id="nombreReporte"></h3>
-  <div id="detalleReporte"></div>
-  <button onclick="location.reload()">Volver</button>
-</div>
-
 <script>
+  // Asegúrate de tener tu URL correcta aquí
   const API_URL = "TU_URL_AQUI_CON_EXEC";
   let datosGlobales = [];
 
-  fetch(API_URL).then(res => res.json()).then(data => {
-    datosGlobales = data;
-    const areas = [...new Set(data.map(d => d.area).filter(a => a && a.trim() !== ""))];
-    document.getElementById('selectA').innerHTML = '<option value="">Seleccione Área...</option>' + 
-      areas.map(a => `<option value="${a}">${a}</option>`).join('');
-  });
+  fetch(API_URL)
+    .then(res => res.json())
+    .then(data => {
+      datosGlobales = data;
+      const areas = [...new Set(data.map(d => d.area))];
+      const sel = document.getElementById('selectA');
+      sel.innerHTML = '<option value="">Seleccione Área...</option>' + areas.map(a => `<option value="${a}">${a}</option>`).join('');
+    })
+    .catch(err => {
+      console.error(err);
+      document.getElementById('selectA').innerHTML = '<option>Error de carga</option>';
+    });
 
   function gestionarCascada(nivel) {
-    const area = document.getElementById('selectA').value;
+    const areaVal = document.getElementById('selectA').value;
     
     if (nivel === 'area') {
-      // Filtrar comisiones (índice 26) que no estén vacías
+      // Filtramos comisiones (índice 26) que no estén vacías o en blanco
       const comisiones = [...new Set(datosGlobales
-        .filter(d => d.area === area && d.comision && d.comision.toString().trim() !== "")
+        .filter(d => d.area === areaVal && d.comision && d.comision.toString().trim() !== "")
         .map(d => d.comision))];
       
-      const grupoC = document.getElementById('grupoC');
+      const divCom = document.getElementById('grupoC');
       if (comisiones.length > 0) {
-        grupoC.classList.remove('hidden');
+        divCom.classList.remove('hidden');
         document.getElementById('selectC').innerHTML = '<option value="">Seleccione Comisión...</option>' + 
           comisiones.map(c => `<option value="${c}">${c}</option>`).join('');
       } else {
-        grupoC.classList.add('hidden');
-        document.getElementById('selectC').value = ""; // Limpiar
+        divCom.classList.add('hidden');
+        document.getElementById('selectC').value = ""; // Limpiamos valor
       }
       document.getElementById('grupoN').classList.remove('hidden');
       filtrarNombres();
@@ -71,14 +74,14 @@
   }
 
   function filtrarNombres() {
-    const area = document.getElementById('selectA').value;
-    const com = document.getElementById('selectC').value;
-    const grupoCVisible = !document.getElementById('grupoC').classList.contains('hidden');
+    const areaVal = document.getElementById('selectA').value;
+    const comVal = document.getElementById('selectC').value;
+    const divComHidden = document.getElementById('grupoC').classList.contains('hidden');
     
-    // Filtrar: si el grupo de comisión es visible, debe coincidir, si no, solo por área
+    // Si la comisión está oculta, filtramos solo por área. Si no, por ambos.
     const filtrados = datosGlobales.filter(d => 
-      d.area === area && 
-      (!grupoCVisible || d.comision === com)
+      d.area === areaVal && 
+      (divComHidden || d.comision === comVal)
     );
     
     document.getElementById('selectN').innerHTML = '<option value="">Seleccione Nombre...</option>' + 
@@ -86,15 +89,7 @@
   }
 
   function consultar() {
-    const usuario = datosGlobales.find(d => d.nombre === document.getElementById('selectN').value);
-    document.getElementById('paginaFiltros').classList.add('hidden');
-    document.getElementById('paginaReporte').classList.remove('hidden');
-    document.getElementById('nombreReporte').innerText = usuario.nombre;
-    document.getElementById('detalleReporte').innerHTML = `
-      <p><strong>Cargo:</strong> ${usuario.cargo}</p>
-      <p><strong>Área:</strong> ${usuario.area}</p>
-      <p><strong>Comisión:</strong> ${usuario.comision || 'N/A'}</p>
-    `;
+    alert("Consultando: " + document.getElementById('selectN').value);
   }
 </script>
 </body>
