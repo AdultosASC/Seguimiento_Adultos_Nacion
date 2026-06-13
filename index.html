@@ -16,7 +16,7 @@
 <div class="container">
   <h3>Dirección Nacional de Adultos</h3>
   <label>Área Estratégica</label>
-  <select id="selArea" onchange="gestionarCascada('area')"><option value="">Cargando...</option></select>
+  <select id="selArea" onchange="gestionarCascada('area')"><option>Cargando...</option></select>
   
   <div id="divComision" class="hidden">
     <label>Comisión</label>
@@ -31,21 +31,19 @@
 </div>
 
 <script>
-  // PEGA AQUÍ TU URL NUEVA DE APPS SCRIPT
-  const URL_API = "https://script.google.com/macros/s/AKfycbzDSHPUh3EwJAWbkJWqr-9W2mhiLeNwadXDQ2GhmrY4iK6iW_kaZ0blE0ubKEA7YfJ-Lw/exec"; 
+  const URL_API = "https://script.google.com/macros/s/AKfycbzDSHPUh3EwJAWbkJWqr-9W2mhiLeNwadXDQ2GhmrY4iK6iW_kaZ0blE0ubKEA7YfJ-Lw/exec";
   let datosGlobales = [];
 
-  fetch(URL_API)
+  fetch(URL_API, { method: 'GET', mode: 'cors' })
     .then(res => res.json())
     .then(data => {
       datosGlobales = data;
       const sel = document.getElementById('selArea');
-      // Obtener áreas únicas y filtrar vacíos
       const areas = [...new Set(data.map(d => d.area).filter(a => a !== ""))];
       sel.innerHTML = '<option value="">Seleccione Área...</option>' + areas.map(a => `<option value="${a}">${a}</option>`).join('');
     })
     .catch(err => {
-      console.error("Error:", err);
+      console.error(err);
       document.getElementById('selArea').innerHTML = '<option>Error de carga</option>';
     });
 
@@ -55,6 +53,7 @@
     if (nivel === 'area') {
       const comisiones = [...new Set(datosGlobales.filter(d => d.area === area && d.comision !== "N/A" && d.comision !== "").map(d => d.comision))];
       const divCom = document.getElementById('divComision');
+      
       if (comisiones.length > 0) {
         divCom.classList.remove('hidden');
         document.getElementById('selComision').innerHTML = '<option value="">Seleccione Comisión...</option>' + comisiones.map(c => `<option value="${c}">${c}</option>`).join('');
@@ -71,13 +70,12 @@
   function filtrarNombres() {
     const area = document.getElementById('selArea').value;
     const comision = document.getElementById('selComision').value;
-    // Si la comisión está oculta, el valor será ""
     const filtrados = datosGlobales.filter(d => d.area === area && (comision === "" || d.comision === comision));
     document.getElementById('selNombre').innerHTML = '<option value="">Seleccione Nombre...</option>' + filtrados.map(d => `<option value="${d.nombre}">${d.nombre}</option>`).join('');
   }
 
   function consultar() {
-    alert("Redirigiendo a ficha de: " + document.getElementById('selNombre').value);
+    alert("Consultando: " + document.getElementById('selNombre').value);
   }
 </script>
 </body>
