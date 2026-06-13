@@ -2,80 +2,46 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Dirección Nacional de Adultos</title>
+  <title>Verificación DNA</title>
   <style>
     body { font-family: sans-serif; background: #f8fafc; padding: 2rem; display: flex; justify-content: center; }
     .container { background: white; padding: 2rem; border-radius: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 100%; max-width: 400px; }
     .hidden { display: none !important; }
-    select, button { width: 100%; margin-top: 10px; padding: 10px; border-radius: 8px; border: 1px solid #ccc; }
-    button { background: #6366f1; color: white; border: none; cursor: pointer; }
+    #status { font-size: 0.8rem; color: #666; margin-top: 10px; }
   </style>
 </head>
 <body>
 
 <div class="container">
   <h3>Dirección Nacional de Adultos</h3>
-  <label>Área Estratégica</label>
-  <select id="selArea" onchange="gestionarCascada('area')"><option>Cargando...</option></select>
-  
-  <div id="divComision" class="hidden">
-    <label>Comisión</label>
-    <select id="selComision" onchange="gestionarCascada('comision')"><option value="">Seleccione...</option></select>
+  <div id="status">Conectando...</div>
+  <select id="selArea" class="hidden" onchange="gestionarCascada('area')"></select>
   </div>
-
-  <div id="divNombre" class="hidden">
-    <label>Nombre</label>
-    <select id="selNombre" onchange="document.getElementById('btnConsultar').disabled = false"><option value="">Seleccione...</option></select>
-  </div>
-  <button id="btnConsultar" disabled onclick="consultar()">Consultar</button>
-</div>
 
 <script>
-  // Pega aquí tu URL nueva que termina en /exec
-  const URL_API = "https://script.google.com/macros/s/AKfycbzDSHPUh3EwJAWbkJWqr-9W2mhiLeNwadXDQ2GhmrY4iK6iW_kaZ0blE0ubKEA7YfJ-Lw/exec";
+  // PEGA AQUÍ TU NUEVA URL DE GOOGLE (La que termina en /exec)
+  const URL_API = "TU_NUEVA_URL_AQUI"; 
   let datosGlobales = [];
 
-  // Inyección de script para JSONP (la lógica que te funciona)
-  const script = document.createElement('script');
-  script.src = URL_API + "?callback=setData";
-  document.body.appendChild(script);
+  // Usamos una función de carga más segura
+  function cargarDatos() {
+    const script = document.createElement('script');
+    script.src = URL_API + "?callback=setData";
+    script.onload = () => document.getElementById('status').innerText = "Datos cargados correctamente";
+    script.onerror = () => document.getElementById('status').innerText = "Error: Google Apps Script bloqueó la conexión. Revisa el despliegue.";
+    document.body.appendChild(script);
+  }
 
   function setData(data) {
     datosGlobales = data;
-    const areas = [...new Set(data.map(d => d.area))];
+    document.getElementById('status').classList.add('hidden');
+    document.getElementById('selArea').classList.remove('hidden');
+    // Llenar selectores...
+    const areas = [...new Set(data.map(d => d.area).filter(a => a))];
     document.getElementById('selArea').innerHTML = '<option value="">Seleccione Área...</option>' + areas.map(a => `<option value="${a}">${a}</option>`).join('');
   }
 
-  function gestionarCascada(nivel) {
-    const areaVal = document.getElementById('selArea').value;
-    
-    if (nivel === 'area') {
-      const comisiones = [...new Set(datosGlobales.filter(d => d.area === areaVal && d.comision !== "N/A" && d.comision !== "").map(d => d.comision))];
-      const divCom = document.getElementById('divComision');
-      
-      if (comisiones.length > 0) {
-        divCom.classList.remove('hidden');
-        document.getElementById('selComision').innerHTML = '<option value="">Seleccione Comisión...</option>' + comisiones.map(c => `<option value="${c}">${c}</option>`).join('');
-      } else {
-        divCom.classList.add('hidden');
-      }
-      document.getElementById('divNombre').classList.remove('hidden');
-      filtrarNombres();
-    } else {
-      filtrarNombres();
-    }
-  }
-
-  function filtrarNombres() {
-    const areaVal = document.getElementById('selArea').value;
-    const comVal = document.getElementById('selComision').value;
-    const filtrados = datosGlobales.filter(d => d.area === areaVal && (comVal === "" || d.comision === comVal));
-    document.getElementById('selNombre').innerHTML = '<option value="">Seleccione Nombre...</option>' + filtrados.map(d => `<option value="${d.nombre}">${d.nombre}</option>`).join('');
-  }
-
-  function consultar() {
-    alert("Consultando: " + document.getElementById('selNombre').value);
-  }
+  cargarDatos();
 </script>
 </body>
 </html>
