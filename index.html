@@ -5,7 +5,7 @@
   <title>Dirección Nacional de Adultos</title>
   <style>
     body { font-family: sans-serif; background: #f8fafc; padding: 2rem; }
-    .container { background: white; padding: 2rem; border-radius: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 100%; max-width: 500px; margin: auto; }
+    .container { background: white; padding: 2rem; border-radius: 16px; width: 100%; max-width: 500px; margin: auto; }
     .hidden { display: none !important; }
     select, button { width: 100%; margin-top: 10px; padding: 10px; }
   </style>
@@ -13,7 +13,7 @@
 <body>
 <div class="container" id="paginaFiltros">
   <h3>Dirección Nacional de Adultos</h3>
-  <select id="selectA" onchange="gestionarCascada('area')"><option value="">Cargando...</option></select>
+  <select id="selectA" onchange="gestionarCascada('area')"><option value="">Cargando datos...</option></select>
   <div id="grupoC" class="hidden"><select id="selectC" onchange="gestionarCascada('comision')"></select></div>
   <div id="grupoN" class="hidden"><select id="selectN"></select></div>
   <button id="btnConsultar" disabled onclick="consultar()">Consultar</button>
@@ -22,18 +22,17 @@
 <div class="container hidden" id="paginaReporte">
   <h3 id="nombreReporte"></h3>
   <div id="detalleReporte"></div>
-  <button onclick="volver()">Volver</button>
+  <button onclick="location.reload()">Volver</button>
 </div>
 
 <script>
-  const API_URL = "https://script.google.com/macros/s/AKfycbw4okkl5_lnmqxK6b2eFL1uG6f92_Fu8BHDun4tvGtrexAECEAdEk1Kf3P9AfL29EH4/exec"; 
+  const API_URL = "https://script.google.com/macros/s/AKfycbw4okkl5_lnmqxK6b2eFL1uG6f92_Fu8BHDun4tvGtrexAECEAdEk1Kf3P9AfL29EH4/exec";
   let datosGlobales = [];
 
   fetch(API_URL).then(res => res.json()).then(data => {
     datosGlobales = data;
     const areas = [...new Set(data.map(d => d.area))];
-    document.getElementById('selectA').innerHTML = '<option value="">Seleccione Área...</option>' + 
-      areas.map(a => `<option value="${a}">${a}</option>`).join('');
+    document.getElementById('selectA').innerHTML = '<option value="">Seleccione Área...</option>' + areas.map(a => `<option value="${a}">${a}</option>`).join('');
   });
 
   function gestionarCascada(nivel) {
@@ -54,15 +53,15 @@
     const usuario = datosGlobales.find(d => d.nombre === document.getElementById('selectN').value);
     document.getElementById('paginaFiltros').classList.add('hidden');
     document.getElementById('paginaReporte').classList.remove('hidden');
+    document.getElementById('nombreReporte').innerText = usuario.nombre;
     document.getElementById('detalleReporte').innerHTML = `
       <p><strong>Cargo:</strong> ${usuario.cargo}</p>
-      <p><strong>Comisión:</strong> ${usuario.comision}</p>
+      <p><strong>Área:</strong> ${usuario.area}</p>
       <p><strong>GN:</strong> ${usuario.gn}</p>
       <p><strong>AAA:</strong> ${usuario.aaa}</p>
+      <p><strong>Carpeta:</strong> <a href="${usuario.carpetaDrive}" target="_blank">Abrir</a></p>
     `;
   }
-
-  function volver() { location.reload(); }
 </script>
 </body>
 </html>
