@@ -2,65 +2,100 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dirección Nacional de Adultos</title>
   <style>
-    body { font-family: sans-serif; background: #f8fafc; padding: 2rem; display: flex; justify-content: center; }
-    .container { background: white; padding: 2rem; border-radius: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 100%; max-width: 400px; }
+    :root {
+      --primary: #6366f1; --primary-hover: #4f46e5; --purple-dark: #4c1d95; --purple-light: #8b5cf6;
+      --bg: #f8fafc; --card-bg: #ffffff; --text: #1e293b; --text-light: #64748b; --border: #e2e8f0;
+      --success: #10b981; --danger: #ef4444;
+    }
+    body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 2rem 1rem; display: flex; justify-content: center; align-items: center; min-height: 100vh; box-sizing: border-box; }
+    .container { background-color: var(--card-bg); padding: 2.5rem; border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05); width: 100%; max-width: 450px; box-sizing: border-box; }
     .hidden { display: none !important; }
-    select, button { width: 100%; margin-top: 10px; padding: 10px; border-radius: 8px; border: 1px solid #ccc; }
-    button { background: #6366f1; color: white; border: none; cursor: pointer; }
+    select, button, input { width: 100%; margin-top: 10px; padding: 12px; border-radius: 8px; border: 1px solid var(--border); box-sizing: border-box; }
+    button { background-color: var(--primary); color: white; border: none; cursor: pointer; font-weight: 600; transition: background 0.3s; }
+    button:hover { background-color: var(--primary-hover); }
+    button:disabled { background-color: var(--border); cursor: not-allowed; }
+    #statusEnvio { margin-top: 10px; font-size: 0.9rem; text-align: center; }
   </style>
 </head>
 <body>
-<div class="container">
+
+<div class="container" id="paginaFiltros">
   <h3>Dirección Nacional de Adultos</h3>
   <label>Área Estratégica</label>
-  <select id="selArea" onchange="gestionarCascada('area')"><option>Cargando...</option></select>
-  <div id="divComision" class="hidden">
+  <select id="selectA" onchange="gestionarCascada('area')"><option value="">Cargando...</option></select>
+  
+  <div id="grupoC" class="hidden">
     <label>Comisión</label>
-    <select id="selComision" onchange="gestionarCascada('comision')"></select>
+    <select id="selectC" onchange="gestionarCascada('comision')"></select>
   </div>
-  <div id="divNombre" class="hidden">
+
+  <div id="grupoN" class="hidden">
     <label>Nombre</label>
-    <select id="selNombre"></select>
+    <select id="selectN" onchange="document.getElementById('btnConsultar').disabled = false"></select>
   </div>
-  <button id="btnConsultar" onclick="consultar()">Consultar</button>
+  
+  <button id="btnConsultar" disabled onclick="consultar()">Consultar</button>
+</div>
+
+<div class="container wide hidden" id="paginaReporte">
+  <h3 id="nombreReporte"></h3>
+  <div id="detalleReporte"></div>
+  <button onclick="volverYRefrescarConsulta()">Volver</button>
 </div>
 
 <script>
-  const URL_API = "https://script.google.com/macros/s/AKfycbw4okkl5_lnmqxK6b2eFL1uG6f92_Fu8BHDun4tvGtrexAECEAdEk1Kf3P9AfL29EH4/exec"; 
+  const API_URL = "TU_URL_AQUI"; // RECUERDA PEGAR AQUÍ TU URL
   let datosGlobales = [];
 
-  fetch(URL_API)
-    .then(res => res.json())
-    .then(data => {
-      console.log("Datos recibidos:", data); // <--- MIRA ESTO EN LA CONSOLA (F12)
-      datosGlobales = data;
-      const areas = [...new Set(data.map(d => d.area))];
-      document.getElementById('selArea').innerHTML = '<option value="">Seleccione Área...</option>' + 
-        areas.map(a => `<option value="${a}">${a}</option>`).join('');
-    })
-    .catch(err => console.error("Error en fetch:", err));
+  // Carga inicial
+  window.onload = cargarDatosDesdeAPI;
+
+  function cargarDatosDesdeAPI() {
+    fetch(API_URL)
+      .then(res => res.json())
+      .then(data => {
+        datosGlobales = data;
+        const areas = [...new Set(data.map(d => d.columnaA))];
+        document.getElementById('selectA').innerHTML = '<option value="">Seleccione Área...</option>' + 
+          areas.map(a => `<option value="${a}">${a}</option>`).join('');
+      });
+  }
 
   function gestionarCascada(nivel) {
-    const area = document.getElementById('selArea').value;
+    const area = document.getElementById('selectA').value;
     if (nivel === 'area') {
-      const coms = [...new Set(datosGlobales.filter(d => d.area === area).map(d => d.comision))];
-      document.getElementById('divComision').classList.toggle('hidden', coms.length === 0);
-      document.getElementById('selComision').innerHTML = coms.map(c => `<option value="${c}">${c}</option>`).join('');
-      document.getElementById('divNombre').classList.remove('hidden');
+      const comisiones = [...new Set(datosGlobales.filter(d => d.columnaA === area).map(d => d.comision))];
+      document.getElementById('grupoC').classList.toggle('hidden', comisiones.length === 0);
+      document.getElementById('selectC').innerHTML = comisiones.map(c => `<option value="${c}">${c}</option>`).join('');
+      document.getElementById('grupoN').classList.remove('hidden');
     }
     filtrarNombres();
   }
 
   function filtrarNombres() {
-    const area = document.getElementById('selArea').value;
-    const com = document.getElementById('selComision').value;
-    const filtrados = datosGlobales.filter(d => d.area === area && (com === "" || d.comision === com));
-    document.getElementById('selNombre').innerHTML = filtrados.map(d => `<option value="${d.nombre}">${d.nombre}</option>`).join('');
+    const area = document.getElementById('selectA').value;
+    const com = document.getElementById('selectC').value;
+    const filtrados = datosGlobales.filter(d => d.columnaA === area && (com === "" || d.comision === com));
+    document.getElementById('selectN').innerHTML = '<option value="">Seleccione Nombre...</option>' + 
+      filtrados.map(d => `<option value="${d.nombre}">${d.nombre}</option>`).join('');
   }
 
-  function consultar() { alert("Consultando: " + document.getElementById('selNombre').value); }
+  function consultar() {
+    const nombre = document.getElementById('selectN').value;
+    document.getElementById('paginaFiltros').classList.add('hidden');
+    document.getElementById('paginaReporte').classList.remove('hidden');
+    document.getElementById('nombreReporte').innerText = nombre;
+    // Lógica para mostrar detalles del reporte...
+  }
+
+  function volverYRefrescarConsulta() {
+    document.getElementById('paginaReporte').classList.add('hidden'); 
+    document.getElementById('paginaFiltros').classList.remove('hidden');
+    document.getElementById('btnConsultar').disabled = true;
+  }
 </script>
 </body>
 </html>
