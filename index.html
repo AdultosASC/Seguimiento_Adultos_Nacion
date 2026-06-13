@@ -2,69 +2,73 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dirección Nacional de Adultos</title>
   <style>
+    :root { --primary: #6366f1; --border: #e2e8f0; }
     body { font-family: sans-serif; background: #f8fafc; padding: 2rem; display: flex; justify-content: center; }
-    .container { background: white; padding: 2rem; border-radius: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 100%; max-width: 400px; }
+    .container { background: white; padding: 2rem; border-radius: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 100%; max-width: 450px; }
     .hidden { display: none !important; }
-    select, button { width: 100%; margin-top: 10px; padding: 10px; border-radius: 8px; border: 1px solid #ccc; }
-    button { background: #6366f1; color: white; border: none; cursor: pointer; }
+    select, button { width: 100%; margin-top: 10px; padding: 12px; border-radius: 8px; border: 1px solid var(--border); }
+    button { background: var(--primary); color: white; border: none; cursor: pointer; }
+    button:disabled { background: #cbd5e1; }
   </style>
 </head>
 <body>
 
-<div class="container">
+<div class="container" id="paginaFiltros">
   <h3>Dirección Nacional de Adultos</h3>
   <label>Área Estratégica</label>
-  <select id="selectA" onchange="gestionarCascada('area')"><option>Cargando...</option></select>
+  <select id="selectA" onchange="gestionarCascada('area')"><option value="">Cargando...</option></select>
   
   <div id="grupoC" class="hidden">
     <label>Comisión</label>
-    <select id="selectC" onchange="gestionarCascada('comision')"><option value="">Seleccione...</option></select>
+    <select id="selectC" onchange="gestionarCascada('comision')"></select>
   </div>
 
   <div id="grupoN" class="hidden">
     <label>Nombre</label>
-    <select id="selectN" onchange="document.getElementById('btnConsultar').disabled = false"><option value="">Seleccione...</option></select>
+    <select id="selectN" onchange="document.getElementById('btnConsultar').disabled = false"></select>
   </div>
   <button id="btnConsultar" disabled onclick="consultar()">Consultar</button>
 </div>
 
+<div class="container hidden" id="paginaReporte">
+  <h3 id="nombreReporte"></h3>
+  <div id="detalleReporte"></div>
+  <button onclick="location.reload()">Volver</button>
+</div>
+
 <script>
-  // Asegúrate de tener tu URL correcta aquí
   const API_URL = "https://script.google.com/macros/s/AKfycbw4okkl5_lnmqxK6b2eFL1uG6f92_Fu8BHDun4tvGtrexAECEAdEk1Kf3P9AfL29EH4/exec";
   let datosGlobales = [];
 
   fetch(API_URL)
     .then(res => res.json())
     .then(data => {
+      // Filtramos áreas vacías inmediatamente
       datosGlobales = data;
-      const areas = [...new Set(data.map(d => d.area))];
-      const sel = document.getElementById('selectA');
-      sel.innerHTML = '<option value="">Seleccione Área...</option>' + areas.map(a => `<option value="${a}">${a}</option>`).join('');
-    })
-    .catch(err => {
-      console.error(err);
-      document.getElementById('selectA').innerHTML = '<option>Error de carga</option>';
+      const areas = [...new Set(data.map(d => d.area).filter(a => a && a.toString().trim() !== ""))];
+      document.getElementById('selectA').innerHTML = '<option value="">Seleccione Área...</option>' + 
+        areas.map(a => `<option value="${a}">${a}</option>`).join('');
     });
 
   function gestionarCascada(nivel) {
-    const areaVal = document.getElementById('selectA').value;
+    const area = document.getElementById('selectA').value;
     
     if (nivel === 'area') {
-      // Filtramos comisiones (índice 26) que no estén vacías o en blanco
+      // Filtrar comisiones: solo si existen y no están en blanco
       const comisiones = [...new Set(datosGlobales
-        .filter(d => d.area === areaVal && d.comision && d.comision.toString().trim() !== "")
+        .filter(d => d.area === area && d.comision && d.comision.toString().trim() !== "")
         .map(d => d.comision))];
       
-      const divCom = document.getElementById('grupoC');
+      const grupoC = document.getElementById('grupoC');
       if (comisiones.length > 0) {
-        divCom.classList.remove('hidden');
+        grupoC.classList.remove('hidden');
         document.getElementById('selectC').innerHTML = '<option value="">Seleccione Comisión...</option>' + 
           comisiones.map(c => `<option value="${c}">${c}</option>`).join('');
       } else {
-        divCom.classList.add('hidden');
-        document.getElementById('selectC').value = ""; // Limpiamos valor
+        grupoC.classList.add('hidden');
       }
       document.getElementById('grupoN').classList.remove('hidden');
       filtrarNombres();
@@ -74,14 +78,14 @@
   }
 
   function filtrarNombres() {
-    const areaVal = document.getElementById('selectA').value;
-    const comVal = document.getElementById('selectC').value;
-    const divComHidden = document.getElementById('grupoC').classList.contains('hidden');
+    const area = document.getElementById('selectA').value;
+    const com = document.getElementById('selectC').value;
+    const isComHidden = document.getElementById('grupoC').classList.contains('hidden');
     
-    // Si la comisión está oculta, filtramos solo por área. Si no, por ambos.
     const filtrados = datosGlobales.filter(d => 
-      d.area === areaVal && 
-      (divComHidden || d.comision === comVal)
+      d.area === area && 
+      d.nombre && d.nombre.trim() !== "" &&
+      (isComHidden || d.comision === com)
     );
     
     document.getElementById('selectN').innerHTML = '<option value="">Seleccione Nombre...</option>' + 
@@ -89,7 +93,18 @@
   }
 
   function consultar() {
-    alert("Consultando: " + document.getElementById('selectN').value);
+    const usuario = datosGlobales.find(d => d.nombre === document.getElementById('selectN').value);
+    if (!usuario) return;
+    
+    document.getElementById('paginaFiltros').classList.add('hidden');
+    document.getElementById('paginaReporte').classList.remove('hidden');
+    document.getElementById('nombreReporte').innerText = usuario.nombre;
+    document.getElementById('detalleReporte').innerHTML = `
+      <p><strong>Cargo:</strong> ${usuario.cargo || 'N/A'}</p>
+      <p><strong>Comisión:</strong> ${usuario.comision || 'N/A'}</p>
+      <p><strong>GN:</strong> ${usuario.gn || 'N/A'}</p>
+      <p><strong>AAA:</strong> ${usuario.aaa || 'N/A'}</p>
+    `;
   }
 </script>
 </body>
