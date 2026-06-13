@@ -6,10 +6,13 @@
   <style>
     body { font-family: sans-serif; background: #f4f4f9; display: flex; justify-content: center; padding: 20px; }
     .card { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 100%; max-width: 400px; }
-    h2 { color: #4a148c; text-align: center; }
-    select, button { width: 100%; margin: 10px 0; padding: 10px; border-radius: 5px; border: 1px solid #ccc; }
-    button { background: #5c6bc0; color: white; border: none; font-weight: bold; cursor: pointer; }
-    #resultado { display: none; }
+    h2 { color: #4a148c; text-align: center; font-size: 1.2em; }
+    hr { border: 0; border-top: 1px dashed #ccc; margin: 20px 0; }
+    label { display: block; margin-top: 15px; font-weight: bold; color: #333; }
+    select, button { width: 100%; margin-top: 5px; padding: 10px; border-radius: 5px; border: 1px solid #ccc; box-sizing: border-box; }
+    button { background: #5c6bc0; color: white; border: none; font-weight: bold; cursor: pointer; margin-top: 20px; }
+    button:hover { background: #3f51b5; }
+    .hidden { display: none; }
   </style>
 </head>
 <body>
@@ -17,77 +20,104 @@
 <div class="card" id="selectorDiv">
   <h2>Dirección Nacional de Adultos en el Movimiento</h2>
   <hr>
-  <label>Seleccione Área Estratégica</label>
-  <select id="selArea" onchange="actualizarComisiones()"><option value="">Seleccione...</option></select>
   
-  <div id="divComision" style="display:none;">
+  <label>Seleccione Área Estratégica</label>
+  <select id="selArea" onchange="gestionarCascada('area')">
+    <option value="">Seleccione...</option>
+  </select>
+  
+  <div id="divComision" class="hidden">
     <label>Seleccione Comisión</label>
-    <select id="selComision" onchange="actualizarNombres()"><option value="">Seleccione...</option></select>
+    <select id="selComision" onchange="gestionarCascada('comision')">
+      <option value="">Seleccione...</option>
+    </select>
   </div>
 
-  <label>Seleccione Nombre</label>
-  <select id="selNombre"><option value="">Seleccione...</option></select>
+  <div id="divNombre" class="hidden">
+    <label>Seleccione Nombre</label>
+    <select id="selNombre">
+      <option value="">Seleccione...</option>
+    </select>
+  </div>
   
   <button onclick="consultar()">Consultar</button>
 </div>
 
-<div class="card" id="resultado">
+<div class="card hidden" id="resultado">
   <h2 id="resNombre"></h2>
   <p><strong>Cargo:</strong> <span id="resCargo"></span></p>
   <button onclick="volver()">Volver a consultar</button>
 </div>
 
 <script>
-  // --- PEGA AQUÍ TU URL DE GOOGLE APPS SCRIPT ---
+  // PEGA AQUÍ TU URL DE GOOGLE APPS SCRIPT
   const URL_API = "https://script.google.com/macros/s/AKfycbzDSHPUh3EwJAWbkJWqr-9W2mhiLeNwadXDQ2GhmrY4iK6iW_kaZ0blE0ubKEA7YfJ-Lw/exec"; 
-  // ----------------------------------------------
 
   let datosGlobales = [];
 
-  // Cargar datos al iniciar
-  fetch(URL_API + "?callback=setData");
+  // Inicializar carga de datos
+  window.onload = () => {
+    const script = document.createElement('script');
+    script.src = URL_API + "?callback=setData";
+    document.body.appendChild(script);
+  };
+
   function setData(data) {
     datosGlobales = data;
     const areas = [...new Set(data.map(d => d.area).filter(a => a))];
-    areas.forEach(a => selArea.innerHTML += `<option value="${a}">${a}</option>`);
+    const sel = document.getElementById('selArea');
+    areas.forEach(a => sel.innerHTML += `<option value="${a}">${a}</option>`);
   }
 
-  function actualizarComisiones() {
-    const area = document.getElementById('selArea').value;
-    const comisiones = [...new Set(datosGlobales.filter(d => d.area === area).map(d => d.comision).filter(c => c && c !== "N/A"))];
-    const div = document.getElementById('divComision');
-    if(comisiones.length > 0) {
-      div.style.display = 'block';
-      selComision.innerHTML = '<option value="">Seleccione...</option>';
-      comisiones.forEach(c => selComision.innerHTML += `<option value="${c}">${c}</option>`);
-    } else {
-      div.style.display = 'none';
-      actualizarNombres();
+  function gestionarCascada(nivel) {
+    const areaVal = document.getElementById('selArea').value;
+    const comVal = document.getElementById('selComision').value;
+
+    if (nivel === 'area') {
+      const comisiones = [...new Set(datosGlobales.filter(d => d.area === areaVal).map(d => d.comision).filter(c => c && c !== "N/A"))];
+      const divCom = document.getElementById('divComision');
+      
+      if (comisiones.length > 0) {
+        divCom.classList.remove('hidden');
+        const selCom = document.getElementById('selComision');
+        selCom.innerHTML = '<option value="">Seleccione...</option>';
+        comisiones.forEach(c => selCom.innerHTML += `<option value="${c}">${c}</option>');
+      } else {
+        divCom.classList.add('hidden');
+      }
+      document.getElementById('divNombre').classList.add('hidden');
     }
-  }
 
-  function actualizarNombres() {
-    const area = document.getElementById('selArea').value;
-    const comision = document.getElementById('selComision').value;
-    const filtrados = datosGlobales.filter(d => d.area === area && (comision === "" || d.comision === comision));
-    selNombre.innerHTML = '<option value="">Seleccione...</option>';
-    filtrados.forEach(d => selNombre.innerHTML += `<option value="${d.nombre}">${d.nombre}</option>`);
+    if (nivel === 'area' || nivel === 'comision') {
+      const filtrados = datosGlobales.filter(d => 
+        d.area === areaVal && (comVal === "" || d.comision === comVal)
+      );
+      
+      if (filtrados.length > 0) {
+        document.getElementById('divNombre').classList.remove('hidden');
+        const selNom = document.getElementById('selNombre');
+        selNom.innerHTML = '<option value="">Seleccione...</option>';
+        filtrados.forEach(d => selNom.innerHTML += `<option value="${d.nombre}">${d.nombre}</option>`);
+      }
+    }
   }
 
   function consultar() {
     const nombre = document.getElementById('selNombre').value;
     const seleccionado = datosGlobales.find(d => d.nombre === nombre);
-    if(seleccionado) {
+    if (seleccionado) {
       document.getElementById('resNombre').innerText = "Nombre: " + seleccionado.nombre;
       document.getElementById('resCargo').innerText = seleccionado.cargo;
-      document.getElementById('selectorDiv').style.display = 'none';
-      document.getElementById('resultado').style.display = 'block';
+      document.getElementById('selectorDiv').classList.add('hidden');
+      document.getElementById('resultado').classList.remove('hidden');
+    } else {
+      alert("Por favor seleccione un nombre válido.");
     }
   }
 
   function volver() {
-    document.getElementById('selectorDiv').style.display = 'block';
-    document.getElementById('resultado').style.display = 'none';
+    document.getElementById('selectorDiv').classList.remove('hidden');
+    document.getElementById('resultado').classList.add('hidden');
   }
 </script>
 </body>
