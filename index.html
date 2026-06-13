@@ -31,27 +31,26 @@
 </div>
 
 <script>
+  // Pega aquí tu URL nueva que termina en /exec
   const URL_API = "https://script.google.com/macros/s/AKfycbzDSHPUh3EwJAWbkJWqr-9W2mhiLeNwadXDQ2GhmrY4iK6iW_kaZ0blE0ubKEA7YfJ-Lw/exec";
   let datosGlobales = [];
 
-  fetch(URL_API, { method: 'GET', mode: 'cors' })
-    .then(res => res.json())
-    .then(data => {
-      datosGlobales = data;
-      const sel = document.getElementById('selArea');
-      const areas = [...new Set(data.map(d => d.area).filter(a => a !== ""))];
-      sel.innerHTML = '<option value="">Seleccione Área...</option>' + areas.map(a => `<option value="${a}">${a}</option>`).join('');
-    })
-    .catch(err => {
-      console.error(err);
-      document.getElementById('selArea').innerHTML = '<option>Error de carga</option>';
-    });
+  // Inyección de script para JSONP (la lógica que te funciona)
+  const script = document.createElement('script');
+  script.src = URL_API + "?callback=setData";
+  document.body.appendChild(script);
+
+  function setData(data) {
+    datosGlobales = data;
+    const areas = [...new Set(data.map(d => d.area))];
+    document.getElementById('selArea').innerHTML = '<option value="">Seleccione Área...</option>' + areas.map(a => `<option value="${a}">${a}</option>`).join('');
+  }
 
   function gestionarCascada(nivel) {
-    const area = document.getElementById('selArea').value;
+    const areaVal = document.getElementById('selArea').value;
     
     if (nivel === 'area') {
-      const comisiones = [...new Set(datosGlobales.filter(d => d.area === area && d.comision !== "N/A" && d.comision !== "").map(d => d.comision))];
+      const comisiones = [...new Set(datosGlobales.filter(d => d.area === areaVal && d.comision !== "N/A" && d.comision !== "").map(d => d.comision))];
       const divCom = document.getElementById('divComision');
       
       if (comisiones.length > 0) {
@@ -68,9 +67,9 @@
   }
 
   function filtrarNombres() {
-    const area = document.getElementById('selArea').value;
-    const comision = document.getElementById('selComision').value;
-    const filtrados = datosGlobales.filter(d => d.area === area && (comision === "" || d.comision === comision));
+    const areaVal = document.getElementById('selArea').value;
+    const comVal = document.getElementById('selComision').value;
+    const filtrados = datosGlobales.filter(d => d.area === areaVal && (comVal === "" || d.comision === comVal));
     document.getElementById('selNombre').innerHTML = '<option value="">Seleccione Nombre...</option>' + filtrados.map(d => `<option value="${d.nombre}">${d.nombre}</option>`).join('');
   }
 
