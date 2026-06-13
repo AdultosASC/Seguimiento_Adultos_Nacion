@@ -2,56 +2,49 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dirección Nacional de Adultos</title>
   <style>
-    :root { --primary: #6366f1; --primary-hover: #4f46e5; --purple-dark: #4c1d95; --bg: #f8fafc; --card-bg: #ffffff; --text: #1e293b; --border: #e2e8f0; }
-    body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 2rem 1rem; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
-    .container { background-color: var(--card-bg); padding: 2.5rem; border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05); width: 100%; max-width: 450px; }
-    .header-institucional { color: var(--purple-dark); font-size: 1.25rem; font-weight: 700; text-align: center; margin-bottom: 1.5rem; border-bottom: 2px dashed var(--border); padding-bottom: 1rem; }
-    .form-group { margin-bottom: 1.5rem; }
-    .label-filtro { display: block; font-size: 0.9rem; font-weight: 700; color: var(--purple-dark); margin-bottom: 0.6rem; }
-    select, button { width: 100%; padding: 0.75rem 1rem; font-size: 1rem; border-radius: 8px; border: 1px solid var(--border); box-sizing: border-box; }
-    button { background-color: var(--primary); color: white; border: none; cursor: pointer; margin-top: 1rem; font-weight: 600; }
-    button:disabled { background-color: var(--border); }
-    .hidden { display: none; }
+    :root { --primary: #6366f1; --purple-dark: #4c1d95; --bg: #f8fafc; --border: #e2e8f0; }
+    body { font-family: sans-serif; background: var(--bg); padding: 2rem; display: flex; justify-content: center; }
+    .container { background: white; padding: 2rem; border-radius: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 100%; max-width: 400px; }
+    .hidden { display: none !important; }
+    select, button { width: 100%; margin-top: 10px; padding: 10px; border-radius: 8px; border: 1px solid var(--border); }
+    button { background: var(--primary); color: white; border: none; cursor: pointer; }
   </style>
 </head>
 <body>
 
 <div id="paginaFiltros" class="container">
-  <div class="header-institucional">Dirección Nacional de <br>Adultos en el Movimiento</div>
+  <h3>Dirección Nacional de Adultos</h3>
+  <label>Área Estratégica</label>
+  <select id="selArea" onchange="gestionarCascada('area')"><option value="">Cargando...</option></select>
   
-  <div class="form-group">
-    <label class="label-filtro">Área Estratégica</label>
-    <select id="selArea" onchange="gestionarCascada('area')"><option value="">Cargando...</option></select>
+  <div id="divComision" class="hidden">
+    <label>Comisión</label>
+    <select id="selComision" onchange="gestionarCascada('comision')"><option value="">Seleccione...</option></select>
   </div>
 
-  <div id="divComision" class="form-group hidden">
-    <label class="label-filtro">Comisión</label>
-    <select id="selComision" onchange="gestionarCascada('comision')"><option value="">-- Seleccione --</option></select>
-  </div>
-
-  <div id="divNombre" class="form-group hidden">
-    <label class="label-filtro">Nombre</label>
+  <div id="divNombre" class="hidden">
+    <label>Nombre</label>
     <select id="selNombre" onchange="document.getElementById('btnConsultar').disabled = false">
-      <option value="">-- Seleccione --</option>
+      <option value="">Seleccione...</option>
     </select>
   </div>
-
-  <button id="btnConsultar" disabled onclick="consultar()">Consultar</button>
+  <button id="btnConsultar" disabled onclick="alert('Consultando...')">Consultar</button>
 </div>
 
 <script>
   // PEGA TU URL DE APPS SCRIPT AQUÍ
-  const URL_API = "https://script.google.com/macros/s/AKfycbzDSHPUh3EwJAWbkJWqr-9W2mhiLeNwadXDQ2GhmrY4iK6iW_kaZ0blE0ubKEA7YfJ-Lw/exec"; 
+  const URL_API = "TU_URL_DE_APPS_SCRIPT_AQUI"; 
   let datosGlobales = [];
 
-  window.onload = () => {
+  // Función para cargar datos
+  function cargarDatos() {
     const script = document.createElement('script');
     script.src = URL_API + "?callback=setData";
+    script.onerror = () => document.getElementById('selArea').innerHTML = '<option>Error de conexión</option>';
     document.body.appendChild(script);
-  };
+  }
 
   function setData(data) {
     datosGlobales = data;
@@ -67,14 +60,14 @@
 
     if (nivel === 'area') {
       const comisiones = [...new Set(datosGlobales.filter(d => d.area === areaVal && d.comision !== "N/A").map(d => d.comision).filter(c => c))];
-      const divCom = document.getElementById('divComision');
+      const div = document.getElementById('divComision');
       if (comisiones.length > 0) {
-        divCom.classList.remove('hidden');
-        const selCom = document.getElementById('selComision');
-        selCom.innerHTML = '<option value="">Seleccione Comisión...</option>';
-        comisiones.forEach(c => selCom.innerHTML += `<option value="${c}">${c}</option>`);
+        div.classList.remove('hidden');
+        const sel = document.getElementById('selComision');
+        sel.innerHTML = '<option value="">Seleccione Comisión...</option>';
+        comisiones.forEach(c => sel.innerHTML += `<option value="${c}">${c}</option>`);
       } else {
-        divCom.classList.add('hidden');
+        div.classList.add('hidden');
       }
       document.getElementById('divNombre').classList.add('hidden');
     }
@@ -83,17 +76,14 @@
       const filtrados = datosGlobales.filter(d => d.area === areaVal && (comVal === "" || d.comision === comVal));
       if (filtrados.length > 0) {
         document.getElementById('divNombre').classList.remove('hidden');
-        const selNom = document.getElementById('selNombre');
-        selNom.innerHTML = '<option value="">Seleccione Nombre...</option>';
-        filtrados.forEach(d => selNom.innerHTML += `<option value="${d.nombre}">${d.nombre}</option>`);
+        const sel = document.getElementById('selNombre');
+        sel.innerHTML = '<option value="">Seleccione Nombre...</option>';
+        filtrados.forEach(d => sel.innerHTML += `<option value="${d.nombre}">${d.nombre}</option>`);
       }
     }
   }
 
-  function consultar() {
-    const nombre = document.getElementById('selNombre').value;
-    alert("Redirigiendo a ficha de: " + nombre); // Aquí puedes añadir lógica de redirección
-  }
+  cargarDatos();
 </script>
 </body>
 </html>
