@@ -2,13 +2,12 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Dirección Nacional de Adultos</title>
+  <title>Consulta DNA</title>
   <style>
-    body { font-family: sans-serif; background: #f8fafc; padding: 2rem; display: flex; justify-content: center; }
-    .container { background: white; padding: 2rem; border-radius: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 100%; max-width: 400px; }
+    body { font-family: sans-serif; padding: 2rem; background: #f8fafc; }
+    .container { background: white; padding: 2rem; border-radius: 16px; width: 100%; max-width: 400px; margin: auto; }
+    select, button { width: 100%; margin-top: 10px; padding: 10px; }
     .hidden { display: none !important; }
-    select, button { width: 100%; margin-top: 10px; padding: 10px; border-radius: 8px; border: 1px solid #ccc; }
-    button { background: #6366f1; color: white; border: none; cursor: pointer; }
   </style>
 </head>
 <body>
@@ -16,61 +15,44 @@
 <div class="container">
   <h3>Dirección Nacional de Adultos</h3>
   <label>Área Estratégica</label>
-  <select id="selArea" onchange="gestionarCascada('area')"><option>Cargando datos...</option></select>
+  <select id="selArea" onchange="gestionarCascada('area')"><option>Cargando...</option></select>
   
   <div id="divComision" class="hidden">
     <label>Comisión</label>
-    <select id="selComision" onchange="gestionarCascada('comision')"><option value="">Seleccione...</option></select>
+    <select id="selComision" onchange="gestionarCascada('comision')"></select>
   </div>
 
   <div id="divNombre" class="hidden">
     <label>Nombre</label>
-    <select id="selNombre" onchange="document.getElementById('btnConsultar').disabled = false"><option value="">Seleccione...</option></select>
+    <select id="selNombre"></select>
   </div>
-  <button id="btnConsultar" disabled onclick="consultar()">Consultar</button>
+  <button onclick="alert('Consultando...')">Consultar</button>
 </div>
 
 <script>
-  const URL_API = "https://script.google.com/macros/s/AKfycbw4okkl5_lnmqxK6b2eFL1uG6f92_Fu8BHDun4tvGtrexAECEAdEk1Kf3P9AfL29EH4/exec"; 
+  // PEGA AQUÍ TU URL DE LA WEB APP (la que termina en /exec)
+  const URL_API = "TU_URL_AQUI"; 
   let datosGlobales = [];
 
-  // La forma que siempre ha funcionado: Inyectar el script
-  const script = document.createElement('script');
-  script.src = URL_API + "?callback=setData";
-  document.body.appendChild(script);
-
-  function setData(data) {
-    datosGlobales = data;
-    const sel = document.getElementById('selArea');
-    const areas = [...new Set(data.map(d => d.area).filter(a => a))];
-    sel.innerHTML = '<option value="">Seleccione Área...</option>' + areas.map(a => `<option value="${a}">${a}</option>`).join('');
-  }
+  fetch(URL_API)
+    .then(res => res.json())
+    .then(data => {
+      datosGlobales = data;
+      const areas = [...new Set(data.map(d => d.area))];
+      document.getElementById('selArea').innerHTML = '<option value="">Seleccione Área...</option>' + areas.map(a => `<option value="${a}">${a}</option>`).join('');
+    });
 
   function gestionarCascada(nivel) {
-    const areaVal = document.getElementById('selArea').value;
+    const area = document.getElementById('selArea').value;
     if (nivel === 'area') {
-      const comisiones = [...new Set(datosGlobales.filter(d => d.area === areaVal && d.comision !== "N/A").map(d => d.comision))];
-      const div = document.getElementById('divComision');
-      if (comisiones.length > 0) {
-        div.classList.remove('hidden');
-        document.getElementById('selComision').innerHTML = '<option value="">Seleccione Comisión...</option>' + comisiones.map(c => `<option value="${c}">${c}</option>`).join('');
-      } else {
-        div.classList.add('hidden');
-      }
-      document.getElementById('divNombre').classList.remove('hidden');
+      const coms = [...new Set(datosGlobales.filter(d => d.area === area).map(d => d.comision))];
+      document.getElementById('divComision').classList.toggle('hidden', coms.length === 0);
+      document.getElementById('selComision').innerHTML = coms.map(c => `<option value="${c}">${c}</option>`).join('');
     }
-    filtrarNombres();
-  }
-
-  function filtrarNombres() {
-    const areaVal = document.getElementById('selArea').value;
-    const comVal = document.getElementById('selComision').value;
-    const filtrados = datosGlobales.filter(d => d.area === areaVal && (comVal === "" || d.comision === comVal));
-    document.getElementById('selNombre').innerHTML = '<option value="">Seleccione Nombre...</option>' + filtrados.map(d => `<option value="${d.nombre}">${d.nombre}</option>`).join('');
-  }
-
-  function consultar() {
-    alert("Consultando: " + document.getElementById('selNombre').value);
+    const com = document.getElementById('selComision').value;
+    const filtrados = datosGlobales.filter(d => d.area === area && (com === "" || d.comision === com));
+    document.getElementById('divNombre').classList.remove('hidden');
+    document.getElementById('selNombre').innerHTML = filtrados.map(d => `<option value="${d.nombre}">${d.nombre}</option>`).join('');
   }
 </script>
 </body>
