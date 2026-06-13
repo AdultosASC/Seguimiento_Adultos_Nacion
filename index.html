@@ -16,7 +16,7 @@
 <div class="container">
   <h3>Dirección Nacional de Adultos</h3>
   <label>Área Estratégica</label>
-  <select id="selArea" onchange="gestionarCascada('area')"><option>Cargando datos...</option></select>
+  <select id="selArea" onchange="gestionarCascada('area')"><option value="">Cargando...</option></select>
   
   <div id="divComision" class="hidden">
     <label>Comisión</label>
@@ -31,7 +31,8 @@
 </div>
 
 <script>
-  const URL_API = "https://script.google.com/macros/s/AKfycbzDSHPUh3EwJAWbkJWqr-9W2mhiLeNwadXDQ2GhmrY4iK6iW_kaZ0blE0ubKEA7YfJ-Lw/exec";
+  // PEGA AQUÍ TU URL NUEVA DE APPS SCRIPT
+  const URL_API = "https://script.google.com/macros/s/AKfycbzDSHPUh3EwJAWbkJWqr-9W2mhiLeNwadXDQ2GhmrY4iK6iW_kaZ0blE0ubKEA7YfJ-Lw/exec"; 
   let datosGlobales = [];
 
   fetch(URL_API)
@@ -39,29 +40,38 @@
     .then(data => {
       datosGlobales = data;
       const sel = document.getElementById('selArea');
-      const areas = [...new Set(data.map(d => d.area))];
+      // Obtener áreas únicas y filtrar vacíos
+      const areas = [...new Set(data.map(d => d.area).filter(a => a !== ""))];
       sel.innerHTML = '<option value="">Seleccione Área...</option>' + areas.map(a => `<option value="${a}">${a}</option>`).join('');
     })
     .catch(err => {
-      console.error(err);
-      document.getElementById('selArea').innerHTML = '<option>Error de carga. Revisa la consola.</option>';
+      console.error("Error:", err);
+      document.getElementById('selArea').innerHTML = '<option>Error de carga</option>';
     });
 
   function gestionarCascada(nivel) {
     const area = document.getElementById('selArea').value;
-    const comision = document.getElementById('selComision').value;
-
+    
     if (nivel === 'area') {
-      const comisiones = [...new Set(datosGlobales.filter(d => d.area === area && d.comision !== "N/A").map(d => d.comision))];
+      const comisiones = [...new Set(datosGlobales.filter(d => d.area === area && d.comision !== "N/A" && d.comision !== "").map(d => d.comision))];
+      const divCom = document.getElementById('divComision');
       if (comisiones.length > 0) {
-        document.getElementById('divComision').classList.remove('hidden');
+        divCom.classList.remove('hidden');
         document.getElementById('selComision').innerHTML = '<option value="">Seleccione Comisión...</option>' + comisiones.map(c => `<option value="${c}">${c}</option>`).join('');
       } else {
-        document.getElementById('divComision').classList.add('hidden');
+        divCom.classList.add('hidden');
       }
       document.getElementById('divNombre').classList.remove('hidden');
+      filtrarNombres();
+    } else {
+      filtrarNombres();
     }
-    
+  }
+
+  function filtrarNombres() {
+    const area = document.getElementById('selArea').value;
+    const comision = document.getElementById('selComision').value;
+    // Si la comisión está oculta, el valor será ""
     const filtrados = datosGlobales.filter(d => d.area === area && (comision === "" || d.comision === comision));
     document.getElementById('selNombre').innerHTML = '<option value="">Seleccione Nombre...</option>' + filtrados.map(d => `<option value="${d.nombre}">${d.nombre}</option>`).join('');
   }
