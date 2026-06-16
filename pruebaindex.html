@@ -5,22 +5,26 @@
   <title>Dirección Nacional de Adultos</title>
   <style>
     body { font-family: sans-serif; background: #f8fafc; padding: 2rem; display: flex; justify-content: center; }
-    .container { background: white; padding: 2.5rem; border-radius: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 100%; max-width: 600px; }
+    .container { background: white; padding: 2rem; border-radius: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 100%; max-width: 600px; }
     .field-wrapper { margin-bottom: 1.5rem; }
     .hidden { display: none !important; }
     select, button { width: 100%; margin-top: 5px; padding: 12px; border-radius: 8px; border: 1px solid #ccc; box-sizing: border-box; }
     button { background: #6366f1; color: white; border: none; cursor: pointer; font-weight: bold; }
     button:disabled { background: #cbd5e1; }
-    /* Grid más amplio y espaciado */
+    
     .grid-reporte { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 20px; }
     .card-resaltada { background: #eef2ff; padding: 20px; border-radius: 8px; border-left: 4px solid #6366f1; margin-top: 25px; text-align: center; }
-    .nav-buttons { display: flex; gap: 10px; margin-bottom: 20px; }
+    .card-asesor { background: #f1f5f9; padding: 15px; border-radius: 8px; margin-top: 15px; border: 1px solid #e2e8f0; }
+    
+    .seccion-titulo { font-size: 1.2rem; font-weight: bold; margin-top: 30px; border-bottom: 2px solid #6366f1; padding-bottom: 5px; }
+    .item-fila { display: flex; align-items: center; margin-top: 10px; gap: 10px; }
+    .status { font-size: 1.2rem; }
   </style>
 </head>
 <body>
 
 <div class="container" id="paginaFiltros">
-  <h3>Dirección nacional de Adultos</h3>
+  <h3>Dirección NNacional de Adultos</h3>
   <div class="field-wrapper">
     <label>Área Estratégica</label>
     <select id="selectA" onchange="filtrarNombres()"><option value="">Cargando...</option></select>
@@ -50,8 +54,7 @@
   fetch(API_URL).then(res => res.json()).then(data => {
     datosGlobales = data;
     const areas = [...new Set(data.map(d => d.area).filter(a => a && a.trim() !== ""))];
-    document.getElementById('selectA').innerHTML = '<option value="">Seleccione Área...</option>' + 
-      areas.map(a => `<option value="${a}">${a}</option>`).join('');
+    document.getElementById('selectA').innerHTML = '<option value="">Seleccione Área...</option>' + areas.map(a => `<option value="${a}">${a}</option>`).join('');
   });
 
   function filtrarNombres() {
@@ -60,25 +63,11 @@
     if (areaVal) {
       divN.classList.remove('hidden');
       const filtrados = datosGlobales.filter(d => d.area === areaVal && d.nombre && d.nombre.trim() !== "");
-      document.getElementById('selectN').innerHTML = '<option value="">Seleccione Nombre...</option>' + 
-        filtrados.map(d => `<option value="${d.nombre}">${d.nombre}</option>`).join('');
+      document.getElementById('selectN').innerHTML = '<option value="">Seleccione Nombre...</option>' + filtrados.map(d => `<option value="${d.nombre}">${d.nombre}</option>`).join('');
     } else { divN.classList.add('hidden'); }
   }
 
-  function calcularTiempo(fechaFinal) {
-    let hoy = new Date();
-    let d2 = new Date(fechaFinal);
-    if (d2 < hoy) return "Expirado";
-    
-    let años = d2.getFullYear() - hoy.getFullYear();
-    let meses = d2.getMonth() - hoy.getMonth();
-    let dias = d2.getDate() - hoy.getDate();
-
-    if (dias < 0) { meses--; dias += new Date(hoy.getFullYear(), hoy.getMonth() + 1, 0).getDate(); }
-    if (meses < 0) { años--; meses += 12; }
-    
-    return `${años} años, ${meses} meses y ${dias} días`;
-  }
+  function icon(val) { return (val === true || val === 'TRUE' || val == 1) ? '✅' : '❌'; }
 
   function consultar() {
     const u = datosGlobales.find(d => d.nombre === document.getElementById('selectN').value);
@@ -91,20 +80,30 @@
     let fechaInicio = new Date(u.fechaNombramiento);
     let fechaFin = new Date(fechaInicio);
     fechaFin.setMonth(fechaInicio.getMonth() + parseInt(u.duracionMeses || 0));
+    
+    let hoy = new Date();
+    let años = fechaFin.getFullYear() - hoy.getFullYear();
+    let meses = fechaFin.getMonth() - hoy.getMonth();
+    let dias = fechaFin.getDate() - hoy.getDate();
+    if (dias < 0) { meses--; dias += 30; }
+    if (meses < 0) { años--; meses += 12; }
+    let tiempoRestante = (fechaFin < hoy) ? "Expirado" : `${años} años, ${meses} meses y ${dias} días`;
 
     document.getElementById('nombreReporte').innerText = "Información General";
     document.getElementById('detalleReporte').innerHTML = `
       <div class="grid-reporte">
-        <p><strong>Área Estratégica:</strong><br>${u.area}</p>
-        <p><strong>Nombre:</strong><br>${u.nombre}</p>
-        <p><strong>Cargo:</strong><br>${u.cargo}</p>
-        <p><strong>Metodología:</strong><br>${u.metodologia}</p>
-        <p><strong>Fecha Nombramiento:</strong><br>${u.fechaNombramiento}</p>
-        <p><strong>Fecha Finalización:</strong><br>${fechaFin.toISOString().split('T')[0]}</p>
+        <p><strong>Área:</strong><br>${u.area}</p><p><strong>Nombre:</strong><br>${u.nombre}</p>
+        <p><strong>Cargo:</strong><br>${u.cargo}</p><p><strong>Metodología:</strong><br>${u.metodologia}</p>
+        <p><strong>F. Nombramiento:</strong><br>${u.fechaNombramiento}</p><p><strong>F. Finalización:</strong><br>${fechaFin.toISOString().split('T')[0]}</p>
       </div>
-      <div class="card-resaltada">
-        <strong>Tiempo restante en el cargo:</strong><br>${calcularTiempo(fechaFin)}
-      </div>
+      <div class="card-resaltada"><strong>Tiempo restante en el cargo:</strong><br>${tiempoRestante}</div>
+      <div class="card-asesor"><strong>Asesor Personal:</strong> ${u.asesorPersonal}</div>
+      
+      <div class="seccion-titulo">Proceso de Formación Básica</div>
+      <div class="item-fila"><span class="status">${icon(u.valoracionInicial)}</span> <strong>Valoración Inicial:</strong> ${u.fechaValoracionInicial || ''}</div>
+      <div class="item-fila"><span class="status">${icon(u.desarrolloPPD)}</span> <strong>En desarrollo PPD</strong></div>
+      <div class="item-fila"><span class="status">${icon(u.valoracionFinal)}</span> <strong>Valoración Final:</strong> ${u.fechaValoracionFinal || ''}</div>
+      <div class="item-fila"><span class="status">${icon(u.gn)}</span> <strong>Gestor Nacional:</strong> ${u.gestorNacionalFecha || ''}</div>
     `;
   }
 </script>
