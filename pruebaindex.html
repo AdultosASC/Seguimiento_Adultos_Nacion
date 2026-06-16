@@ -4,31 +4,28 @@
   <meta charset="UTF-8">
   <title>Dirección Nacional de Adultos</title>
   <style>
-    body { font-family: 'Segoe UI', sans-serif; background: #f8fafc; padding: 1.5rem; }
+    body { font-family: 'Segoe UI', system-ui, sans-serif; background: #f8fafc; padding: 1.5rem; }
     .container { background: white; padding: 2rem; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); width: 100%; max-width: 650px; margin: auto; }
     .hidden { display: none !important; }
     select, button, input { width: 100%; padding: 12px; margin-top: 8px; border-radius: 10px; border: 1px solid #e2e8f0; }
     button { background: #4f46e5; color: white; border: none; cursor: pointer; font-weight: 600; }
     
-    /* Navegación y Secciones */
     .nav-buttons { display: flex; gap: 10px; margin-bottom: 20px; justify-content: center; }
     .nav-buttons button { width: auto; padding: 8px 16px; font-size: 0.85rem; background: #e0e7ff; color: #4f46e5; }
     .section-card { background: #fff; border: 1px solid #e2e8f0; padding: 1.5rem; border-radius: 16px; margin-bottom: 1.5rem; }
     .seccion-titulo { color: #4f46e5; font-weight: 800; text-transform: uppercase; margin-bottom: 1rem; border-left: 4px solid #4f46e5; padding-left: 10px; }
     
-    /* Archivos */
     .file-item { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #f1f5f9; }
     .btn-icon { width: 30px; height: 30px; padding: 4px; cursor: pointer; border: none; background: none; }
     
-    .grid-reporte { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; align-items: center; }
-    .card-resaltada { background: #4f46e5; color: white; padding: 1.2rem; border-radius: 12px; text-align: center; margin: 1rem 0; }
+    .grid-reporte { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+    .resaltado-tiempo { background: #4f46e5; color: white; padding: 10px; border-radius: 8px; font-weight: bold; margin-top: 10px; text-align: center; }
   </style>
 </head>
 <body>
 
 <div class="container" id="paginaFiltros">
-  <h2 style="text-align:center">Dirección Nacional de Adultos en el Movimiento</h2>
+  <h2 style="text-align:center">Dirección Nacional de Adultos M</h2>
   <div class="field-wrapper"><label>Área Estratégica</label><select id="selectA" onchange="filtrarNombres()"><option value="">Cargando...</option></select></div>
   <div id="grupoN" class="hidden"><label>Nombre</label><select id="selectN" onchange="document.getElementById('btnConsultar').disabled = false"><option value="">Seleccione...</option></select></div>
   <button id="btnConsultar" disabled onclick="consultar()">Consultar Datos</button>
@@ -36,11 +33,10 @@
 
 <div class="container hidden" id="paginaReporte">
   <div class="nav-buttons">
-    <button onclick="mostrarSeccion('detalleReporte')">Información Personal</button>
+    <button onclick="mostrarSeccion()">Información Personal</button>
     <button onclick="alert('General')">General</button>
     <button onclick="alert('Área')">Área</button>
   </div>
-  
   <div id="detalleReporte"></div>
   
   <div class="section-card">
@@ -72,7 +68,7 @@
     document.getElementById('selectA').innerHTML = '<option value="">Seleccione Área...</option>' + areas.map(a => `<option value="${a}">${a}</option>`).join('');
   });
 
-  function getIcon(v) { return (v == true || v == 'TRUE' || v == 1) ? '<svg width="20" height="20" fill="green" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>' : '<svg width="20" height="20" fill="red" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>'; }
+  function getIcon(v) { return (v == true || v == 'TRUE' || v == 1) ? '<svg width="20" fill="green" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>' : '<svg width="20" fill="red" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>'; }
 
   function consultar() {
     usuarioActual = datosGlobales.find(d => d.nombre === document.getElementById('selectN').value);
@@ -87,13 +83,19 @@
 
     document.getElementById('detalleReporte').innerHTML = `
       <div class="section-card">
-        <div class="seccion-titulo">Información General</div>
-        <div class="grid-reporte"><p><strong>Área:</strong><br>${usuarioActual.area}</p><p><strong>Cargo:</strong><br>${usuarioActual.cargo}</p></div>
-        <div class="card-resaltada">Tiempo restante: ${resto}</div>
+        <div class="seccion-titulo">INFORMACIÓN GENERAL</div>
+        <p><strong>${usuarioActual.nombre}</strong></p>
+        <div class="grid-reporte">
+          <p><strong>Área:</strong><br>${usuarioActual.area}</p><p><strong>Cargo:</strong><br>${usuarioActual.cargo}</p>
+          <p><strong>Nombramiento:</strong><br>${usuarioActual.nombramiento}</p><p><strong>Metodología:</strong><br>${usuarioActual.metodologia}</p>
+          <p><strong>Fecha de nombramiento:</strong><br>${usuarioActual.fechaNombramiento}</p><p><strong>Duración (meses):</strong><br>${usuarioActual.duracionMeses}</p>
+          <p><strong>Fecha de finalización:</strong><br>${fFin.toISOString().split('T')[0]}</p>
+        </div>
+        <div class="resaltado-tiempo">Tiempo restante en el cargo: ${resto}</div>
       </div>
       <div class="section-card">
         <div class="seccion-titulo">Formación Básica</div>
-        <div class="form-grid">
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
           <div>${getIcon(usuarioActual.valoracionInicial)} Val. Inicial</div><div>F: ${usuarioActual.fechaValoracionInicial || '--'}</div>
           <div>${getIcon(usuarioActual.desarrolloPPD)} PPD</div><div></div>
           <div>${getIcon(usuarioActual.valoracionFinal)} Val. Final</div><div>F: ${usuarioActual.fechaValoracionFinal || '--'}</div>
@@ -102,7 +104,7 @@
       </div>
       <div class="section-card">
         <div class="seccion-titulo">Perfeccionamiento Continuo</div>
-        <div class="form-grid">
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
           <div>${getIcon(usuarioActual.pcValoracionInicial)} Val. Inicial</div><div>F: ${usuarioActual.pcFechaValoracionInicial || '--'}</div>
           <div>${getIcon(usuarioActual.pcDesarrolloPPD)} PPD</div><div></div>
           <div>${getIcon(usuarioActual.pcValoracionFinal)} Val. Final</div><div>F: ${usuarioActual.pcFechaValoracionFinal || '--'}</div>
@@ -116,40 +118,16 @@
     fetch(`${API_URL}?accion=listarFiles&urlCarpeta=${usuarioActual.carpetaDrive}`)
       .then(r => r.json()).then(res => {
         document.getElementById('listaArchivos').innerHTML = res.archivos.map(f => `
-          <div class="file-item">
-            <span>${f.nombre}</span>
-            <div>
-              <a href="${f.url}" target="_blank" class="btn-icon"><svg width="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg></a>
-              <button class="btn-icon" onclick="eliminarArchivo('${f.id}')"><svg width="20" viewBox="0 0 24 24" fill="red"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg></button>
-            </div>
-          </div>`).join('');
+          <div class="file-item"><span>${f.nombre}</span><div>
+            <a href="${f.url}" target="_blank" class="btn-icon"><svg width="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg></a>
+            <button class="btn-icon" onclick="eliminarArchivo('${f.id}')"><svg width="20" viewBox="0 0 24 24" fill="red"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg></button>
+          </div></div>`).join('');
       });
   }
 
-  function eliminarArchivo(id) {
-    if(!confirm("¿Eliminar archivo?")) return;
-    fetch(API_URL, { method: 'POST', body: JSON.stringify({ accion: 'eliminar', id: id }) }).then(() => listarArchivos());
-  }
-
-  function subirArchivo() {
-    const f = document.getElementById('inputArchivo').files[0];
-    const r = new FileReader();
-    r.onload = (e) => {
-      fetch(API_URL, { method: 'POST', body: JSON.stringify({ base64: e.target.result.split(',')[1], nombre: usuarioActual.nombre + "_" + document.getElementById('tipoArchivo').value, mimeType: f.type, idCarpeta: usuarioActual.carpetaDrive }) })
-        .then(() => { alert("Subido"); listarArchivos(); });
-    };
-    r.readAsDataURL(f);
-  }
-
-  function filtrarNombres() {
-    const areaVal = document.getElementById('selectA').value;
-    const divN = document.getElementById('grupoN');
-    if (areaVal) {
-      divN.classList.remove('hidden');
-      const filtrados = datosGlobales.filter(d => d.area === areaVal && d.nombre && d.nombre.trim() !== "");
-      document.getElementById('selectN').innerHTML = '<option value="">Seleccione Nombre...</option>' + filtrados.map(d => `<option value="${d.nombre}">${d.nombre}</option>`).join('');
-    } else { divN.classList.add('hidden'); }
-  }
+  function eliminarArchivo(id) { if(confirm("¿Eliminar?")) fetch(API_URL, { method: 'POST', body: JSON.stringify({ accion: 'eliminar', id: id }) }).then(() => listarArchivos()); }
+  function subirArchivo() { const f = document.getElementById('inputArchivo').files[0]; const r = new FileReader(); r.onload = (e) => { fetch(API_URL, { method: 'POST', body: JSON.stringify({ base64: e.target.result.split(',')[1], nombre: usuarioActual.nombre + "_" + document.getElementById('tipoArchivo').value, mimeType: f.type, idCarpeta: usuarioActual.carpetaDrive }) }).then(() => { alert("Subido"); listarArchivos(); }); }; r.readAsDataURL(f); }
+  function filtrarNombres() { const val = document.getElementById('selectA').value, divN = document.getElementById('grupoN'); if(val) { divN.classList.remove('hidden'); const filtrados = datosGlobales.filter(d => d.area === val && d.nombre); document.getElementById('selectN').innerHTML = '<option value="">Seleccione Nombre...</option>' + filtrados.map(d => `<option value="${d.nombre}">${d.nombre}</option>`).join(''); } else { divN.classList.add('hidden'); } }
 </script>
 </body>
 </html>
