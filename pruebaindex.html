@@ -16,14 +16,17 @@
     .seccion-titulo { color: #4f46e5; font-weight: 800; text-transform: uppercase; margin-bottom: 1rem; border-left: 4px solid #4f46e5; padding-left: 10px; }
     .file-item { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #f1f5f9; }
     .btn-icon { width: 30px; height: 30px; padding: 4px; cursor: pointer; border: none; background: none; }
-    table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
-    th, td { padding: 8px; border: 1px solid #e2e8f0; text-align: center; }
+    .grid-reporte { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; align-items: center; }
+    .card-resaltada { background: #4f46e5; color: white; padding: 1.2rem; border-radius: 12px; text-align: center; margin: 1rem 0; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.75rem; margin-top: 10px; }
+    th, td { padding: 6px; border: 1px solid #e2e8f0; text-align: center; }
   </style>
 </head>
 <body>
 
 <div class="container" id="paginaFiltros">
-  <h2 style="text-align:center">Dirección Nacional de Adultos m</h2>
+  <h2 style="text-align:center">Dirección Nacional de Adultos MM</h2>
   <div class="field-wrapper"><label>Área Estratégica</label><select id="selectA" onchange="filtrarNombres()"><option value="">Cargando...</option></select></div>
   <div id="grupoN" class="hidden"><label>Nombre</label><select id="selectN" onchange="document.getElementById('btnConsultar').disabled = false"><option value="">Seleccione...</option></select></div>
   <button id="btnConsultar" disabled onclick="consultar()">Consultar Datos</button>
@@ -57,16 +60,17 @@
   </div>
   
   <div id="dashBoard" class="hidden section-card">
-    <div class="seccion-titulo">Consolidado Formación</div>
+    <div class="seccion-titulo">Consolidado Formación Básica</div>
     <canvas id="chartBasica"></canvas>
+    <div class="seccion-titulo" style="margin-top:20px">Consolidado Perfeccionamiento</div>
+    <canvas id="chartPc"></canvas>
   </div>
 
   <div id="vistaArea" class="hidden section-card">
     <div class="seccion-titulo">Información por Área</div>
-    <select id="filtroArea" onchange="actualizarComisiones(); renderizarTablaArea();"></select>
+    <select id="filtroArea" onchange="actualizarComisiones()"><option value="">Seleccione Área...</option></select>
     <select id="filtroComision" onchange="renderizarTablaArea()"><option value="">Todas las comisiones</option></select>
     <div id="tablaAreaContainer" style="overflow-x:auto; margin-top:20px"></div>
-    <button onclick="alert('Descarga en construcción')">Descargar Informe</button>
   </div>
   
   <button onclick="location.reload()" style="background:#64748b">Volver al inicio</button>
@@ -82,58 +86,49 @@
     document.getElementById('selectA').innerHTML = '<option value="">Seleccione Área...</option>' + areas.map(a => `<option value="${a}">${a}</option>`).join('');
   });
 
-  function filtrarNombres() {
-    const areaVal = document.getElementById('selectA').value;
-    const divN = document.getElementById('grupoN');
-    if (areaVal) {
-      divN.classList.remove('hidden');
-      const filtrados = datosGlobales.filter(d => d.area === areaVal && d.nombre);
-      document.getElementById('selectN').innerHTML = '<option value="">Seleccione Nombre...</option>' + filtrados.map(d => `<option value="${d.nombre}">${d.nombre}</option>`).join('');
-    } else { divN.classList.add('hidden'); }
-  }
-
   function cambiarVista(id) {
     document.getElementById('vistaInformacionPersonal').classList.toggle('hidden', id !== 'vistaInformacionPersonal');
     document.getElementById('dashBoard').classList.toggle('hidden', id !== 'dashBoard');
     document.getElementById('vistaArea').classList.toggle('hidden', id !== 'vistaArea');
+    if(id === 'dashBoard') generarGraficos();
     if(id === 'vistaArea') prepararFiltrosArea();
   }
 
-  function prepararFiltrosArea() {
-    const areas = [...new Set(datosGlobales.map(d => d.area))];
-    document.getElementById('filtroArea').innerHTML = '<option value="">Seleccione Área...</option>' + areas.map(a => `<option value="${a}">${a}</option>`).join('');
+  function filtrarNombres() {
+    const val = document.getElementById('selectA').value;
+    const divN = document.getElementById('grupoN');
+    if (val) {
+      divN.classList.remove('hidden');
+      const filtrados = datosGlobales.filter(d => d.area === val && d.nombre);
+      document.getElementById('selectN').innerHTML = '<option value="">Seleccione Nombre...</option>' + filtrados.map(d => `<option value="${d.nombre}">${d.nombre}</option>`).join('');
+    } else { divN.classList.add('hidden'); }
   }
-
-  function actualizarComisiones() {
-    const area = document.getElementById('filtroArea').value;
-    const coms = [...new Set(datosGlobales.filter(d => d.area === area).map(d => d.comision))];
-    document.getElementById('filtroComision').innerHTML = '<option value="">Todas las comisiones</option>' + coms.map(c => `<option value="${c}">${c}</option>`).join('');
-  }
-
-  function renderizarTablaArea() {
-    const area = document.getElementById('filtroArea').value;
-    const com = document.getElementById('filtroComision').value;
-    let filtrados = datosGlobales.filter(d => d.area === area && (com === "" || d.comision == com));
-    let html = `<table><tr><th>Nombre</th><th>FB: VI</th><th>FB: PPD</th><th>FB: VF</th><th>FB: GN</th><th>PC: VI</th><th>PC: PPD</th><th>PC: VF</th><th>PC: AAA</th></tr>`;
-    filtrados.forEach(f => {
-      html += `<tr><td>${f.nombre}</td><td>${getIcon(f.valoracionInicial)}</td><td>${getIcon(f.desarrolloPPD)}</td><td>${getIcon(f.valoracionFinal)}</td><td>${getIcon(f.gn)}</td><td>${getIcon(f.pcValoracionInicial)}</td><td>${getIcon(f.pcDesarrolloPPD)}</td><td>${getIcon(f.pcValoracionFinal)}</td><td>${getIcon(f.aaa)}</td></tr>`;
-    });
-    document.getElementById('tablaAreaContainer').innerHTML = html + "</table>";
-  }
-
-  function getIcon(v) { return (v == true || v == 'TRUE' || v == 1) ? '✅' : '❌'; }
 
   function consultar() {
     usuarioActual = datosGlobales.find(d => d.nombre === document.getElementById('selectN').value);
     document.getElementById('paginaFiltros').classList.add('hidden');
     document.getElementById('paginaReporte').classList.remove('hidden');
     if (usuarioActual.lider == true || usuarioActual.lider == "TRUE" || usuarioActual.lider == 1) document.getElementById('areaAdmin').classList.remove('hidden');
-    // ... [código original de renderizado de secciones 1, 2, 3] ...
+    
+    let hoy = new Date(), fN = new Date(usuarioActual.fechaNombramiento), fFin = new Date(fN);
+    fFin.setMonth(fN.getMonth() + parseInt(usuarioActual.duracionMeses || 0));
+    let y = fFin.getFullYear() - hoy.getFullYear(), m = fFin.getMonth() - hoy.getMonth(), d = fFin.getDate() - hoy.getDate();
+    if(d < 0) { m--; d += 30; } if(m < 0) { y--; m += 12; }
+    let resto = (fFin < hoy) ? "Expirado" : `${y} años, ${m} meses y ${d} días`;
+
+    document.getElementById('detalleReporte').innerHTML = `<div class="section-card"><div class="seccion-titulo">INFORMACIÓN GENERAL</div><p><strong>${usuarioActual.nombre}</strong></p><div class="grid-reporte"><p><strong>Área:</strong><br>${usuarioActual.area}</p><p><strong>Cargo:</strong><br>${usuarioActual.cargo}</p><p><strong>Nombramiento:</strong><br>${usuarioActual.nombramiento}</p><p><strong>Metodología:</strong><br>${usuarioActual.metodologia}</p><p><strong>Fecha de nombramiento:</strong><br>${usuarioActual.fechaNombramiento}</p><p><strong>Duración (meses):</strong><br>${usuarioActual.duracionMeses}</p><p><strong>Fecha de finalización:</strong><br>${fFin.toISOString().split('T')[0]}</p></div><div class="card-resaltada">Tiempo restante en el cargo: ${resto}</div></div><div class="section-card"><div class="seccion-titulo">Proceso de Formación Básica</div><div class="form-grid"><div>${getIcon(usuarioActual.valoracionInicial)} Valoración Inicial</div><div>Fecha: ${usuarioActual.fechaValoracionInicial || '--'}</div><div>${getIcon(usuarioActual.desarrolloPPD)} En desarrollo PPD</div><div></div><div>${getIcon(usuarioActual.valoracionFinal)} Valoración Final</div><div>Fecha: ${usuarioActual.fechaValoracionFinal || '--'}</div><div>${getIcon(usuarioActual.gn)} Gestor Nacional</div><div>Fecha: ${usuarioActual.gestorNacionalFecha || '--'}</div></div></div><div class="section-card"><div class="seccion-titulo">Perfeccionamiento Continuo</div><div class="form-grid"><div>${getIcon(usuarioActual.pcValoracionInicial)} Valoración Inicial</div><div>Fecha: ${usuarioActual.pcFechaValoracionInicial || '--'}</div><div>${getIcon(usuarioActual.pcDesarrolloPPD)} En desarrollo PPD</div><div></div><div>${getIcon(usuarioActual.pcValoracionFinal)} Valoración Final</div><div>Fecha: ${usuarioActual.pcFechaValoracionFinal || '--'}</div><div>${getIcon(usuarioActual.aaa)} AAA</div><div>Fecha: ${usuarioActual.aaaFecha || '--'}</div></div></div>`;
+    listarArchivos();
   }
-  
+
+  function getIcon(v) { return (v == true || v == 'TRUE' || v == 1) ? '✅' : '❌'; }
   function listarArchivos() { fetch(`${API_URL}?accion=listarFiles&urlCarpeta=${usuarioActual.carpetaDrive}`).then(r => r.json()).then(res => document.getElementById('listaArchivos').innerHTML = res.archivos.map(f => `<div class="file-item"><span>${f.nombre}</span><div><a href="${f.url}" target="_blank" class="btn-icon">👁️</a><button class="btn-icon" onclick="eliminarArchivo('${f.id}')">🗑️</button></div></div>`).join('')); }
   function eliminarArchivo(id) { if(confirm("¿Eliminar?")) fetch(API_URL, { method: 'POST', body: JSON.stringify({ accion: 'eliminar', id: id }) }).then(() => listarArchivos()); }
   function subirArchivo() { const f = document.getElementById('inputArchivo').files[0]; const r = new FileReader(); r.onload = (e) => { fetch(API_URL, { method: 'POST', body: JSON.stringify({ base64: e.target.result.split(',')[1], nombre: usuarioActual.nombre + "_" + document.getElementById('tipoArchivo').value, mimeType: f.type, idCarpeta: usuarioActual.carpetaDrive }) }).then(() => { alert("Subido"); listarArchivos(); }); }; r.readAsDataURL(f); }
+
+  function prepararFiltrosArea() { const areas = [...new Set(datosGlobales.map(d => d.area))]; document.getElementById('filtroArea').innerHTML = '<option value="">Área...</option>' + areas.map(a => `<option value="${a}">${a}</option>`).join(''); }
+  function actualizarComisiones() { const area = document.getElementById('filtroArea').value; const coms = [...new Set(datosGlobales.filter(d => d.area === area).map(d => d.comision))]; document.getElementById('filtroComision').innerHTML = '<option value="">Comisión...</option>' + coms.map(c => `<option value="${c}">${c}</option>`).join(''); renderizarTablaArea(); }
+  function renderizarTablaArea() { const area = document.getElementById('filtroArea').value, com = document.getElementById('filtroComision').value; let filtrados = datosGlobales.filter(d => d.area === area && (com === "" || d.comision === com)); let html = `<table><tr><th>Nombre</th><th>FB:VI</th><th>FB:PPD</th><th>FB:VF</th><th>FB:GN</th><th>PC:VI</th><th>PC:PPD</th><th>PC:VF</th><th>PC:AAA</th></tr>`; filtrados.forEach(f => html += `<tr><td>${f.nombre}</td><td>${getIcon(f.valoracionInicial)}</td><td>${getIcon(f.desarrolloPPD)}</td><td>${getIcon(f.valoracionFinal)}</td><td>${getIcon(f.gn)}</td><td>${getIcon(f.pcValoracionInicial)}</td><td>${getIcon(f.pcDesarrolloPPD)}</td><td>${getIcon(f.pcValoracionFinal)}</td><td>${getIcon(f.aaa)}</td></tr>`); document.getElementById('tablaAreaContainer').innerHTML = html + "</table>"; }
+  function generarGraficos() { const total = datosGlobales.length; const v = (k) => datosGlobales.filter(d => d[k]==true || d[k]=='TRUE' || d[k]==1).length; new Chart(document.getElementById('chartBasica'), { type: 'bar', data: { labels: ['VI', 'PPD', 'VF', 'GN'], datasets: [{ label: 'Completos', data: [v('valoracionInicial'), v('desarrolloPPD'), v('valoracionFinal'), v('gn')], backgroundColor: '#4f46e5' }] } }); new Chart(document.getElementById('chartPc'), { type: 'bar', data: { labels: ['VI', 'PPD', 'VF', 'AAA'], datasets: [{ label: 'Completos', data: [v('pcValoracionInicial'), v('pcDesarrolloPPD'), v('pcValoracionFinal'), v('aaa')], backgroundColor: '#10b981' }] } }); }
 </script>
 </body>
 </html>
