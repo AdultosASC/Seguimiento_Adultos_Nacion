@@ -2,10 +2,10 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Dirección NNacional de Adultos</title>
+  <title>Dirección nacional de Adultos</title>
   <style>
     body { font-family: sans-serif; background: #f8fafc; padding: 2rem; display: flex; justify-content: center; }
-    .container { background: white; padding: 2rem; border-radius: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 100%; max-width: 500px; }
+    .container { background: white; padding: 2rem; border-radius: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 100%; max-width: 400px; }
     .field-wrapper { margin-bottom: 1.5rem; }
     .hidden { display: none !important; }
     select, button { width: 100%; margin-top: 5px; padding: 12px; border-radius: 8px; border: 1px solid #ccc; box-sizing: border-box; }
@@ -23,12 +23,7 @@
   
   <div class="field-wrapper">
     <label>Área Estratégica</label>
-    <select id="selectA" onchange="gestionarCascada('area')"><option value="">Cargando...</option></select>
-  </div>
-  
-  <div id="grupoC" class="field-wrapper hidden">
-    <label>Comisión</label>
-    <select id="selectC" onchange="gestionarCascada('comision')"><option value="">Seleccione...</option></select>
+    <select id="selectA" onchange="filtrarNombres()"><option value="">Cargando...</option></select>
   </div>
 
   <div id="grupoN" class="field-wrapper hidden">
@@ -54,7 +49,7 @@
   const API_URL = "https://script.google.com/macros/s/AKfycbw4okkl5_lnmqxK6b2eFL1uG6f92_Fu8BHDun4tvGtrexAECEAdEk1Kf3P9AfL29EH4/exec";
   let datosGlobales = [];
 
-  // CARGA INICIAL
+  // Carga ligera: solo procesamos datos al iniciar
   fetch(API_URL)
     .then(res => res.json())
     .then(data => {
@@ -64,47 +59,21 @@
         areas.map(a => `<option value="${a}">${a}</option>`).join('');
     });
 
-  // CASCADA FUNCIONAL
-  function gestionarCascada(nivel) {
+  // Filtrado directo de Área a Nombre
+  function filtrarNombres() {
     const areaVal = document.getElementById('selectA').value;
+    const divN = document.getElementById('grupoN');
     
-    if (nivel === 'area') {
-      const comisiones = [...new Set(datosGlobales
-        .filter(d => d.area === areaVal && d.comision && d.comision.toString().trim() !== "")
-        .map(d => d.comision))];
-      
-      const divCom = document.getElementById('grupoC');
-      if (comisiones.length > 0) {
-        divCom.classList.remove('hidden');
-        document.getElementById('selectC').innerHTML = '<option value="">Seleccione Comisión...</option>' + 
-          comisiones.map(c => `<option value="${c}">${c}</option>`).join('');
-      } else {
-        divCom.classList.add('hidden');
-        document.getElementById('selectC').value = "";
-      }
-      document.getElementById('grupoN').classList.remove('hidden');
-      filtrarNombres();
+    if (areaVal) {
+      divN.classList.remove('hidden');
+      const filtrados = datosGlobales.filter(d => d.area === areaVal && d.nombre && d.nombre.trim() !== "");
+      document.getElementById('selectN').innerHTML = '<option value="">Seleccione Nombre...</option>' + 
+        filtrados.map(d => `<option value="${d.nombre}">${d.nombre}</option>`).join('');
     } else {
-      filtrarNombres();
+      divN.classList.add('hidden');
     }
   }
 
-  function filtrarNombres() {
-    const areaVal = document.getElementById('selectA').value;
-    const comVal = document.getElementById('selectC').value;
-    const isComHidden = document.getElementById('grupoC').classList.contains('hidden');
-    
-    const filtrados = datosGlobales.filter(d => 
-      d.area === areaVal && 
-      d.nombre && d.nombre.trim() !== "" &&
-      (isComHidden || d.comision === comVal)
-    );
-    
-    document.getElementById('selectN').innerHTML = '<option value="">Seleccione Nombre...</option>' + 
-      filtrados.map(d => `<option value="${d.nombre}">${d.nombre}</option>`).join('');
-  }
-
-  // CONSULTA Y REPORTE
   function consultar() {
     const u = datosGlobales.find(d => d.nombre === document.getElementById('selectN').value);
     if (!u) return;
@@ -112,12 +81,12 @@
     document.getElementById('paginaFiltros').classList.add('hidden');
     document.getElementById('paginaReporte').classList.remove('hidden');
     
-    // Botones de Lider
+    // Verificación de Lider
     if (u.lider == true || u.lider == "TRUE" || u.lider == 1) {
       document.getElementById('areaAdmin').classList.remove('hidden');
     }
 
-    // Cálculos
+    // Cálculos de fecha
     let fechaInicio = new Date(u.fechaNombramiento);
     let fechaFin = new Date(fechaInicio);
     fechaFin.setMonth(fechaInicio.getMonth() + parseInt(u.duracionMeses || 0));
