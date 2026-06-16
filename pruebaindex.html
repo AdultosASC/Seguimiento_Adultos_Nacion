@@ -5,7 +5,7 @@
   <title>Dirección Nacional de Adultos</title>
   <style>
     body { font-family: sans-serif; background: #f8fafc; padding: 2rem; display: flex; justify-content: center; }
-    .container { background: white; padding: 2rem; border-radius: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 100%; max-width: 600px; }
+    .container { background: white; padding: 2.5rem; border-radius: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 100%; max-width: 600px; }
     .field-wrapper { margin-bottom: 1.5rem; }
     .hidden { display: none !important; }
     select, button { width: 100%; margin-top: 5px; padding: 12px; border-radius: 8px; border: 1px solid #ccc; box-sizing: border-box; }
@@ -16,15 +16,15 @@
     .card-resaltada { background: #eef2ff; padding: 20px; border-radius: 8px; border-left: 4px solid #6366f1; margin-top: 25px; text-align: center; }
     .card-asesor { background: #f1f5f9; padding: 15px; border-radius: 8px; margin-top: 15px; border: 1px solid #e2e8f0; }
     
-    .seccion-titulo { font-size: 1.2rem; font-weight: bold; margin-top: 30px; border-bottom: 2px solid #6366f1; padding-bottom: 5px; }
-    .item-fila { display: flex; align-items: center; margin-top: 10px; gap: 10px; }
-    .status { font-size: 1.2rem; }
+    .seccion-titulo { font-size: 1.2rem; font-weight: bold; margin-top: 30px; border-bottom: 2px solid #6366f1; padding-bottom: 5px; margin-bottom: 15px; }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; align-items: center; gap: 10px; margin-bottom: 10px; }
+    .icon { width: 20px; height: 20px; vertical-align: middle; margin-right: 8px; }
   </style>
 </head>
 <body>
 
 <div class="container" id="paginaFiltros">
-  <h3>Dirección NNacional de Adultos</h3>
+  <h3>Dirección Nacionalll de Adultos</h3>
   <div class="field-wrapper">
     <label>Área Estratégica</label>
     <select id="selectA" onchange="filtrarNombres()"><option value="">Cargando...</option></select>
@@ -67,7 +67,11 @@
     } else { divN.classList.add('hidden'); }
   }
 
-  function icon(val) { return (val === true || val === 'TRUE' || val == 1) ? '✅' : '❌'; }
+  function getIcon(val) {
+    const check = '<svg class="icon" viewBox="0 0 24 24" fill="green"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>';
+    const cross = '<svg class="icon" viewBox="0 0 24 24" fill="red"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>';
+    return (val == true || val == 'TRUE' || val == 1) ? check : cross;
+  }
 
   function consultar() {
     const u = datosGlobales.find(d => d.nombre === document.getElementById('selectN').value);
@@ -77,11 +81,11 @@
     document.getElementById('paginaReporte').classList.remove('hidden');
     if (u.lider == true || u.lider == "TRUE" || u.lider == 1) document.getElementById('areaAdmin').classList.remove('hidden');
 
+    let hoy = new Date();
     let fechaInicio = new Date(u.fechaNombramiento);
     let fechaFin = new Date(fechaInicio);
     fechaFin.setMonth(fechaInicio.getMonth() + parseInt(u.duracionMeses || 0));
     
-    let hoy = new Date();
     let años = fechaFin.getFullYear() - hoy.getFullYear();
     let meses = fechaFin.getMonth() - hoy.getMonth();
     let dias = fechaFin.getDate() - hoy.getDate();
@@ -94,16 +98,21 @@
       <div class="grid-reporte">
         <p><strong>Área:</strong><br>${u.area}</p><p><strong>Nombre:</strong><br>${u.nombre}</p>
         <p><strong>Cargo:</strong><br>${u.cargo}</p><p><strong>Metodología:</strong><br>${u.metodologia}</p>
-        <p><strong>F. Nombramiento:</strong><br>${u.fechaNombramiento}</p><p><strong>F. Finalización:</strong><br>${fechaFin.toISOString().split('T')[0]}</p>
       </div>
       <div class="card-resaltada"><strong>Tiempo restante en el cargo:</strong><br>${tiempoRestante}</div>
       <div class="card-asesor"><strong>Asesor Personal:</strong> ${u.asesorPersonal}</div>
       
       <div class="seccion-titulo">Proceso de Formación Básica</div>
-      <div class="item-fila"><span class="status">${icon(u.valoracionInicial)}</span> <strong>Valoración Inicial:</strong> ${u.fechaValoracionInicial || ''}</div>
-      <div class="item-fila"><span class="status">${icon(u.desarrolloPPD)}</span> <strong>En desarrollo PPD</strong></div>
-      <div class="item-fila"><span class="status">${icon(u.valoracionFinal)}</span> <strong>Valoración Final:</strong> ${u.fechaValoracionFinal || ''}</div>
-      <div class="item-fila"><span class="status">${icon(u.gn)}</span> <strong>Gestor Nacional:</strong> ${u.gestorNacionalFecha || ''}</div>
+      <div class="form-grid">
+        <div>${getIcon(u.valoracionInicial)} <strong>Valoración Inicial</strong></div>
+        <div><strong>Fecha Valoración Inicial:</strong> ${u.fechaValoracionInicial || ''}</div>
+        <div>${getIcon(u.desarrolloPPD)} <strong>En desarrollo PPD</strong></div>
+        <div></div>
+        <div>${getIcon(u.valoracionFinal)} <strong>Valoración Final</strong></div>
+        <div><strong>Fecha Valoración Final:</strong> ${u.fechaValoracionFinal || ''}</div>
+        <div>${getIcon(u.gn)} <strong>Gestor Nacional</strong></div>
+        <div><strong>Fecha Gestor Nacional:</strong> ${u.gestorNacionalFecha || ''}</div>
+      </div>
     `;
   }
 </script>
