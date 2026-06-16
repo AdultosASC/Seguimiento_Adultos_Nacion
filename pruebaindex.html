@@ -2,29 +2,37 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dirección Nacional de Adultos</title>
   <style>
-    body { font-family: sans-serif; background: #f8fafc; padding: 2rem; display: flex; justify-content: center; }
-    .container { background: white; padding: 2.5rem; border-radius: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 100%; max-width: 600px; }
+    :root { --primary: #4f46e5; --bg: #f8fafc; --card: #ffffff; --text: #1e293b; }
+    body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); padding: 1.5rem; margin: 0; }
+    .container { background: var(--card); padding: 2rem; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); width: 100%; max-width: 650px; margin: auto; }
+    
+    /* Inputs y Botones */
     .field-wrapper { margin-bottom: 1.5rem; }
+    select, button { width: 100%; padding: 14px; border-radius: 12px; border: 1px solid #e2e8f0; font-size: 1rem; }
+    button { background: var(--primary); color: white; border: none; cursor: pointer; font-weight: 600; transition: transform 0.2s; }
+    button:active { transform: scale(0.98); }
+    
+    /* Estilos de Reporte */
     .hidden { display: none !important; }
-    select, button { width: 100%; margin-top: 5px; padding: 12px; border-radius: 8px; border: 1px solid #ccc; box-sizing: border-box; }
-    button { background: #6366f1; color: white; border: none; cursor: pointer; font-weight: bold; }
-    button:disabled { background: #cbd5e1; }
+    .nav-buttons { display: flex; gap: 10px; margin-bottom: 2rem; justify-content: center; }
+    .nav-buttons button { padding: 10px 20px; font-size: 0.9rem; background: #e0e7ff; color: var(--primary); }
     
-    .grid-reporte { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 20px; }
-    .card-resaltada { background: #eef2ff; padding: 20px; border-radius: 8px; border-left: 4px solid #6366f1; margin-top: 25px; text-align: center; }
-    .card-asesor { background: #f1f5f9; padding: 15px; border-radius: 8px; margin-top: 15px; border: 1px solid #e2e8f0; }
+    .section-card { background: #fdfdfd; border: 1px solid #eef2ff; padding: 1.5rem; border-radius: 16px; margin-bottom: 1.5rem; }
+    .seccion-titulo { color: var(--primary); font-size: 1.1rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 1rem; border-left: 4px solid var(--primary); padding-left: 10px; }
     
-    .seccion-titulo { font-size: 1.2rem; font-weight: bold; margin-top: 30px; border-bottom: 2px solid #6366f1; padding-bottom: 5px; margin-bottom: 15px; }
-    .form-grid { display: grid; grid-template-columns: 1fr 1fr; align-items: center; gap: 10px; margin-bottom: 10px; }
-    .icon { width: 20px; height: 20px; vertical-align: middle; margin-right: 8px; }
+    .grid-reporte { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+    .card-resaltada { background: var(--primary); color: white; padding: 1.5rem; border-radius: 12px; text-align: center; margin: 1.5rem 0; }
+    .icon { width: 22px; height: 22px; vertical-align: middle; }
   </style>
 </head>
 <body>
 
 <div class="container" id="paginaFiltros">
-  <h3>DDirección Nacional de Adultos</h3>
+  <h2 style="text-align:center">Dirección Nacional de Adultos</h2>
   <div class="field-wrapper">
     <label>Área Estratégica</label>
     <select id="selectA" onchange="filtrarNombres()"><option value="">Cargando...</option></select>
@@ -33,7 +41,7 @@
     <label>Nombre</label>
     <select id="selectN" onchange="document.getElementById('btnConsultar').disabled = false"><option value="">Seleccione...</option></select>
   </div>
-  <button id="btnConsultar" disabled onclick="consultar()">Consultar</button>
+  <button id="btnConsultar" disabled onclick="consultar()">Consultar Datos</button>
 </div>
 
 <div class="container hidden" id="paginaReporte">
@@ -42,9 +50,9 @@
     <button onclick="alert('General')">General</button>
     <button onclick="alert('Área')">Área</button>
   </div>
-  <h3 id="nombreReporte"></h3>
+  <h3 id="nombreReporte" style="text-align:center"></h3>
   <div id="detalleReporte"></div>
-  <button onclick="location.reload()">Volver</button>
+  <button onclick="location.reload()" style="background:#64748b">Volver al inicio</button>
 </div>
 
 <script>
@@ -68,15 +76,14 @@
   }
 
   function getIcon(val) {
-    const check = '<svg class="icon" viewBox="0 0 24 24" fill="green"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>';
-    const cross = '<svg class="icon" viewBox="0 0 24 24" fill="red"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>';
+    const check = '<svg class="icon" viewBox="0 0 24 24" fill="#10b981"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>';
+    const cross = '<svg class="icon" viewBox="0 0 24 24" fill="#ef4444"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>';
     return (val == true || val == 'TRUE' || val == 1) ? check : cross;
   }
 
   function consultar() {
     const u = datosGlobales.find(d => d.nombre === document.getElementById('selectN').value);
     if (!u) return;
-
     document.getElementById('paginaFiltros').classList.add('hidden');
     document.getElementById('paginaReporte').classList.remove('hidden');
     if (u.lider == true || u.lider == "TRUE" || u.lider == 1) document.getElementById('areaAdmin').classList.remove('hidden');
@@ -93,37 +100,36 @@
     if (meses < 0) { años--; meses += 12; }
     let tiempoRestante = (fechaFin < hoy) ? "Expirado" : `${años} años, ${meses} meses y ${dias} días`;
 
-    document.getElementById('nombreReporte').innerText = "Información General";
+    document.getElementById('nombreReporte').innerText = u.nombre;
     document.getElementById('detalleReporte').innerHTML = `
-      <div class="grid-reporte">
-        <p><strong>Área:</strong><br>${u.area}</p><p><strong>Nombre:</strong><br>${u.nombre}</p>
-        <p><strong>Cargo:</strong><br>${u.cargo}</p><p><strong>Metodología:</strong><br>${u.metodologia}</p>
+      <div class="section-card">
+        <div class="seccion-titulo">Información General</div>
+        <div class="grid-reporte">
+          <p><strong>Área:</strong><br>${u.area}</p><p><strong>Cargo:</strong><br>${u.cargo}</p>
+          <p><strong>Metodología:</strong><br>${u.metodologia}</p><p><strong>F. Nombramiento:</strong><br>${u.fechaNombramiento}</p>
+        </div>
+        <div class="card-resaltada"><strong>Tiempo restante en el cargo:</strong><br>${tiempoRestante}</div>
+        <div style="text-align:center"><strong>Asesor:</strong> ${u.asesorPersonal}</div>
       </div>
-      <div class="card-resaltada"><strong>Tiempo restante en el cargo:</strong><br>${tiempoRestante}</div>
-      <div class="card-asesor"><strong>Asesor Personal:</strong> ${u.asesorPersonal}</div>
       
-      <div class="seccion-titulo">Proceso de Formación Básica</div>
-      <div class="form-grid">
-        <div>${getIcon(u.valoracionInicial)} <strong>Valoración Inicial</strong></div>
-        <div><strong>Fecha Valoración Inicial:</strong> ${u.fechaValoracionInicial || ''}</div>
-        <div>${getIcon(u.desarrolloPPD)} <strong>En desarrollo PPD</strong></div>
-        <div></div>
-        <div>${getIcon(u.valoracionFinal)} <strong>Valoración Final</strong></div>
-        <div><strong>Fecha Valoración Final:</strong> ${u.fechaValoracionFinal || ''}</div>
-        <div>${getIcon(u.gn)} <strong>Gestor Nacional</strong></div>
-        <div><strong>Fecha Gestor Nacional:</strong> ${u.gestorNacionalFecha || ''}</div>
+      <div class="section-card">
+        <div class="seccion-titulo">Formación Básica</div>
+        <div class="form-grid">
+          <div>${getIcon(u.valoracionInicial)} Val. Inicial</div><div>F: ${u.fechaValoracionInicial || '--'}</div>
+          <div>${getIcon(u.desarrolloPPD)} PPD</div><div></div>
+          <div>${getIcon(u.valoracionFinal)} Val. Final</div><div>F: ${u.fechaValoracionFinal || '--'}</div>
+          <div>${getIcon(u.gn)} Gestor Nac.</div><div>F: ${u.gestorNacionalFecha || '--'}</div>
+        </div>
       </div>
 
-      <div class="seccion-titulo">Proceso de Perfeccionamiento Continuo</div>
-      <div class="form-grid">
-        <div>${getIcon(u.pcValoracionInicial)} <strong>Valoración Inicial</strong></div>
-        <div><strong>Fecha Valoración Inicial:</strong> ${u.pcFechaValoracionInicial || ''}</div>
-        <div>${getIcon(u.pcDesarrolloPPD)} <strong>En desarrollo PPD</strong></div>
-        <div></div>
-        <div>${getIcon(u.pcValoracionFinal)} <strong>Valoración Final</strong></div>
-        <div><strong>Fecha Valoración Final:</strong> ${u.pcFechaValoracionFinal || ''}</div>
-        <div>${getIcon(u.aaa)} <strong>AAA</strong></div>
-        <div><strong>Fecha AAA:</strong> ${u.aaaFecha || ''}</div>
+      <div class="section-card">
+        <div class="seccion-titulo">Perfeccionamiento Continuo</div>
+        <div class="form-grid">
+          <div>${getIcon(u.pcValoracionInicial)} Val. Inicial</div><div>F: ${u.pcFechaValoracionInicial || '--'}</div>
+          <div>${getIcon(u.pcDesarrolloPPD)} PPD</div><div></div>
+          <div>${getIcon(u.pcValoracionFinal)} Val. Final</div><div>F: ${u.pcFechaValoracionFinal || '--'}</div>
+          <div>${getIcon(u.aaa)} AAA</div><div>F: ${u.aaaFecha || '--'}</div>
+        </div>
       </div>
     `;
   }
