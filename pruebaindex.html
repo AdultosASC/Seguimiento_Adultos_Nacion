@@ -26,18 +26,19 @@
 <body>
 
 <div class="container" id="paginaFiltros">
-  <h2 style="text-align:center">Dirección Nacional de Adultos</h2>
+  <h2 style="text-align:center">Dirección Nacional de Adultos en el Movimiento</h2>
   <div class="field-wrapper"><label>Área Estratégica</label><select id="selectA" onchange="filtrarNombres()"><option value="">Cargando...</option></select></div>
   <div id="grupoN" class="hidden"><label>Nombre</label><select id="selectN" onchange="document.getElementById('btnConsultar').disabled = false"><option value="">Seleccione...</option></select></div>
   <button id="btnConsultar" disabled onclick="consultar()">Consultar Datos</button>
 </div>
 
 <div class="container hidden" id="paginaReporte">
-  <div class="nav-buttons">
-    <button onclick="mostrarSeccion()">Información Personal</button>
+  <div id="areaAdmin" class="nav-buttons hidden">
+    <button onclick="alert('Información Personal')">Información Personal</button>
     <button onclick="alert('General')">General</button>
     <button onclick="alert('Área')">Área</button>
   </div>
+  
   <div id="detalleReporte"></div>
   
   <div class="section-card">
@@ -75,6 +76,13 @@
     usuarioActual = datosGlobales.find(d => d.nombre === document.getElementById('selectN').value);
     document.getElementById('paginaFiltros').classList.add('hidden');
     document.getElementById('paginaReporte').classList.remove('hidden');
+    
+    // Lógica para mostrar/ocultar botones de Lider
+    if (usuarioActual.lider == true || usuarioActual.lider == "TRUE" || usuarioActual.lider == 1) {
+      document.getElementById('areaAdmin').classList.remove('hidden');
+    } else {
+      document.getElementById('areaAdmin').classList.add('hidden');
+    }
     
     let hoy = new Date(), fN = new Date(usuarioActual.fechaNombramiento), fFin = new Date(fN);
     fFin.setMonth(fN.getMonth() + parseInt(usuarioActual.duracionMeses || 0));
