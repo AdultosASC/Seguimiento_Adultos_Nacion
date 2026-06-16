@@ -16,17 +16,14 @@
     .seccion-titulo { color: #4f46e5; font-weight: 800; text-transform: uppercase; margin-bottom: 1rem; border-left: 4px solid #4f46e5; padding-left: 10px; }
     .file-item { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #f1f5f9; }
     .btn-icon { width: 30px; height: 30px; padding: 4px; cursor: pointer; border: none; background: none; }
-    .grid-reporte { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; align-items: center; }
-    .card-resaltada { background: #4f46e5; color: white; padding: 1.2rem; border-radius: 12px; text-align: center; margin: 1rem 0; }
-    table { width: 100%; font-size: 0.85rem; border-collapse: collapse; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
     th, td { padding: 8px; border: 1px solid #e2e8f0; text-align: center; }
   </style>
 </head>
 <body>
 
 <div class="container" id="paginaFiltros">
-  <h2 style="text-align:center">Dirección Nacional de Adultos en el M</h2>
+  <h2 style="text-align:center">Dirección Nacional de Adultos</h2>
   <div class="field-wrapper"><label>Área Estratégica</label><select id="selectA" onchange="filtrarNombres()"><option value="">Cargando...</option></select></div>
   <div id="grupoN" class="hidden"><label>Nombre</label><select id="selectN" onchange="document.getElementById('btnConsultar').disabled = false"><option value="">Seleccione...</option></select></div>
   <button id="btnConsultar" disabled onclick="consultar()">Consultar Datos</button>
@@ -34,9 +31,9 @@
 
 <div class="container hidden" id="paginaReporte">
   <div id="areaAdmin" class="nav-buttons hidden">
-    <button onclick="cambiarVista('vistaInformacionPersonal')">Información Personal</button>
-    <button onclick="cambiarVista('dashBoard')">Información General</button>
-    <button onclick="cambiarVista('vistaArea')">Información por Área</button>
+    <button onclick="cambiarVista('vistaInformacionPersonal')">Personal</button>
+    <button onclick="cambiarVista('dashBoard')">General</button>
+    <button onclick="cambiarVista('vistaArea')">Área</button>
   </div>
   
   <div id="vistaInformacionPersonal">
@@ -46,25 +43,30 @@
         <div id="listaArchivos"></div>
         <hr style="border:0; border-top:1px solid #eee; margin:20px 0;">
         <div class="seccion-titulo">Cargar nuevo</div>
-        <select id="tipoArchivo"><option value="Resolución nombramiento">Resolución nombramiento</option><option value="Acuerdo mutuo">Acuerdo mutuo</option><option value="Aval AP">Aval AP</option><option value="Curso SfH1">Curso SfH1</option><option value="Curso SfH2">Curso SfH2</option><option value="Módulo de inducción">Módulo de inducción</option></select>
+        <select id="tipoArchivo">
+          <option value="Resolución nombramiento">Resolución nombramiento</option>
+          <option value="Acuerdo mutuo">Acuerdo mutuo</option>
+          <option value="Aval AP">Aval AP</option>
+          <option value="Curso SfH1">Curso SfH1</option>
+          <option value="Curso SfH2">Curso SfH2</option>
+          <option value="Módulo de inducción">Módulo de inducción</option>
+        </select>
         <input type="file" id="inputArchivo">
         <button onclick="subirArchivo()">Subir Archivo</button>
     </div>
   </div>
   
   <div id="dashBoard" class="hidden section-card">
-    <div class="seccion-titulo">Consolidado Formación Básica</div>
+    <div class="seccion-titulo">Consolidado Formación</div>
     <canvas id="chartBasica"></canvas>
-    <div class="seccion-titulo" style="margin-top:20px">Consolidado Perfeccionamiento</div>
-    <canvas id="chartPc"></canvas>
   </div>
 
   <div id="vistaArea" class="hidden section-card">
-    <div class="seccion-titulo">Reporte por Área / Comisión</div>
-    <select id="filtroArea" onchange="actualizarVistaArea()"><option value="">Seleccione Área...</option></select>
-    <select id="filtroComision" onchange="actualizarVistaArea()"><option value="">Seleccione Comisión...</option></select>
-    <div id="tablaArea" style="overflow-x:auto; margin-top:15px"></div>
-    <button onclick="alert('Descargando reporte...')">Descargar Informe CSV</button>
+    <div class="seccion-titulo">Información por Área</div>
+    <select id="filtroArea" onchange="renderizarTablaArea()"></select>
+    <select id="filtroComision" onchange="renderizarTablaArea()"><option value="">Todas las comisiones</option></select>
+    <div id="tablaAreaContainer" style="overflow-x:auto; margin-top:20px"></div>
+    <button onclick="alert('Funcionalidad de descarga en desarrollo')">Descargar Informe</button>
   </div>
   
   <button onclick="location.reload()" style="background:#64748b">Volver al inicio</button>
@@ -78,34 +80,41 @@
     datosGlobales = data;
     const areas = [...new Set(data.map(d => d.area).filter(a => a))];
     document.getElementById('selectA').innerHTML = '<option value="">Seleccione Área...</option>' + areas.map(a => `<option value="${a}">${a}</option>`).join('');
-    document.getElementById('filtroArea').innerHTML = '<option value="">Todas las Áreas...</option>' + areas.map(a => `<option value="${a}">${a}</option>`).join('');
   });
 
   function cambiarVista(id) {
     document.getElementById('vistaInformacionPersonal').classList.toggle('hidden', id !== 'vistaInformacionPersonal');
     document.getElementById('dashBoard').classList.toggle('hidden', id !== 'dashBoard');
     document.getElementById('vistaArea').classList.toggle('hidden', id !== 'vistaArea');
-    if(id === 'dashBoard') generarGraficos();
-    if(id === 'vistaArea') actualizarVistaArea();
+    if(id === 'vistaArea') prepararFiltrosArea();
   }
 
-  function actualizarVistaArea() {
+  function prepararFiltrosArea() {
+    const areas = [...new Set(datosGlobales.map(d => d.area))];
+    document.getElementById('filtroArea').innerHTML = '<option value="">Seleccione Área...</option>' + areas.map(a => `<option value="${a}">${a}</option>`).join('');
+  }
+
+  function renderizarTablaArea() {
     const area = document.getElementById('filtroArea').value;
     const com = document.getElementById('filtroComision').value;
-    const filtrados = datosGlobales.filter(d => (!area || d.area === area) && (!com || d.comision === com));
-    let html = `<table><tr><th>Nombre</th><th>Básica (V, P, F, GN)</th><th>Perfecc. (V, P, F, AAA)</th></tr>`;
-    filtrados.forEach(d => {
-        html += `<tr><td>${d.nombre}</td><td>${getIcon(d.valoracionInicial)}${getIcon(d.desarrolloPPD)}${getIcon(d.valoracionFinal)}${getIcon(d.gn)}</td><td>${getIcon(d.pcValoracionInicial)}${getIcon(d.pcDesarrolloPPD)}${getIcon(d.pcValoracionFinal)}${getIcon(d.aaa)}</td></tr>`;
+    let filtrados = datosGlobales.filter(d => d.area === area && (com === "" || d.comision === com));
+    let html = `<table><tr><th>Nombre</th><th>FB: VI</th><th>FB: PPD</th><th>FB: VF</th><th>FB: GN</th><th>PC: VI</th><th>PC: PPD</th><th>PC: VF</th><th>PC: AAA</th></tr>`;
+    filtrados.forEach(f => {
+      html += `<tr><td>${f.nombre}</td><td>${getIcon(f.valoracionInicial)}</td><td>${getIcon(f.desarrolloPPD)}</td><td>${getIcon(f.valoracionFinal)}</td><td>${getIcon(f.gn)}</td><td>${getIcon(f.pcValoracionInicial)}</td><td>${getIcon(f.pcDesarrolloPPD)}</td><td>${getIcon(f.pcValoracionFinal)}</td><td>${getIcon(f.aaa)}</td></tr>`;
     });
-    document.getElementById('tablaArea').innerHTML = html + '</table>';
+    document.getElementById('tablaAreaContainer').innerHTML = html + "</table>";
   }
 
-  function getIcon(v) { return (v == true || v == 'TRUE' || v == 1) ? '<span style="color:green">✅</span>' : '<span style="color:red">❌</span>'; }
-  function generarGraficos() { /* ... lógica previa de Chart.js ... */ }
-  function consultar() { /* ... lógica de renderizado personal ... */ }
-  function listarArchivos() { /* ... lógica archivos ... */ }
-  function subirArchivo() { /* ... lógica subida ... */ }
-  function filtrarNombres() { /* ... lógica filtro ... */ }
+  function getIcon(v) { return (v == true || v == 'TRUE' || v == 1) ? '✅' : '❌'; }
+
+  function consultar() {
+    usuarioActual = datosGlobales.find(d => d.nombre === document.getElementById('selectN').value);
+    document.getElementById('paginaFiltros').classList.add('hidden');
+    document.getElementById('paginaReporte').classList.remove('hidden');
+    if (usuarioActual.lider == true || usuarioActual.lider == "TRUE" || usuarioActual.lider == 1) document.getElementById('areaAdmin').classList.remove('hidden');
+    // ... lógica de renderizado original ...
+  }
+  // ... funciones listarArchivos, subirArchivo, etc. sin cambios ...
 </script>
 </body>
 </html>
