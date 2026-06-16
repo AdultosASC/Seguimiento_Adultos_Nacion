@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <title>Dirección Nacional de Adultos</title>
   <style>
-    body { font-family: 'Segoe UI', system-ui, sans-serif; background: #f8fafc; padding: 1.5rem; }
+    body { font-family: 'Segoe UI', sans-serif; background: #f8fafc; padding: 1.5rem; }
     .container { background: white; padding: 2rem; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); width: 100%; max-width: 650px; margin: auto; }
     .hidden { display: none !important; }
     select, button, input { width: 100%; padding: 12px; margin-top: 8px; border-radius: 10px; border: 1px solid #e2e8f0; }
@@ -18,14 +18,15 @@
     .file-item { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #f1f5f9; }
     .btn-icon { width: 30px; height: 30px; padding: 4px; cursor: pointer; border: none; background: none; }
     
-    .grid-reporte { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-    .resaltado-tiempo { background: #4f46e5; color: white; padding: 10px; border-radius: 8px; font-weight: bold; margin-top: 10px; text-align: center; }
+    .grid-reporte { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; align-items: center; }
+    .card-resaltada { background: #4f46e5; color: white; padding: 1.2rem; border-radius: 12px; text-align: center; margin: 1rem 0; }
   </style>
 </head>
 <body>
 
 <div class="container" id="paginaFiltros">
-  <h2 style="text-align:center">Dirección Nacional de Adultos M</h2>
+  <h2 style="text-align:center">Dirección Nacional de Adultos</h2>
   <div class="field-wrapper"><label>Área Estratégica</label><select id="selectA" onchange="filtrarNombres()"><option value="">Cargando...</option></select></div>
   <div id="grupoN" class="hidden"><label>Nombre</label><select id="selectN" onchange="document.getElementById('btnConsultar').disabled = false"><option value="">Seleccione...</option></select></div>
   <button id="btnConsultar" disabled onclick="consultar()">Consultar Datos</button>
@@ -91,24 +92,24 @@
           <p><strong>Fecha de nombramiento:</strong><br>${usuarioActual.fechaNombramiento}</p><p><strong>Duración (meses):</strong><br>${usuarioActual.duracionMeses}</p>
           <p><strong>Fecha de finalización:</strong><br>${fFin.toISOString().split('T')[0]}</p>
         </div>
-        <div class="resaltado-tiempo">Tiempo restante en el cargo: ${resto}</div>
+        <div class="card-resaltada">Tiempo restante en el cargo: ${resto}</div>
       </div>
       <div class="section-card">
-        <div class="seccion-titulo">Formación Básica</div>
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-          <div>${getIcon(usuarioActual.valoracionInicial)} Val. Inicial</div><div>F: ${usuarioActual.fechaValoracionInicial || '--'}</div>
-          <div>${getIcon(usuarioActual.desarrolloPPD)} PPD</div><div></div>
-          <div>${getIcon(usuarioActual.valoracionFinal)} Val. Final</div><div>F: ${usuarioActual.fechaValoracionFinal || '--'}</div>
-          <div>${getIcon(usuarioActual.gn)} Gestor Nac.</div><div>F: ${usuarioActual.gestorNacionalFecha || '--'}</div>
+        <div class="seccion-titulo">Proceso de Formación Básica</div>
+        <div class="form-grid">
+          <div>${getIcon(usuarioActual.valoracionInicial)} Valoración Inicial</div><div>Fecha: ${usuarioActual.fechaValoracionInicial || '--'}</div>
+          <div>${getIcon(usuarioActual.desarrolloPPD)} En desarrollo PPD</div><div></div>
+          <div>${getIcon(usuarioActual.valoracionFinal)} Valoración Final</div><div>Fecha: ${usuarioActual.fechaValoracionFinal || '--'}</div>
+          <div>${getIcon(usuarioActual.gn)} Gestor Nacional</div><div>Fecha: ${usuarioActual.gestorNacionalFecha || '--'}</div>
         </div>
       </div>
       <div class="section-card">
         <div class="seccion-titulo">Perfeccionamiento Continuo</div>
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-          <div>${getIcon(usuarioActual.pcValoracionInicial)} Val. Inicial</div><div>F: ${usuarioActual.pcFechaValoracionInicial || '--'}</div>
-          <div>${getIcon(usuarioActual.pcDesarrolloPPD)} PPD</div><div></div>
-          <div>${getIcon(usuarioActual.pcValoracionFinal)} Val. Final</div><div>F: ${usuarioActual.pcFechaValoracionFinal || '--'}</div>
-          <div>${getIcon(usuarioActual.aaa)} AAA</div><div>F: ${usuarioActual.aaaFecha || '--'}</div>
+        <div class="form-grid">
+          <div>${getIcon(usuarioActual.pcValoracionInicial)} Valoración Inicial</div><div>Fecha: ${usuarioActual.pcFechaValoracionInicial || '--'}</div>
+          <div>${getIcon(usuarioActual.pcDesarrolloPPD)} En desarrollo PPD</div><div></div>
+          <div>${getIcon(usuarioActual.pcValoracionFinal)} Valoración Final</div><div>Fecha: ${usuarioActual.pcFechaValoracionFinal || '--'}</div>
+          <div>${getIcon(usuarioActual.aaa)} AAA</div><div>Fecha: ${usuarioActual.aaaFecha || '--'}</div>
         </div>
       </div>`;
     listarArchivos();
