@@ -2,35 +2,33 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Dirección nacional de Adultos</title>
+  <title>Dirección Nacional de Adultos</title>
   <style>
     body { font-family: sans-serif; background: #f8fafc; padding: 2rem; display: flex; justify-content: center; }
-    .container { background: white; padding: 2rem; border-radius: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 100%; max-width: 400px; }
+    .container { background: white; padding: 2.5rem; border-radius: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 100%; max-width: 600px; }
     .field-wrapper { margin-bottom: 1.5rem; }
     .hidden { display: none !important; }
     select, button { width: 100%; margin-top: 5px; padding: 12px; border-radius: 8px; border: 1px solid #ccc; box-sizing: border-box; }
     button { background: #6366f1; color: white; border: none; cursor: pointer; font-weight: bold; }
     button:disabled { background: #cbd5e1; }
-    .grid-reporte { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
-    .card-resaltada { background: #eef2ff; padding: 15px; border-radius: 8px; border-left: 4px solid #6366f1; margin-top: 20px; text-align: center; }
+    /* Grid más amplio y espaciado */
+    .grid-reporte { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 20px; }
+    .card-resaltada { background: #eef2ff; padding: 20px; border-radius: 8px; border-left: 4px solid #6366f1; margin-top: 25px; text-align: center; }
     .nav-buttons { display: flex; gap: 10px; margin-bottom: 20px; }
   </style>
 </head>
 <body>
 
 <div class="container" id="paginaFiltros">
-  <h3>Dirección Nacional de Adultos</h3>
-  
+  <h3>Dirección nacional de Adultos</h3>
   <div class="field-wrapper">
     <label>Área Estratégica</label>
     <select id="selectA" onchange="filtrarNombres()"><option value="">Cargando...</option></select>
   </div>
-
   <div id="grupoN" class="field-wrapper hidden">
     <label>Nombre</label>
     <select id="selectN" onchange="document.getElementById('btnConsultar').disabled = false"><option value="">Seleccione...</option></select>
   </div>
-  
   <button id="btnConsultar" disabled onclick="consultar()">Consultar</button>
 </div>
 
@@ -49,29 +47,37 @@
   const API_URL = "https://script.google.com/macros/s/AKfycbw4okkl5_lnmqxK6b2eFL1uG6f92_Fu8BHDun4tvGtrexAECEAdEk1Kf3P9AfL29EH4/exec";
   let datosGlobales = [];
 
-  // Carga ligera: solo procesamos datos al iniciar
-  fetch(API_URL)
-    .then(res => res.json())
-    .then(data => {
-      datosGlobales = data;
-      const areas = [...new Set(data.map(d => d.area).filter(a => a && a.trim() !== ""))];
-      document.getElementById('selectA').innerHTML = '<option value="">Seleccione Área...</option>' + 
-        areas.map(a => `<option value="${a}">${a}</option>`).join('');
-    });
+  fetch(API_URL).then(res => res.json()).then(data => {
+    datosGlobales = data;
+    const areas = [...new Set(data.map(d => d.area).filter(a => a && a.trim() !== ""))];
+    document.getElementById('selectA').innerHTML = '<option value="">Seleccione Área...</option>' + 
+      areas.map(a => `<option value="${a}">${a}</option>`).join('');
+  });
 
-  // Filtrado directo de Área a Nombre
   function filtrarNombres() {
     const areaVal = document.getElementById('selectA').value;
     const divN = document.getElementById('grupoN');
-    
     if (areaVal) {
       divN.classList.remove('hidden');
       const filtrados = datosGlobales.filter(d => d.area === areaVal && d.nombre && d.nombre.trim() !== "");
       document.getElementById('selectN').innerHTML = '<option value="">Seleccione Nombre...</option>' + 
         filtrados.map(d => `<option value="${d.nombre}">${d.nombre}</option>`).join('');
-    } else {
-      divN.classList.add('hidden');
-    }
+    } else { divN.classList.add('hidden'); }
+  }
+
+  function calcularTiempo(fechaFinal) {
+    let hoy = new Date();
+    let d2 = new Date(fechaFinal);
+    if (d2 < hoy) return "Expirado";
+    
+    let años = d2.getFullYear() - hoy.getFullYear();
+    let meses = d2.getMonth() - hoy.getMonth();
+    let dias = d2.getDate() - hoy.getDate();
+
+    if (dias < 0) { meses--; dias += new Date(hoy.getFullYear(), hoy.getMonth() + 1, 0).getDate(); }
+    if (meses < 0) { años--; meses += 12; }
+    
+    return `${años} años, ${meses} meses y ${dias} días`;
   }
 
   function consultar() {
@@ -80,20 +86,11 @@
 
     document.getElementById('paginaFiltros').classList.add('hidden');
     document.getElementById('paginaReporte').classList.remove('hidden');
-    
-    // Verificación de Lider
-    if (u.lider == true || u.lider == "TRUE" || u.lider == 1) {
-      document.getElementById('areaAdmin').classList.remove('hidden');
-    }
+    if (u.lider == true || u.lider == "TRUE" || u.lider == 1) document.getElementById('areaAdmin').classList.remove('hidden');
 
-    // Cálculos de fecha
     let fechaInicio = new Date(u.fechaNombramiento);
     let fechaFin = new Date(fechaInicio);
     fechaFin.setMonth(fechaInicio.getMonth() + parseInt(u.duracionMeses || 0));
-    
-    let hoy = new Date();
-    let diff = Math.ceil((fechaFin - hoy) / (1000 * 60 * 60 * 24));
-    let tiempoRestante = diff > 0 ? diff + " días restantes" : "Expirado";
 
     document.getElementById('nombreReporte').innerText = "Información General";
     document.getElementById('detalleReporte').innerHTML = `
@@ -106,7 +103,7 @@
         <p><strong>Fecha Finalización:</strong><br>${fechaFin.toISOString().split('T')[0]}</p>
       </div>
       <div class="card-resaltada">
-        <strong>Tiempo en el cargo:</strong><br>${tiempoRestante}
+        <strong>Tiempo restante en el cargo:</strong><br>${calcularTiempo(fechaFin)}
       </div>
     `;
   }
