@@ -8,52 +8,44 @@
     :root { --primary: #4f46e5; --bg: #f8fafc; --text: #1e293b; }
     body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); padding: 1.5rem; margin: 0; }
     .container { background: white; padding: 2rem; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); width: 100%; max-width: 650px; margin: auto; }
-    
-    /* Estilos de Formulario */
-    .field-wrapper { margin-bottom: 1.5rem; }
-    select, button, input { width: 100%; padding: 14px; border-radius: 12px; border: 1px solid #e2e8f0; font-size: 1rem; box-sizing: border-box; }
-    button { background: var(--primary); color: white; border: none; cursor: pointer; font-weight: 600; transition: transform 0.2s; }
-    button:active { transform: scale(0.98); }
-
-    /* Estilos de Reporte */
+    .section-card { background: #ffffff; border: 1px solid #eef2ff; padding: 1.5rem; border-radius: 16px; margin-bottom: 1.5rem; }
+    .seccion-titulo { color: var(--primary); font-size: 1.1rem; font-weight: 800; text-transform: uppercase; margin-bottom: 1rem; border-left: 4px solid var(--primary); padding-left: 10px; }
     .hidden { display: none !important; }
-    .section-card { background: #ffffff; border: 1px solid #eef2ff; padding: 1.5rem; border-radius: 16px; margin-bottom: 1.5rem; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
-    .seccion-titulo { color: var(--primary); font-size: 1.1rem; font-weight: 800; text-transform: uppercase; margin-bottom: 1.2rem; border-left: 4px solid var(--primary); padding-left: 10px; }
+    select, button, input { width: 100%; padding: 12px; margin-top: 5px; border-radius: 10px; border: 1px solid #e2e8f0; font-size: 0.95rem; box-sizing: border-box; }
+    button { background: var(--primary); color: white; border: none; cursor: pointer; font-weight: 600; }
+    
+    .file-item { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #f1f5f9; }
+    .btn-icon { width: 32px; height: 32px; padding: 4px; border-radius: 6px; cursor: pointer; border: none; background: transparent; }
+    .btn-icon:hover { background: #f1f5f9; }
     
     .grid-reporte { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; }
     .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; align-items: center; }
     .card-resaltada { background: var(--primary); color: white; padding: 1.5rem; border-radius: 12px; text-align: center; margin: 1.5rem 0; font-weight: bold; }
-    
-    .file-item { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #f1f5f9; font-size: 0.9rem; }
-    .nav-buttons { display: flex; gap: 10px; margin-bottom: 1.5rem; justify-content: center; }
-    .nav-buttons button { padding: 10px 20px; font-size: 0.85rem; background: #e0e7ff; color: var(--primary); }
-    .icon { width: 20px; height: 20px; vertical-align: middle; margin-right: 8px; }
   </style>
 </head>
 <body>
 
 <div class="container" id="paginaFiltros">
   <h2 style="text-align:center">Dirección Nacional de Adultos</h2>
-  <div class="field-wrapper">
-    <label>Área Estratégica</label>
-    <select id="selectA" onchange="filtrarNombres()"><option value="">Cargando...</option></select>
-  </div>
-  <div id="grupoN" class="hidden">
-    <label>Nombre</label>
-    <select id="selectN" onchange="document.getElementById('btnConsultar').disabled = false"><option value="">Seleccione...</option></select>
-  </div>
+  <div class="field-wrapper"><label>Área Estratégica</label><select id="selectA" onchange="filtrarNombres()"><option value="">Cargando...</option></select></div>
+  <div id="grupoN" class="hidden"><label>Nombre</label><select id="selectN" onchange="document.getElementById('btnConsultar').disabled = false"><option value="">Seleccione...</option></select></div>
   <button id="btnConsultar" disabled onclick="consultar()">Consultar Datos</button>
 </div>
 
 <div class="container hidden" id="paginaReporte">
-  <div id="areaAdmin" class="nav-buttons hidden">
-    <button>Integrante</button><button>General</button><button>Área</button>
+  <div id="areaAdmin" class="nav-buttons hidden" style="display:flex; gap:10px; margin-bottom:1rem; justify-content:center;">
+    <button style="width:auto">Integrante</button><button style="width:auto">General</button><button style="width:auto">Área</button>
   </div>
   <h3 id="nombreReporte" style="text-align:center"></h3>
   <div id="detalleReporte"></div>
   
   <div class="section-card">
-    <div class="seccion-titulo">Gestión de Archivos</div>
+    <div class="seccion-titulo">Documentos cargados en tu carpeta</div>
+    <div id="listaArchivos"></div>
+    
+    <hr style="border:0; border-top:1px solid #eee; margin: 20px 0;">
+    
+    <div class="seccion-titulo">Cargar nuevo documento</div>
     <select id="tipoArchivo">
       <option value="Resolución nombramiento">Resolución nombramiento</option>
       <option value="Acuerdo mutuo">Acuerdo mutuo</option>
@@ -63,8 +55,7 @@
       <option value="Módulo de inducción">Módulo de inducción</option>
     </select>
     <input type="file" id="inputArchivo">
-    <button onclick="subirArchivo()" style="margin-top:10px">Subir Archivo</button>
-    <div id="listaArchivos" style="margin-top:15px"></div>
+    <button onclick="subirArchivo()" style="margin-top:10px">Subir Documento</button>
   </div>
   <button onclick="location.reload()" style="background:#64748b">Volver al inicio</button>
 </div>
@@ -79,6 +70,39 @@
     document.getElementById('selectA').innerHTML = '<option value="">Seleccione Área...</option>' + areas.map(a => `<option value="${a}">${a}</option>`).join('');
   });
 
+  function getIcon(v) { 
+    return (v == true || v == 'TRUE' || v == 1) ? '<svg style="width:20px; height:20px; vertical-align:middle" viewBox="0 0 24 24" fill="green"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>' : '<svg style="width:20px; height:20px; vertical-align:middle" viewBox="0 0 24 24" fill="red"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>'; 
+  }
+
+  function listarArchivos() {
+    fetch(`${API_URL}?accion=listarFiles&urlCarpeta=${usuarioActual.carpetaDrive}`)
+      .then(r => r.json()).then(res => {
+        document.getElementById('listaArchivos').innerHTML = res.archivos.map(f => `
+          <div class="file-item">
+            <span>${f.nombre}</span>
+            <div>
+              <a href="${f.url}" target="_blank" class="btn-icon" style="display:inline-block"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg></a>
+              <button class="btn-icon" onclick="eliminarArchivo('${f.id}')"><svg viewBox="0 0 24 24" fill="red"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg></button>
+            </div>
+          </div>`).join('');
+      });
+  }
+
+  function eliminarArchivo(id) {
+    if(!confirm("¿Eliminar este archivo?")) return;
+    fetch(`${API_URL}?accion=eliminar&id=${id}`).then(() => listarArchivos());
+  }
+
+  function subirArchivo() {
+    const f = document.getElementById('inputArchivo').files[0];
+    const r = new FileReader();
+    r.onload = (e) => {
+      fetch(API_URL, { method: 'POST', body: JSON.stringify({ base64: e.target.result.split(',')[1], nombre: document.getElementById('tipoArchivo').value, mimeType: f.type, idCarpeta: usuarioActual.carpetaDrive }) })
+        .then(() => { alert("Subido"); listarArchivos(); });
+    };
+    r.readAsDataURL(f);
+  }
+
   function filtrarNombres() {
     const areaVal = document.getElementById('selectA').value;
     const divN = document.getElementById('grupoN');
@@ -87,12 +111,6 @@
       const filtrados = datosGlobales.filter(d => d.area === areaVal && d.nombre && d.nombre.trim() !== "");
       document.getElementById('selectN').innerHTML = '<option value="">Seleccione Nombre...</option>' + filtrados.map(d => `<option value="${d.nombre}">${d.nombre}</option>`).join('');
     } else { divN.classList.add('hidden'); }
-  }
-
-  function getIcon(v) { 
-    const check = '<svg class="icon" viewBox="0 0 24 24" fill="#10b981"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>';
-    const cross = '<svg class="icon" viewBox="0 0 24 24" fill="#ef4444"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>';
-    return (v == true || v == 'TRUE' || v == 1) ? check : cross; 
   }
 
   function consultar() {
@@ -113,7 +131,6 @@
         <div class="seccion-titulo">Información General</div>
         <div class="grid-reporte"><p><strong>Área:</strong><br>${usuarioActual.area}</p><p><strong>Cargo:</strong><br>${usuarioActual.cargo}</p><p><strong>F. Finalización:</strong><br>${fFin.toISOString().split('T')[0]}</p></div>
         <div class="card-resaltada">Tiempo restante en el cargo:<br>${resto}</div>
-        <p><strong>Asesor Personal:</strong> ${usuarioActual.asesorPersonal}</p>
       </div>
       <div class="section-card">
         <div class="seccion-titulo">Formación Básica</div>
@@ -134,23 +151,6 @@
         </div>
       </div>`;
     listarArchivos();
-  }
-
-  function listarArchivos() {
-    fetch(`${API_URL}?accion=listarFiles&urlCarpeta=${usuarioActual.carpetaDrive}`)
-      .then(r => r.json()).then(res => {
-        document.getElementById('listaArchivos').innerHTML = res.archivos.map(f => `<div class="file-item">${f.nombre} <a href="${f.url}" target="_blank">Ver</a></div>`).join('');
-      });
-  }
-
-  function subirArchivo() {
-    const f = document.getElementById('inputArchivo').files[0];
-    const r = new FileReader();
-    r.onload = (e) => {
-      fetch(API_URL, { method: 'POST', body: JSON.stringify({ base64: e.target.result.split(',')[1], nombre: document.getElementById('tipoArchivo').value, mimeType: f.type, idCarpeta: usuarioActual.carpetaDrive }) })
-        .then(() => { alert("Archivo subido con éxito"); listarArchivos(); });
-    };
-    r.readAsDataURL(f);
   }
 </script>
 </body>
