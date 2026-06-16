@@ -24,7 +24,7 @@
 <body>
 
 <div class="container" id="paginaFiltros">
-  <h3>Dirección Nacionalll de Adultos</h3>
+  <h3>DDirección Nacional de Adultos</h3>
   <div class="field-wrapper">
     <label>Área Estratégica</label>
     <select id="selectA" onchange="filtrarNombres()"><option value="">Cargando...</option></select>
@@ -112,6 +112,18 @@
         <div><strong>Fecha Valoración Final:</strong> ${u.fechaValoracionFinal || ''}</div>
         <div>${getIcon(u.gn)} <strong>Gestor Nacional</strong></div>
         <div><strong>Fecha Gestor Nacional:</strong> ${u.gestorNacionalFecha || ''}</div>
+      </div>
+
+      <div class="seccion-titulo">Proceso de Perfeccionamiento Continuo</div>
+      <div class="form-grid">
+        <div>${getIcon(u.pcValoracionInicial)} <strong>Valoración Inicial</strong></div>
+        <div><strong>Fecha Valoración Inicial:</strong> ${u.pcFechaValoracionInicial || ''}</div>
+        <div>${getIcon(u.pcDesarrolloPPD)} <strong>En desarrollo PPD</strong></div>
+        <div></div>
+        <div>${getIcon(u.pcValoracionFinal)} <strong>Valoración Final</strong></div>
+        <div><strong>Fecha Valoración Final:</strong> ${u.pcFechaValoracionFinal || ''}</div>
+        <div>${getIcon(u.aaa)} <strong>AAA</strong></div>
+        <div><strong>Fecha AAA:</strong> ${u.aaaFecha || ''}</div>
       </div>
     `;
   }
