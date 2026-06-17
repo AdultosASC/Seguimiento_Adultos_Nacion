@@ -18,7 +18,7 @@
     .btn-icon { width: 30px; height: 30px; padding: 4px; cursor: pointer; border: none; background: none; }
     .grid-reporte { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
     .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; align-items: center; }
-    .card-resaltada { background: #4f46e5; color: white; padding: 1.2rem; border-radius: 12px; text-align: center; margin: 1rem 0; }
+    .card-resaltada { background: #4f46e5; color: white; padding: 1.2rem; border-radius: 12px; text-align: center; margin: 1rem 0; font-weight: bold; }
     table { width: 100%; border-collapse: collapse; font-size: 0.75rem; margin-top: 10px; }
     th, td { padding: 6px; border: 1px solid #e2e8f0; text-align: center; }
   </style>
@@ -26,7 +26,7 @@
 <body>
 
 <div class="container" id="paginaFiltros">
-  <h2 style="text-align:center">Dirección Nacional </h2>
+  <h2 style="text-align:center">Dirección Nacional de Adultos DNAM</h2>
   <div class="field-wrapper"><label>Área Estratégica</label><select id="selectA" onchange="filtrarNombres()"><option value="">Cargando...</option></select></div>
   <div id="grupoN" class="hidden"><label>Nombre</label><select id="selectN" onchange="document.getElementById('btnConsultar').disabled = false"></select></div>
   <button id="btnConsultar" disabled onclick="consultar()">Consultar Datos</button>
@@ -110,25 +110,52 @@
     if(!usuarioActual) return;
     document.getElementById('paginaFiltros').classList.add('hidden');
     document.getElementById('paginaReporte').classList.remove('hidden');
+    if (usuarioActual.lider == true || usuarioActual.lider == "TRUE" || usuarioActual.lider == 1) document.getElementById('areaAdmin').classList.remove('hidden');
     
-    if (usuarioActual.lider == true || usuarioActual.lider == "TRUE" || usuarioActual.lider == 1) {
-      document.getElementById('areaAdmin').classList.remove('hidden');
-    }
-    
-    cambiarVista('vistaInformacionPersonal');
-    
-    let hoy = new Date(), fN = new Date(usuarioActual.fechaNombramiento), fFin = new Date(fN);
+    let hoy = new Date(), fN = new Date(usuarioActual.fechaNombramiento || new Date()), fFin = new Date(fN);
     fFin.setMonth(fN.getMonth() + parseInt(usuarioActual.duracionMeses || 0));
     let y = fFin.getFullYear() - hoy.getFullYear(), m = fFin.getMonth() - hoy.getMonth(), d = fFin.getDate() - hoy.getDate();
     if(d < 0) { m--; d += 30; } if(m < 0) { y--; m += 12; }
     let resto = (fFin < hoy) ? "Expirado" : `${y} años, ${m} meses y ${d} días`;
 
-    document.getElementById('detalleReporte').innerHTML = `<div class="section-card"><div class="seccion-titulo">INFORMACIÓN GENERAL</div><p><strong>${usuarioActual.nombre || ''}</strong></p><div class="grid-reporte"><p><strong>Área:</strong><br>${usuarioActual.area || ''}</p><p><strong>Cargo:</strong><br>${usuarioActual.cargo || ''}</p><p><strong>Nombramiento:</strong><br>${usuarioActual.nombramiento || ''}</p><p><strong>Metodología:</strong><br>${usuarioActual.metodologia || ''}</p><p><strong>Fecha de nombramiento:</strong><br>${usuarioActual.fechaNombramiento || ''}</p><p><strong>Duración (meses):</strong><br>${usuarioActual.duracionMeses || ''}</p><p><strong>Fecha de finalización:</strong><br>${fFin.toISOString().split('T')[0]}</p></div><div class="card-resaltada">Tiempo restante en el cargo: ${resto}</div></div><div class="section-card"><div class="seccion-titulo">Proceso de Formación Básica</div><div class="form-grid"><div>${getIcon(usuarioActual.valoracionInicial)} Valoración Inicial</div><div>Fecha: ${usuarioActual.fechaValoracionInicial || '--'}</div><div>${getIcon(usuarioActual.desarrolloPPD)} En desarrollo PPD</div><div></div><div>${getIcon(usuarioActual.valoracionFinal)} Valoración Final</div><div>Fecha: ${usuarioActual.fechaValoracionFinal || '--'}</div><div>${getIcon(usuarioActual.gn)} Gestor Nacional</div><div>Fecha: ${usuarioActual.gestorNacionalFecha || '--'}</div></div></div><div class="section-card"><div class="seccion-titulo">Perfeccionamiento Continuo</div><div class="form-grid"><div>${getIcon(usuarioActual.pcValoracionInicial)} Valoración Inicial</div><div>Fecha: ${usuarioActual.pcFechaValoracionInicial || '--'}</div><div>${getIcon(usuarioActual.pcDesarrolloPPD)} En desarrollo PPD</div><div></div><div>${getIcon(usuarioActual.pcValoracionFinal)} Valoración Final</div><div>Fecha: ${usuarioActual.pcFechaValoracionFinal || '--'}</div><div>${getIcon(usuarioActual.aaa)} AAA</div><div>Fecha: ${usuarioActual.aaaFecha || '--'}</div></div></div>`;
+    document.getElementById('detalleReporte').innerHTML = `
+      <div class="section-card">
+        <div class="seccion-titulo">INFORMACIÓN GENERAL</div>
+        <p><strong>${usuarioActual.nombre || ''}</strong></p>
+        <div class="grid-reporte">
+          <p><strong>Área:</strong><br>${usuarioActual.area || ''}</p>
+          <p><strong>Cargo:</strong><br>${usuarioActual.cargo || ''}</p>
+          <p><strong>Nombramiento:</strong><br>${usuarioActual.nombramiento || ''}</p>
+          <p><strong>Metodología:</strong><br>${usuarioActual.metodologia || ''}</p>
+          <p><strong>Fecha de nombramiento:</strong><br>${usuarioActual.fechaNombramiento || ''}</p>
+          <p><strong>Duración (meses):</strong><br>${usuarioActual.duracionMeses || ''}</p>
+          <p><strong>Fecha de finalización:</strong><br>${fFin.toISOString().split('T')[0]}</p>
+        </div>
+        <div class="card-resaltada">Tiempo restante en el cargo: ${resto}</div>
+      </div>
+      <div class="section-card">
+        <div class="seccion-titulo">Proceso de Formación Básica</div>
+        <div class="form-grid">
+          <div>${getIcon(usuarioActual.valoracionInicial)} Valoración Inicial</div><div>Fecha: ${usuarioActual.fechaValoracionInicial || '--'}</div>
+          <div>${getIcon(usuarioActual.desarrolloPPD)} En desarrollo PPD</div><div></div>
+          <div>${getIcon(usuarioActual.valoracionFinal)} Valoración Final</div><div>Fecha: ${usuarioActual.fechaValoracionFinal || '--'}</div>
+          <div>${getIcon(usuarioActual.gn)} Gestor Nacional</div><div>Fecha: ${usuarioActual.gestorNacionalFecha || '--'}</div>
+        </div>
+      </div>
+      <div class="section-card">
+        <div class="seccion-titulo">Perfeccionamiento Continuo</div>
+        <div class="form-grid">
+          <div>${getIcon(usuarioActual.pcValoracionInicial)} Valoración Inicial</div><div>Fecha: ${usuarioActual.pcFechaValoracionInicial || '--'}</div>
+          <div>${getIcon(usuarioActual.pcDesarrolloPPD)} En desarrollo PPD</div><div></div>
+          <div>${getIcon(usuarioActual.pcValoracionFinal)} Valoración Final</div><div>Fecha: ${usuarioActual.pcFechaValoracionFinal || '--'}</div>
+          <div>${getIcon(usuarioActual.aaa)} AAA</div><div>Fecha: ${usuarioActual.aaaFecha || '--'}</div>
+        </div>
+      </div>`;
     listarArchivos();
   }
 
   function getIcon(v) { return (v == true || v == 'TRUE' || v == 1) ? '✅' : '❌'; }
-  function listarArchivos() { fetch(`${API_URL}?accion=listarFiles&urlCarpeta=${usuarioActual.carpetaDrive}`).then(r => r.json()).then(res => document.getElementById('listaArchivos').innerHTML = res.archivos.map(f => `<div class="file-item"><span>${f.nombre}</span><div><a href="${f.url}" target="_blank" class="btn-icon">👁️</a><button class="btn-icon" onclick="eliminarArchivo('${f.id}')">🗑️</button></div></div>`).join('')); }
+  function listarArchivos() { if(usuarioActual.carpetaDrive) fetch(`${API_URL}?accion=listarFiles&urlCarpeta=${usuarioActual.carpetaDrive}`).then(r => r.json()).then(res => document.getElementById('listaArchivos').innerHTML = res.archivos.map(f => `<div class="file-item"><span>${f.nombre}</span><div><a href="${f.url}" target="_blank" class="btn-icon">👁️</a><button class="btn-icon" onclick="eliminarArchivo('${f.id}')">🗑️</button></div></div>`).join('')); }
   function eliminarArchivo(id) { if(confirm("¿Eliminar?")) fetch(API_URL, { method: 'POST', body: JSON.stringify({ accion: 'eliminar', id: id }) }).then(() => listarArchivos()); }
   function subirArchivo() { const f = document.getElementById('inputArchivo').files[0]; const r = new FileReader(); r.onload = (e) => { fetch(API_URL, { method: 'POST', body: JSON.stringify({ base64: e.target.result.split(',')[1], nombre: usuarioActual.nombre + "_" + document.getElementById('tipoArchivo').value, mimeType: f.type, idCarpeta: usuarioActual.carpetaDrive }) }).then(() => { alert("Subido"); listarArchivos(); }); }; r.readAsDataURL(f); }
 
