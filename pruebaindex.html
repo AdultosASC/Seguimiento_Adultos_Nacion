@@ -26,7 +26,7 @@
 <body>
 
 <div class="container" id="paginaFiltros">
-  <h2 style="text-align:center">Dirección Nacional de Adultos</h2>
+  <h2 style="text-align:center">Dirección Nacional </h2>
   <div class="field-wrapper"><label>Área Estratégica</label><select id="selectA" onchange="filtrarNombres()"><option value="">Cargando...</option></select></div>
   <div id="grupoN" class="hidden"><label>Nombre</label><select id="selectN" onchange="document.getElementById('btnConsultar').disabled = false"></select></div>
   <button id="btnConsultar" disabled onclick="consultar()">Consultar Datos</button>
@@ -111,14 +111,10 @@
     document.getElementById('paginaFiltros').classList.add('hidden');
     document.getElementById('paginaReporte').classList.remove('hidden');
     
-    // VALIDACIÓN LÍDER: Muestra botones si es True/1
     if (usuarioActual.lider == true || usuarioActual.lider == "TRUE" || usuarioActual.lider == 1) {
       document.getElementById('areaAdmin').classList.remove('hidden');
-    } else {
-      document.getElementById('areaAdmin').classList.add('hidden');
     }
     
-    // Vista por defecto
     cambiarVista('vistaInformacionPersonal');
     
     let hoy = new Date(), fN = new Date(usuarioActual.fechaNombramiento), fFin = new Date(fN);
@@ -135,6 +131,7 @@
   function listarArchivos() { fetch(`${API_URL}?accion=listarFiles&urlCarpeta=${usuarioActual.carpetaDrive}`).then(r => r.json()).then(res => document.getElementById('listaArchivos').innerHTML = res.archivos.map(f => `<div class="file-item"><span>${f.nombre}</span><div><a href="${f.url}" target="_blank" class="btn-icon">👁️</a><button class="btn-icon" onclick="eliminarArchivo('${f.id}')">🗑️</button></div></div>`).join('')); }
   function eliminarArchivo(id) { if(confirm("¿Eliminar?")) fetch(API_URL, { method: 'POST', body: JSON.stringify({ accion: 'eliminar', id: id }) }).then(() => listarArchivos()); }
   function subirArchivo() { const f = document.getElementById('inputArchivo').files[0]; const r = new FileReader(); r.onload = (e) => { fetch(API_URL, { method: 'POST', body: JSON.stringify({ base64: e.target.result.split(',')[1], nombre: usuarioActual.nombre + "_" + document.getElementById('tipoArchivo').value, mimeType: f.type, idCarpeta: usuarioActual.carpetaDrive }) }).then(() => { alert("Subido"); listarArchivos(); }); }; r.readAsDataURL(f); }
+
   function prepararFiltrosArea() { const areas = [...new Set(datosGlobales.map(d => d.area))]; document.getElementById('filtroArea').innerHTML = '<option value="">Área...</option>' + areas.map(a => `<option value="${a}">${a}</option>`).join(''); }
   function actualizarComisiones() { const area = document.getElementById('filtroArea').value; const coms = [...new Set(datosGlobales.filter(d => d.area === area).map(d => d.comision))]; document.getElementById('filtroComision').innerHTML = '<option value="">Comisión...</option>' + coms.map(c => `<option value="${c}">${c}</option>`).join(''); renderizarTablaArea(); }
   function renderizarTablaArea() { const area = document.getElementById('filtroArea').value, com = document.getElementById('filtroComision').value; let filtrados = datosGlobales.filter(d => d.area === area && (com === "" || d.comision === com)); let html = `<table><tr><th>Nombre</th><th>FB:VI</th><th>FB:PPD</th><th>FB:VF</th><th>FB:GN</th><th>PC:VI</th><th>PC:PPD</th><th>PC:VF</th><th>PC:AAA</th></tr>`; filtrados.forEach(f => html += `<tr><td>${f.nombre}</td><td>${getIcon(f.valoracionInicial)}</td><td>${getIcon(f.desarrolloPPD)}</td><td>${getIcon(f.valoracionFinal)}</td><td>${getIcon(f.gn)}</td><td>${getIcon(f.pcValoracionInicial)}</td><td>${getIcon(f.pcDesarrolloPPD)}</td><td>${getIcon(f.pcValoracionFinal)}</td><td>${getIcon(f.aaa)}</td></tr>`); document.getElementById('tablaAreaContainer').innerHTML = html + "</table>"; }
