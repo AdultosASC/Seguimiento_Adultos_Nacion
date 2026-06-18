@@ -6,7 +6,10 @@
   <style>
     body { font-family: 'Segoe UI', sans-serif; background: #f8fafc; padding: 2rem; }
     .container { background: white; padding: 2rem; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); max-width: 900px; margin: auto; }
-    button { background: #7c3aed; color: white; padding: 12px 24px; border-radius: 10px; border: none; cursor: pointer; font-weight: 600; width: 100%; }
+    .filtros { margin-bottom: 20px; padding: 15px; background: #f1f5f9; border-radius: 10px; }
+    select, button { width: 100%; padding: 12px; margin-top: 10px; border-radius: 10px; border: 1px solid #e2e8f0; }
+    button { background: #7c3aed; color: white; border: none; cursor: pointer; font-weight: 600; }
+    button:disabled { background: #cbd5e1; }
     table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 0.9rem; }
     th, td { padding: 12px; border: 1px solid #e2e8f0; text-align: left; }
     th { background: #f1f5f9; }
@@ -17,32 +20,56 @@
 
 <div class="container">
   <h1>Validación de Documentos</h1>
-  <p>Este informe verifica el estado de las carpetas de Drive para todos los registros.</p>
-  <button id="btnGenerar" onclick="generarInforme()">Generar Informe de Documentos</button>
+  
+  <div class="filtros">
+    <label>Filtrar por Área:</label>
+    <select id="filtroArea">
+      <option value="TODOS">Todos los registros</option>
+    </select>
+    <button id="btnGenerar" onclick="generarInforme()">Generar Informe</button>
+  </div>
+
   <div id="resultadoInforme"></div>
 </div>
 
 <script>
-  // Esta variable debe ser poblada con los datos que recibes del doGet en tu index principal
-  // Si este archivo se abre por separado, deberás hacer un fetch inicial a tu API_URL
   const API_URL = "https://script.google.com/macros/s/AKfycbw4okkl5_lnmqxK6b2eFL1uG6f92_Fu8BHDun4tvGtrexAECEAdEk1Kf3P9AfL29EH4/exec";
   let datosGlobales = [];
 
-  // Cargar datos al abrir
-  fetch(API_URL).then(res => res.json()).then(data => { datosGlobales = data; });
+  // Cargar datos y popular el selector
+  fetch(API_URL).then(res => res.json()).then(data => {
+    datosGlobales = data;
+    const areas = [...new Set(data.map(d => d.area).filter(a => a))];
+    const select = document.getElementById('filtroArea');
+    areas.forEach(a => {
+      let opt = document.createElement('option');
+      opt.value = a;
+      opt.innerHTML = a;
+      select.appendChild(opt);
+    });
+  });
 
   async function generarInforme() {
     const btn = document.getElementById('btnGenerar');
     const container = document.getElementById('resultadoInforme');
+    const areaSeleccionada = document.getElementById('filtroArea').value;
+    
     btn.disabled = true;
-    btn.innerText = "Procesando... esto puede tomar un momento";
+    btn.innerText = "Procesando...";
+    container.innerHTML = "Consultando Drive, por favor espera...";
+    
+    // Filtrar los datos locales según la selección
+    let listaFiltrada = areaSeleccionada === "TODOS" 
+      ? datosGlobales 
+      : datosGlobales.filter(d => d.area === areaSeleccionada);
     
     let html = `<table><tr><th>Nombre</th><th>Área</th><th>Cant.</th><th>Documentos</th></tr>`;
     
-    for (const usuario of datosGlobales) {
+    for (const usuario of listaFiltrada) {
       if (!usuario.carpetaDrive) continue;
       
       try {
+        // Obtenemos la lista real de archivos
         const res = await fetch(`${API_URL}?accion=listarFiles&urlCarpeta=${usuario.carpetaDrive}`);
         const data = await res.json();
         const docs = data.archivos || [];
