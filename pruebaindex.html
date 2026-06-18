@@ -24,6 +24,7 @@
     .card-resaltada { background: #7c3aed; color: white; padding: 1.2rem; border-radius: 12px; text-align: center; margin: 1rem 0; font-weight: bold; }
     table { width: 100%; border-collapse: collapse; font-size: 0.75rem; margin-top: 10px; }
     th, td { padding: 6px; border: 1px solid #e2e8f0; text-align: center; }
+    .leyenda { font-size: 0.8rem; color: #475569; margin: 15px 0; line-height: 1.4; }
   </style>
 </head>
 <body>
@@ -82,6 +83,10 @@
         <button onclick="exportarExcel()">Descargar Excel</button>
         <button onclick="window.print()" style="background:#10b981">Descargar PDF</button>
     </div>
+    <div class="leyenda">
+        <strong>Referencias:</strong><br>
+        Doc: Documentos completos | FB:VI: Formación básica Valoración inicial | FB:PPD: En desarrollo PPD | FB:VF: Valoración final | FB:GN: Gestor nacional | PC:VI: Perfeccionamiento continuo Valoración inicial | PC:PPD: En desarrollo PPD | PC:VF: Valoración final | PC:AAA: AAA
+    </div>
   </div>
   
   <button onclick="location.reload()" style="background:#64748b; margin-top:10px">Volver al inicio</button>
@@ -126,7 +131,7 @@
     if(d < 0) { m--; d += 30; } if(m < 0) { y--; m += 12; }
     let resto = (fFin < hoy) ? "Expirado" : `${y} años, ${m} meses y ${d} días`;
 
-    document.getElementById('detalleReporte').innerHTML = `<div class="section-card"><div class="seccion-titulo">INFORMACIÓN GENERAL</div><p><strong>${usuarioActual.nombre || ''}</strong></p><div class="grid-reporte"><p><strong>Área:</strong><br>${usuarioActual.area || ''}</p><p><strong>Cargo:</strong><br>${usuarioActual.cargo || ''}</p><p><strong>Nombramiento:</strong><br>${usuarioActual.nombramiento || ''}</p><p><strong>Metodología:</strong><br>${usuarioActual.metodologia || ''}</p><p><strong>Fecha de nombramiento:</strong><br>${usuarioActual.fechaNombramiento || ''}</p><p><strong>Duración (meses):</strong><br>${usuarioActual.duracionMeses || ''}</p><p><strong>Fecha de finalización:</strong><br>${fFin.toISOString().split('T')[0]}</p></div><div class="card-resaltada">Tiempo restante en el cargo: ${resto}</div></div><div class="section-card"><div class="seccion-titulo">Proceso de Formación Básica</div><div class="form-grid"><div>${getIcon(usuarioActual.valoracionInicial)} Valoración Inicial</div><div>Fecha: ${usuarioActual.fechaValoracionInicial || '--'}</div><div>${getIcon(usuarioActual.desarrolloPPD)} En desarrollo PPD</div><div></div><div>${getIcon(usuarioActual.valoracionFinal)} Valoración Final</div><div>Fecha: ${usuarioActual.fechaValoracionFinal || '--'}</div><div>${getIcon(usuarioActual.gn)} Gestor Nacional</div><div>Fecha: ${usuarioActual.gestorNacionalFecha || '--'}</div></div></div><div class="section-card"><div class="seccion-titulo">Perfeccionamiento Continuo</div><div class="form-grid"><div>${getIcon(usuarioActual.pcValoracionInicial)} Valoración Inicial</div><div>Fecha: ${usuarioActual.pcFechaValoracionInicial || '--'}</div><div>${getIcon(usuarioActual.pcDesarrolloPPD)} En desarrollo PPD</div><div></div><div>${getIcon(usuarioActual.pcValoracionFinal)} Valoración Final</div><div>Fecha: ${usuarioActual.pcFechaValoracionFinal || '--'}</div><div>${getIcon(usuarioActual.aaa)} AAA</div><div>Fecha: ${usuarioActual.aaaFecha || '--'}</div></div></div>`;
+    document.getElementById('detalleReporte').innerHTML = `<div class="section-card"><div class="seccion-titulo">INFORMACIÓN GENERAL</div><p><strong>${usuarioActual.nombre || ''}</strong></p><div class="grid-reporte"><p><strong>Área:</strong><br>${usuarioActual.area || ''}</p><p><strong>Cargo:</strong><br>${usuarioActual.cargo || ''}</p><p><strong>Nombramiento:</strong><br>${usuarioActual.nombramiento || ''}</p><p><strong>Metodología:</strong><br>${usuarioActual.metodologia || ''}</p><p><strong>Fecha de nombramiento:</strong><br>${usuarioActual.fechaNombramiento || ''}</p><p><strong>Duración (meses):</strong><br>${usuarioActual.duracionMeses || ''}</p><p><strong>Fecha de finalización:</strong><br>${fFin.toISOString().split('T')[0]}</p></div><div class="card-resaltada">Tiempo restante en el cargo: ${resto}</div></div><div class="section-card"><div class="seccion-titulo">Proceso de Formación Básica</div><div class="form-grid"><div>${getIcon(usuarioActual.valoracionInicial)} Valoración Inicial</div><div>Fecha: ${usuarioActual.fechaValoracionInicial || '--'}</div><div>${getIcon(usuarioActual.desarrolloPPD)} En desarrollo PPD</div><div></div><div>${getIcon(usuarioActual.valoracionFinal)} Valoración Final</div><div>Fecha: ${usuarioActual.fechaValoracionFinal || '--'}</div><div>${getIcon(usuarioActual.gn)} Gestor Nacional</div><div>Fecha: ${usuarioActual.gestorNacionalFecha || '--'}</div></div></div><div class="section-card"><div class="seccion-titulo">Perfeccionamiento Continuo</div><div class="form-grid"><div>${getIcon(usuarioActual.pcValoracionInicial)} Valoración Inicial</div><div>Fecha: ${usuarioActual.pcFechaValoracionInicial || '--'}</div><div>${getIcon(usuarioActual.pcDesarrolloPPD)} En desarrollo PPD</div><div></div><div>${getIcon(usuarioActual.pcValoracionFinal)} Valoración Final</div><div>Fecha: ${usuarioActual.pcValoracionFinal || '--'}</div><div>${getIcon(usuarioActual.aaa)} AAA</div><div>Fecha: ${usuarioActual.aaaFecha || '--'}</div></div></div>`;
     listarArchivos();
   }
 
@@ -147,19 +152,13 @@
   }
   
   function eliminarArchivo(id) { if(confirm("¿Eliminar?")) fetch(API_URL, { method: 'POST', body: JSON.stringify({ accion: 'eliminar', id: id }) }).then(() => listarArchivos()); }
-  
   function subirArchivo() { 
-    const input = document.getElementById('inputArchivo');
-    const f = input.files[0]; 
+    const f = document.getElementById('inputArchivo').files[0]; 
     if(!f) return alert("Selecciona un archivo");
     const r = new FileReader(); 
     const now = new Date(); 
     const fechaStr = ("0" + now.getDate()).slice(-2) + ("0" + (now.getMonth() + 1)).slice(-2) + now.getFullYear(); 
-    r.onload = (e) => { 
-        fetch(API_URL, { method: 'POST', body: JSON.stringify({ base64: e.target.result.split(',')[1], nombre: usuarioActual.nombre + "_" + fechaStr + "_" + document.getElementById('tipoArchivo').value, mimeType: f.type, idCarpeta: usuarioActual.carpetaDrive }) })
-        .then(r => r.json())
-        .then(() => { alert("Subido"); listarArchivos(); input.value = ''; }); 
-    }; 
+    r.onload = (e) => { fetch(API_URL, { method: 'POST', body: JSON.stringify({ base64: e.target.result.split(',')[1], nombre: usuarioActual.nombre + "_" + fechaStr + "_" + document.getElementById('tipoArchivo').value, mimeType: f.type, idCarpeta: usuarioActual.carpetaDrive }) }).then(() => { alert("Subido"); listarArchivos(); }); }; 
     r.readAsDataURL(f); 
   }
 
