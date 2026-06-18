@@ -2,65 +2,66 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Validar Documentos - Auditoría</title>
+  <title>Validación de Documentos - Dirección Nacional</title>
   <style>
     body { font-family: 'Segoe UI', sans-serif; background: #f8fafc; padding: 2rem; }
     .container { background: white; padding: 2rem; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); max-width: 900px; margin: auto; }
+    button { background: #7c3aed; color: white; padding: 12px 24px; border-radius: 10px; border: none; cursor: pointer; font-weight: 600; width: 100%; }
     table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 0.9rem; }
     th, td { padding: 12px; border: 1px solid #e2e8f0; text-align: left; }
-    th { background: #7c3aed; color: white; }
-    button { background: #7c3aed; color: white; padding: 12px 24px; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; }
-    .doc-list { font-size: 0.8rem; color: #475569; list-style: none; padding: 0; }
+    th { background: #f1f5f9; }
+    .doc-list { font-size: 0.75rem; color: #64748b; list-style: none; padding: 0; margin: 0; }
   </style>
 </head>
 <body>
 
 <div class="container">
-  <h1>Auditoría de Documentos</h1>
-  <button id="btnGenerar" onclick="generarInforme()">Generar Informe Completo</button>
-  <div id="resultado"></div>
+  <h1>Validación de Documentos</h1>
+  <p>Este informe verifica el estado de las carpetas de Drive para todos los registros.</p>
+  <button id="btnGenerar" onclick="generarInforme()">Generar Informe de Documentos</button>
+  <div id="resultadoInforme"></div>
 </div>
 
 <script>
+  // Esta variable debe ser poblada con los datos que recibes del doGet en tu index principal
+  // Si este archivo se abre por separado, deberás hacer un fetch inicial a tu API_URL
   const API_URL = "https://script.google.com/macros/s/AKfycbw4okkl5_lnmqxK6b2eFL1uG6f92_Fu8BHDun4tvGtrexAECEAdEk1Kf3P9AfL29EH4/exec";
+  let datosGlobales = [];
+
+  // Cargar datos al abrir
+  fetch(API_URL).then(res => res.json()).then(data => { datosGlobales = data; });
 
   async function generarInforme() {
     const btn = document.getElementById('btnGenerar');
-    const resDiv = document.getElementById('resultado');
+    const container = document.getElementById('resultadoInforme');
     btn.disabled = true;
-    btn.innerText = "Procesando, por favor espere...";
-
-    try {
-      const response = await fetch(API_URL);
-      const data = await response.json();
+    btn.innerText = "Procesando... esto puede tomar un momento";
+    
+    let html = `<table><tr><th>Nombre</th><th>Área</th><th>Cant.</th><th>Documentos</th></tr>`;
+    
+    for (const usuario of datosGlobales) {
+      if (!usuario.carpetaDrive) continue;
       
-      let html = `<table><tr><th>Nombre</th><th>Cant.</th><th>Archivos</th></tr>`;
-      
-      for (const usuario of data) {
-        if (!usuario.carpetaDrive) continue;
-        
-        // Llamamos al script para listar archivos
-        const respDrive = await fetch(`${API_URL}?accion=listarFiles&urlCarpeta=${usuario.carpetaDrive}`);
-        const driveData = await respDrive.json();
-        
-        const archivos = driveData.archivos || [];
-        const listaHtml = archivos.map(f => `<li>• ${f.nombre}</li>`).join('');
+      try {
+        const res = await fetch(`${API_URL}?accion=listarFiles&urlCarpeta=${usuario.carpetaDrive}`);
+        const data = await res.json();
+        const docs = data.archivos || [];
         
         html += `<tr>
-            <td>${usuario.nombre}</td>
-            <td>${archivos.length}</td>
-            <td><ul class="doc-list">${listaHtml}</ul></td>
-          </tr>`;
+          <td>${usuario.nombre}</td>
+          <td>${usuario.area}</td>
+          <td>${docs.length}</td>
+          <td><ul class="doc-list">${docs.map(f => `<li>• ${f.nombre}</li>`).join('')}</ul></td>
+        </tr>`;
+      } catch (e) {
+        console.error("Error cargando: ", usuario.nombre);
       }
-      
-      html += `</table>`;
-      resDiv.innerHTML = html;
-      btn.innerText = "Informe Generado";
-    } catch (e) {
-      alert("Error al generar el informe: " + e.message);
-      btn.disabled = false;
-      btn.innerText = "Generar Informe Completo";
     }
+    
+    html += `</table>`;
+    container.innerHTML = html;
+    btn.disabled = false;
+    btn.innerText = "Generar Informe";
   }
 </script>
 </body>
