@@ -135,7 +135,11 @@
     listarArchivos();
   }
 
-  function getIcon(v) { return (v == true || v == 'TRUE' || v == 1) ? '✅' : '❌'; }
+  function getIcon(v) { 
+  return (v == true || v == 'TRUE' || v == 1) 
+    ? '<span style="color:green; font-weight:bold;">✔</span>' 
+    : '<span style="color:red; font-weight:bold;">✘</span>'; 
+}
   
   function listarArchivos() { 
     const TOTAL = 6; 
